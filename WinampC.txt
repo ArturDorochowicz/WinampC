@@ -1,6 +1,6 @@
-Winamp Control Plugin   version 1.1.0
+Winamp Control Plugin   version 1.1.1
 
-Copyright (C) 2003 x-phile
+Copyright (C) 2003 Artur Dorochowicz
 All Rights Reserved.
 
 TABLE OF CONTENTS
@@ -27,11 +27,11 @@ when they are minimized to system tray.
 The plugin was tested with the following Winamp versions: 2.80, 2.81
 It should work with all 3.6 and newer versions of PowerPro.
 
-Some of the services depend on the Winamp's version.
-If so, it is stated in the service description.
+Some of the services depend on the  Winamp's version. If so, it is stated in the
+service description.
 
 Plugin is intended to be used with Winamp versions: 1.x and 2.x.
-It will probably not work at all with Winamp3.x.
+It will probably not work at all with Winamp3.x and later.
 
 If you want to learn about Winamp API, check this Nullsoft's page:
    http://www.winamp.com/nsdn/winamp2x/dev/sdk/api.jhtml
@@ -106,6 +106,7 @@ open_visual_plugin_options
 open_visual_options
 pause_unpause
 play_audio_cd
+play_any_audio_cd
 play_button
 play_selected
 previous_track
@@ -415,6 +416,14 @@ pause_unpause ("response type", "class name")
 
 play_audio_cd ("response type", "class name")
         Plays audio CD.
+        
+play_any_audio_cd ("drive number", "response type", "class name")
+	Plays audio CD in drive specified by "drive number".
+	To play from first CD drive "drive number" should be 0, to play from second - give 1 and so on.
+	"Drive number" equal to 0 does the same job as play_audio_cd service. 
+	
+	This service uses undocumented commands of Winamp API.
+	It is not guaranteed to work for everybody, on all versions of Winamp.
 
 play_button ("response type", "class name")
         Same as hitting play button. There's also play_selected service (see below).
@@ -593,6 +602,9 @@ volume_up ("response type", "class name")
 
 7. HISTORY
 --------------------------------------------------------------------------------
+v. 1.1.1
+   - added play_any_audio_cd
+
 v. 1.1.0
    - "response type" and "class name" became the last and optional arguments
    - new "response type" defined: 3text... - see description
@@ -616,4 +628,4 @@ v. 1.0.0
 --------------------------------------------------------------------------------
 All comments, feature requests, bug reports are welcome and greatly appreciated.
 
-Mail to: x-phile <x-phile@wp.pl> or use PowerPro group.
+Mail to: Artur Dorochowicz <x-phile@wp.pl> or use PowerPro group.

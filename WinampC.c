@@ -1,7 +1,7 @@
 /*
-  Winamp Control Plugin   version 1.1.0
+  Winamp Control Plugin   version 1.1.1
 
-  Copyright (C) 2003 x-phile
+  Copyright (C) 2003 Artur Dorochowicz
   All Rights Reserved.
 
   All used names are the property of their respective owners.
@@ -54,6 +54,7 @@
 #define SHUFFLE_OFF                     30180 // Turns shuffle off
 #define SHUFFLE_ON                      30190 // Turns shuffle on
 #define UNBLOCK_MINIBROWSER             30200 // Will unblock the Minibrowser
+#define PLAY_ANY_AUDIO_CD		30210 // Play specified audio cd
 
 //WM_USER
 #define IPC_DELETE                      101 // Clears Winamp's internal playlist.
@@ -199,6 +200,7 @@ static int CheckArguments (UINT nargs, LPSTR * szargs, UINT sw)
   {
    switch (sw)
      {
+      case PLAY_ANY_AUDIO_CD:
       case IPC_JUMPTOTIME:
       case IPC_SETPLAYLISTPOS:
       case SET_VOLUME:
@@ -663,6 +665,17 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
          case WINAMP_PLAY_AUDIO_CD:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_PLAY_AUDIO_CD, 0);
             break;
+         case PLAY_ANY_AUDIO_CD:
+           {
+            int i = atoi(*(szargs + 1));
+            
+            // prevent using other commands accidentaly
+            if (i < 0 || i > 26) // 26 - number of letters in English alphabet (I think so)
+            	i = 0;
+            	
+            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_PLAY_AUDIO_CD + i, 0);
+            break;
+           }
          case WINAMP_RELOAD_CURRENT_SKIN:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_RELOAD_CURRENT_SKIN, 0);
             break;
@@ -1010,6 +1023,11 @@ _declspec(dllexport) void pause_unpause (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LP
 _declspec(dllexport) void play_audio_cd (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_PLAY_AUDIO_CD, nargs, szargs, pFlags, ppsv);
+}
+
+_declspec(dllexport) void play_any_audio_cd (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
+{
+   MakeAction (PLAY_ANY_AUDIO_CD, nargs, szargs, pFlags, ppsv);
 }
 
 _declspec(dllexport) void play_button (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)

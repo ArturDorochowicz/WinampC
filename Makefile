@@ -1,10 +1,20 @@
-GCC=c:\PROGRA~1\mingw
+GCCPATH = C:\Progra~1\MinGW
+APPNAME = WinampC
+RESFILE = Resources
 
-WinampC.dll: WinampC.o Resources.o
-	$(GCC)\bin\gcc -shared -s -fno-exceptions -fno-rtti -o WinampC.dll WinampC.o Resources.o
+ifndef DEBUG
+	CFLAGS = -Os -Wall
+	LDFLAGS = -shared -s -fno-exceptions -fno-rtti
+else
+	CFLAGS = -Wall
+	LDFLAGS = -shared
+endif
 
-WinampC.o: WinampC.c
-	$(GCC)\bin\gcc -c -Os WinampC.c
+$(APPNAME).dll : $(APPNAME).o $(RESFILE).o
+	$(GCCPATH)\bin\gcc $(LDFLAGS) -o $(APPNAME).dll $(APPNAME).o $(RESFILE).o
 
-Resources.o: Resources.rc
-	$(GCC)\bin\windres -o Resources.o Resources.rc
+$(APPNAME).o : $(APPNAME).c
+	$(GCCPATH)\bin\gcc $(CFLAGS) -c $(APPNAME).c
+
+$(RESFILE).o : $(RESFILE).rc
+	$(GCCPATH)\bin\windres -o $(RESFILE).o $(RESFILE).rc

@@ -6,10 +6,10 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 #endif
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     1,1,0,0
-PRODUCTVERSION  1,1,0,0
+FILEVERSION     1,1,1,0
+PRODUCTVERSION  1,1,1,0
 FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
-FILEOS          VOS_NT_WINDOWS32
+FILEOS          VOS__WINDOWS32
 FILETYPE        VFT_DLL
 FILESUBTYPE     VFT2_UNKNOWN
 BEGIN
@@ -18,14 +18,14 @@ BEGIN
     BLOCK "080904b0"   //"languageID" '+' "charsetID" - (U.K. English,Unicode)
     BEGIN
       //add standard values
-      VALUE "CompanyName",      "\0"				//(required)
-      VALUE "FileDescription",  "Winamp Control Plugin\0"	//(required)
-      VALUE "FileVersion",      "1.1.0\0"			//(required)
-      VALUE "InternalName",     "\0"				//(required)
-      VALUE "LegalCopyright",   "Copyright © 2003 x-phile\0"    
-      VALUE "OriginalFilename", "WinampC.dll\0"			//(required)
-      VALUE "ProductName",      "Winamp Control Plugin\0"	//(required)
-      VALUE "ProductVersion",   "1.1.0\0"			//(required)
+      VALUE "CompanyName",      "x-phile"
+      VALUE "FileDescription",  "Winamp Control Plugin"
+      VALUE "FileVersion",      "1.1.1"
+      VALUE "InternalName",     "Winamp Control Plugin"
+      VALUE "LegalCopyright",   "Copyright © 2003 Artur Dorochowicz"    
+      VALUE "OriginalFilename", "WinampC.dll"
+      VALUE "ProductName",      "Winamp Control Plugin"
+      VALUE "ProductVersion",   "1.1.1"
     END
   END
   BLOCK "VarFileInfo"
