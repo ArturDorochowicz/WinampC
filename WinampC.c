@@ -1,7 +1,7 @@
 /*
-  Winamp Control Plugin   version 1.1.1
+  Winamp Control Plugin   version 1.1.2
 
-  Copyright (C) 2003 Artur Dorochowicz
+  Copyright (C) 2003-2007 Artur Dorochowicz
   All Rights Reserved.
 
   All used names are the property of their respective owners.
@@ -89,6 +89,8 @@
 #define IPC_MBOPEN                      241 // Will open a new URL in the minibrowser. if url is NULL, it will open the Minibrowser window.
 #define IPC_MBOPENREAL                  249 // Works the same as IPC_MBOPEN except that it will work even if IPC_MBBLOCK has been set to 1
 //------------------------------------------------------------------------------------------------------------------------------------------
+
+#define IPC_GETPLAYLISTFILE             211 // Returns pointer to file name at given playlist position. Usable only from Winamp plugins!
 
 //WM_COPY_DATA
 #define IPC_CHDIR                       103 // This will make Winamp change to the specified directory
@@ -357,6 +359,35 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
          case GET_SAMPLERATE:
             itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETINFO), *szargs, 10);
             break;
+         case IPC_GETPLAYLISTFILE:
+			{
+				LRESULT index = SendMessage( hwndWinamp, WM_USER, 0, IPC_GETPOSITION );
+				char *pfname = (char*) SendMessage( hwndWinamp, WM_USER, index, IPC_GETPLAYLISTFILE );
+				if( pfname != NULL )
+				{
+					DWORD process_id;
+					HANDLE process;
+
+					GetWindowThreadProcessId( hwndWinamp, &process_id );
+					process = OpenProcess( PROCESS_VM_READ, 0, process_id );
+					if( process != INVALID_HANDLE_VALUE )
+					{
+						SIZE_T bytes_read;
+						char file_name[MAX_PATH+1];
+						
+						ReadProcessMemory( process, pfname, file_name, sizeof( file_name ), &bytes_read );
+						CloseHandle( process );
+
+						if( bytes_read > 0 )
+						{
+							/* file_name may or may not be NULL terminated! */
+							strncpy( *szargs, file_name, ( bytes_read > MAX_LENGTH ? MAX_LENGTH : bytes_read ) );
+							(*szargs)[MAX_LENGTH-1] = '\0';   /* make sure it's null-terminated */
+						}						
+					}
+				}
+			}
+			break;
          case GET_SONG_NAME:
            {
             char this_title[MAX_LENGTH],
@@ -403,7 +434,7 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
            {
             int tmp_int;
 
-            itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETVERSION), *szargs, 16);            
+            itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETVERSION), *szargs, 16);
             for (tmp_int = 3; tmp_int > 1; tmp_int--)
               {
                (*szargs)[tmp_int] = (*szargs)[tmp_int-1];
@@ -669,7 +700,7 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
            {
             int i = atoi(*(szargs + 1));
             
-            // prevent using other commands accidentaly
+            // prevent using other commands accidentally
             if (i < 0 || i > 26) // 26 - number of letters in English alphabet (I think so)
             	i = 0;
             	
@@ -777,6 +808,11 @@ _declspec(dllexport) void block_minibrowser (LPSTR szv, LPSTR szx, BOOL (*GetVar
 _declspec(dllexport) void caption(LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (GET_CAPTION, nargs, szargs, pFlags, ppsv);
+}
+
+_declspec(dllexport) void get_plist_selected_path(LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
+{
+	MakeAction (IPC_GETPLAYLISTFILE, nargs, szargs, pFlags, ppsv);
 }
 
 _declspec(dllexport) void change_directory (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)

@@ -1,6 +1,6 @@
-Winamp Control Plugin   version 1.1.1
+Winamp Control Plugin   version 1.1.2
 
-Copyright (C) 2003 Artur Dorochowicz
+Copyright (C) 2003-2007 Artur Dorochowicz
 All Rights Reserved.
 
 TABLE OF CONTENTS
@@ -30,11 +30,9 @@ It should work with all 3.6 and newer versions of PowerPro.
 Some of the services depend on the  Winamp's version. If so, it is stated in the
 service description.
 
-Plugin is intended to be used with Winamp versions: 1.x and 2.x.
-It will probably not work at all with Winamp3.x and later.
+Plugin is  meant to  be used  with Winamp  versions: 1.x  and 2.x.  There is  no
+guarantee that it will work with Winamp 3.x or any later version.
 
-If you want to learn about Winamp API, check this Nullsoft's page:
-   http://www.winamp.com/nsdn/winamp2x/dev/sdk/api.jhtml
 
 2. LEGAL STUFF
 --------------------------------------------------------------------------------
@@ -77,6 +75,7 @@ get_length
 get_net_status
 get_number_of_channels
 get_playback_status
+get_plist_selected_path
 get_plist_length
 get_plist_position
 get_plist_position1
@@ -313,6 +312,10 @@ get_playback_status ("response type", "class name")
         If it returns 3, it is paused.
         If it returns 0, it is not playing.
 
+get_plist_selected_path ("response type", "class name")
+        Gets full path of currently selected playlist entry.
+        Requires Winamp 2.04+
+
 get_plist_length ("response type", "class name")
         Gets playlist length in tracks
         Requires Winamp 2.0+
@@ -416,14 +419,14 @@ pause_unpause ("response type", "class name")
 
 play_audio_cd ("response type", "class name")
         Plays audio CD.
-        
+
 play_any_audio_cd ("drive number", "response type", "class name")
-	Plays audio CD in drive specified by "drive number".
-	To play from first CD drive "drive number" should be 0, to play from second - give 1 and so on.
-	"Drive number" equal to 0 does the same job as play_audio_cd service. 
-	
-	This service uses undocumented commands of Winamp API.
-	It is not guaranteed to work for everybody, on all versions of Winamp.
+        Plays audio CD in drive specified by "drive number".
+        To play from first CD drive "drive number" should be 0, to play from second - give 1 and so on.
+        "Drive number" equal to 0 does the same job as play_audio_cd service. 
+
+        This service uses undocumented commands of Winamp API.
+        It is not guaranteed to work for everybody, on all versions of Winamp.
 
 play_button ("response type", "class name")
         Same as hitting play button. There's also play_selected service (see below).
@@ -602,6 +605,9 @@ volume_up ("response type", "class name")
 
 7. HISTORY
 --------------------------------------------------------------------------------
+v. 1.1.2   2007-11-13
+   - added get_plist_selected_path
+
 v. 1.1.1
    - added play_any_audio_cd
 
