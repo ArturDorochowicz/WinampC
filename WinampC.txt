@@ -1,4 +1,4 @@
-Winamp Control Plugin   version 1.0.1
+Winamp Control Plugin   version 1.0.2
 
 Copyright (c) 2003 x-phile
 All Rights Reserved.
@@ -7,21 +7,24 @@ OVERVIEW
 --------------------------------------------------------------------------------
 Winamp Control Plugin is a PowePro plugin which gives you the ability to control 
 Winamp the way you like. Most of the things this plugin does can be also 
-achieved by using directly Winamp's API. But using clearly named services is 
+achieved by using directly Winamp API. But using clearly named services is
 much easier then using something like SendMessage(some numbers, names etc.)
 The plugin also allows you to control multiple Winamp instances independently,
 even when they are minimized to system tray.
 
-Plugin was tested with following configurations:
- PowerPro: 3.6 RC, 3.6.0.1, 3.6.0.2, 3.6.0.4
- Winamp: 2.80
- OS: Windows XP Professional.
+The plugin was tested with:
+   PowerPro: 3.6 RC, 3.6.0.1, 3.6.0.2, 3.6.0.4
+   Winamp:   2.80
+   OS:       Windows XP Professional.
 
 Some of the services depend on the Winamp's version. 
 If so, it is stated in the service description.
 
 Plugin is intended to be used with Winamp versions: 1.x and 2.x.
 It will probably not work at all with Winamp3.x.
+
+If you want to learn about Winamp API, check this Nullsoft's page:
+   http://www.winamp.com/nsdn/winamp2x/dev/sdk/api.jhtml
 
 LEGAL STUFF
 --------------------------------------------------------------------------------
@@ -39,99 +42,103 @@ PowerPro and plugin template are Copyright (c) by Bruce Switzer.
 LIST OF SERVICES
 --------------------------------------------------------------------------------
 add_file_to_plist
-add_track_as_bookmark 
-autoload_preset_dialog 
-autoload_save_preset_dialog 
-block_minibrowser 
+add_track_as_bookmark
+autoload_preset_dialog
+autoload_save_preset_dialog
+block_minibrowser
 caption
-change_directory 
-close_winamp 
-configure_visual_plugin 
-delete_autoload_preset_dialog 
-delete_plist 
-delete_preset_dialog 
-display_elapsed_time 
-display_remaining_time 
-end_of_plist 
-execute_visual_plugin 
-file_open_dialog 
-flush_plist_cache_buffer 
-forward_5sec 
-get_bitrate 
-get_eq_data 
-get_eq_data63 
-get_length 
-get_net_status 
-get_number_of_channels 
-get_playback_status 
-get_plist_length 
-get_plist_position 
-get_plist_position1 
-get_position 
-get_position_in_sec 
-get_repeat 
-get_samplerate 
-get_shuffle 
-get_version 
-jump_to_file_dialog 
-jump_to_time 
-jump_to_time_dialog 
-load_default_preset 
-load_preset_dialog 
-load_preset_from_eq 
-move_10_tracks_back 
-next_track 
-open_about_box 
-open_file_info_box 
-open_preferences 
-open_skin_selector 
-open_url_dialog 
-open_visual_plugin_options 
+change_directory
+close_winamp
+configure_visual_plugin
+delete_autoload_preset_dialog
+delete_plist
+delete_preset_dialog
+display_elapsed_time
+display_remaining_time
+end_of_plist
+execute_visual_plugin
+file_open_dialog
+flush_plist_cache_buffer
+forward_5sec
+get_bitrate
+get_eq_data
+get_eq_data63
+get_length
+get_net_status
+get_number_of_channels
+get_playback_status
+get_plist_length
+get_plist_position
+get_plist_position1
+get_position
+get_position_in_sec
+get_repeat
+get_samplerate
+get_shuffle
+get_version
+get_version_hex
+jump_to_file_dialog
+jump_to_time
+jump_to_time_dialog
+load_default_preset
+load_preset_dialog
+load_preset_from_eq
+minimize
+min_restore
+move_10_tracks_back
+next_track
+open_about_box
+open_file_info_box
+open_preferences
+open_skin_selector
+open_url_dialog
+open_visual_plugin_options
 open_visual_options
-pause_unpause 
-play_audio_cd 
-play_button  
-play_selected 
-previous_track 
-reload_current_skin 
-repeat_off 
-repeat_on 
-restart_winamp 
-rewind_5sec 
-save_preset_dialog 
-save_preset_to_eqf 
-set_eq_data 
-set_eq_data63 
+pause_unpause
+play_audio_cd
+play_button
+play_selected
+previous_track
+reload_current_skin
+repeat_off
+repeat_on
+restart_winamp
+restore
+rewind_5sec
+save_preset_dialog
+save_preset_to_eqf
+set_eq_data
+set_eq_data63
 set_panning
-set_panning127 
-set_plist_position 
-set_volume 
-set_volume255 
-show_edit_bookmarks 
-shuffle_off 
-shuffle_on 
+set_panning127
+set_plist_position
+set_volume
+set_volume255
+show_edit_bookmarks
+shuffle_off
+shuffle_on
 song_and_number
 song_name
-start_of_plist 
-stop 
-stop_after_current 
-stop_with_fadeout 
-toggle_doublesize 
-toggle_easymove 
-toggle_eq_window 
-toggle_main_window 
-toggle_minibrowser 
-toggle_on_top 
-toggle_plist_window 
-toggle_plist_windowshade 
-toggle_repeat 
-toggle_shuffle 
-toggle_title_scrolling 
-toggle_windowshade 
-unblock_minibrowser 
-update_info 
-volume_down 
-volume_up 
+start_of_plist
+stop
+stop_after_current
+stop_with_fadeout
+toggle_doublesize
+toggle_easymove
+toggle_eq_window
+toggle_main_window
+toggle_minibrowser
+toggle_on_top
+toggle_plist_window
+toggle_plist_windowshade
+toggle_repeat
+toggle_shuffle
+toggle_title_scrolling
+toggle_windowshade
+unblock_minibrowser
+update_info
+volume_down
+volume_up
 
 DESCRIPTION OF SERVICES
 --------------------------------------------------------------------------------
@@ -297,11 +304,16 @@ get_shuffle ("class name", "response type")
 	Requires Winamp 2.4+
 
 get_version ("class name", "response type")
-	Retrieves the version of Winamp running.
+	Retrieves the version of Winamp as x.yz
+	Because of the wealth of hexadecimal Winamp version formats (see below: get_version_hex) this service
+	may not return correct result. It works by simply leaving three first digits in hexadecimal version
+	number and putting a dot after first of these digits.
+
+get_version_hex ("class name", "response type")
+	Retrieves the version of Winamp in hexadecimal format.
 	That's what Nullsoft says about that:
 		"Version will be 0x20yx for winamp 2.yx. Versions previous to Winamp 2.0
 		typically (but not always) use 0x1zyx for 1.zx versions. Weird, I know."
-	No comments.
 
 jump_to_file_dialog ("class name", "response type")
 	Opens 'Jump to file' dialog.
@@ -324,6 +336,12 @@ load_preset_dialog ("class name", "response type")
 load_preset_from_eq ("class name", "response type")
 	Loads a preset from EQ.
 	Doesn't seem to work on Winamp 2.80
+
+minimize ("class name", "response type")
+	Minimizes Winamp window.
+
+min_restore ("class name", "response type")
+	Minimizes Winamp window when not minimized, restores if minimized.
 
 move_10_tracks_back ("class name", "response type")
 	Moves 10 tracks back and starts playing.
@@ -383,6 +401,10 @@ repeat_on ("class name", "response type")
 restart_winamp ("class name", "response type")
 	Restarts Winamp.
 	Requires Winamp 2.2+
+
+restore ("class name", "response type")
+	Restores Winamp window and makes foreground.
+	The window is made foreground when it is not minimized.
 
 rewind_5sec ("class name", "response type")
 	Rewinds 5 seconds.
@@ -532,6 +554,12 @@ volume_up ("class name", "response type")
 
 HISTORY
 --------------------------------------------------------------------------------
+v. 1.0.2
+   - renamed get_version to get_version_hex
+   - added new get_version service - see description
+   - added minimize, restore, min_restore
+   - minor changes in plugin and info file
+
 v. 1.0.1
    - renamed set_panning service to set_panning127
    - added new set_panning service - see description
