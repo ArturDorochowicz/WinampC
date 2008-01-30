@@ -1,0 +1,528 @@
+Winamp Control Plugin   version 1.0.0 
+
+Copyright (c) 2003 x-phile
+All rights reserved.
+
+OVERVIEW
+--------------------------------------------------------------------------------
+Winamp Control Plugin is a PowePro plugin which gives you ability to control 
+Winamp the way you like. Most of the things this plugin does can be also 
+achieved by using directly Winamp's API. But using clearly named services is 
+much easier then using something like SendMessage(some numbers, names etc.)
+The plugin also allows you to control multiple Winamp instances independently,
+even when they are minimized to system tray.
+
+Plugin was tested with PowerPro 3.6 RC, PowerPro 3.6.0.1 and Winamp 2.80 on
+Windows XP Professional.
+
+Some of the services depend on the Winamp's version. 
+If so, it is stated in the service description.
+
+Plugin is intended to be used with Winamp versions: 1.x and 2.x.
+It will probably not work at all with Winamp3.x.
+
+LEGAL STUFF
+--------------------------------------------------------------------------------
+This is a freeware program. You may distribute it freely, but you must not request
+or accept any amount of money or other payment for it. You must not change this 
+program's contents in any way. And, by the way, you use it at your own risk. 
+Distribution is fully allowed as long as the plugin (i.e. plugin's .dll file
+and this .txt info file) remain unchanged. When distributing, both plugin files
+(.dll and .txt) must be included.
+
+All used names are the property of their respective owners.
+Winamp is Copyright (c) by Nullsoft Inc.
+PowerPro and plugin template are Copyright (c) by Bruce Switzer.
+
+LIST OF SERVICES
+--------------------------------------------------------------------------------
+add_file_to_plist
+add_track_as_bookmark 
+autoload_preset_dialog 
+autoload_save_preset_dialog 
+block_minibrowser 
+caption
+change_directory 
+close_winamp 
+configure_visual_plugin 
+delete_autoload_preset_dialog 
+delete_plist 
+delete_preset_dialog 
+display_elapsed_time 
+display_remaining_time 
+end_of_plist 
+execute_visual_plugin 
+file_open_dialog 
+flush_plist_cache_buffer 
+forward_5sec 
+get_bitrate 
+get_eq_data 
+get_eq_data63 
+get_length 
+get_net_status 
+get_number_of_channels 
+get_playback_status 
+get_plist_length 
+get_plist_position 
+get_plist_position1 
+get_position 
+get_position_in_sec 
+get_repeat 
+get_samplerate 
+get_shuffle 
+get_version 
+jump_to_file_dialog 
+jump_to_time 
+jump_to_time_dialog 
+load_default_preset 
+load_preset_dialog 
+load_preset_from_eq 
+move_10_tracks_back 
+next_track 
+open_about_box 
+open_file_info_box 
+open_preferences 
+open_skin_selector 
+open_url_dialog 
+open_visual_plugin_options 
+open_visual_options
+pause_unpause 
+play_audio_cd 
+play_button  
+play_selected 
+previous_track 
+reload_current_skin 
+repeat_off 
+repeat_on 
+restart_winamp 
+rewind_5sec 
+save_preset_dialog 
+save_preset_to_eqf 
+set_eq_data 
+set_eq_data63 
+set_panning 
+set_plist_position 
+set_volume 
+set_volume255 
+show_edit_bookmarks 
+shuffle_off 
+shuffle_on 
+song_and_number
+song_name
+start_of_plist 
+stop 
+stop_after_current 
+stop_with_fadeout 
+toggle_doublesize 
+toggle_easymove 
+toggle_eq_window 
+toggle_main_window 
+toggle_minibrowser 
+toggle_on_top 
+toggle_plist_window 
+toggle_plist_windowshade 
+toggle_repeat 
+toggle_shuffle 
+toggle_title_scrolling 
+toggle_windowshade 
+unblock_minibrowser 
+update_info 
+volume_down 
+volume_up 
+
+DESCRIPTION OF SERVICES
+--------------------------------------------------------------------------------
+All of the services' arguments lists start with these two:
+	- "class name"
+	- "response type"
+
+"Class name" is Winamp's window class name. Command will be issued to this window.
+If you specify an empty string ("") default class name (which is "Winamp v1.x") will be used.
+"Class name" argument enables you to control many Winamp windows independently as
+long as they use different class names. Winamp can be started with /class=class_name
+argument which runs Winamp with class name of your choice.
+
+"Response type" allows you to choose how the plugin should react if specified Winamp's
+window does not exist i.e. Winamp is not running at all or there is no Winamp's window
+of specified class.
+Giving 1 as an argument will show a window with error explanation in case of error.
+Giving 2 will set F0 (flag 0) when Winamp's window was found or will clear F0 if there was an error. 
+Everything else given as the second argument will make plugin not react in any way
+if specified Winamp's window wasn't found.
+
+add_file_to_plist ("class name", "response type", "file")
+	This will make Winamp add "file" to playlist.
+
+add_track_as_bookmark ("class name", "response type")
+	Adds current track as bookmark
+
+autoload_preset_dialog ("class name", "response type")
+	Opens auto-load presets dialog.
+	Doesn't seem to work on Winamp 2.80
+
+autoload_save_preset_dialog ("class name", "response type")
+	Opens auto-load save preset.
+	Doesn't seem to work on Winamp 2.80
+
+block_minibrowser ("class name", "response type")
+	Will block the Minibrowser from updates.
+	Requires Winamp 2.4+
+
+caption ("class name", "response type")
+	Gets full Winamp's window caption. This will be something like this 'Number. Song name - Winamp'
+	Can work nice as button name when Winamp's option 'Scroll song title in the Windows taskbar' is enabled
+
+change_directory ("class name", "response type", "directory")
+	This will make Winamp change to the specified directory.
+
+close_winamp ("class name", "response type")
+	Closes Winamp. (unbelieviable, isn't it :)
+
+configure_visual_plugin ("class name", "response type")
+	Opens config window of current visualization plugin.
+
+delete_autoload_preset_dialog ("class name", "response type")
+	Opens delete an auto load preset dialog.
+	Doesn't seem to work on Winamp 2.80
+
+delete_plist ("class name", "response type")
+	Cleares Winamp's playlist.
+
+delete_preset_dialog ("class name", "response type")
+	Opens delete preset dialog.
+	Doesn't seem to work on Winamp 2.80
+
+display_elapsed_time ("class name", "response type")
+	Sets time display mode to elapsed.
+
+display_remaining_time ("class name", "response type")
+	Sets time display mode to remaining.
+
+end_of_plist ("class name", "response type")
+	Plays the last file on the playlist.
+	When shuffle is on it is the last played file.
+
+execute_visual_plugin ("class name", "response type")
+	Executes current visualization plugin.
+
+file_open_dialog ("class name", "response type")
+	Opens 'Open file(s)' dialog.
+
+flush_plist_cache_buffer ("class name", "response type")
+	Flushes the playlist cache buffer. 
+
+forward_5sec ("class name", "response type")
+	Fast forwards 5 seconds.
+
+get_bitrate ("class name", "response type")
+	Retrieves bitrate of current song. This is momentary not average bitrate.
+	Requires Winamp 2.05+
+
+get_eq_data ("class name", "response type", "position")
+	Queries the status of the EQ. 
+        The value returned depends on what "position" is set to:
+        Value      Meaning
+        ------------------
+	0-9        The 10 bands of EQ data. (+20db - -20db)
+	10         The preamp value. (+20db - -20db)
+	11         Enabled. zero if disabled, nonzero if enabled.
+	12         Autoload. zero if disabled, nonzero if enabled.
+
+	For positions 0-10 you will get number from between -20 and 20
+	Requires Winamp 2.05+
+
+get_eq_data63 ("class name", "response type", "position")
+	Queries the status of the EQ. 
+        The value returned depends on what "position" is set to:
+        Value      Meaning
+        ------------------
+	0-9        The 10 bands of EQ data. 0-63 (+20db - -20db)
+	10         The preamp value. 0-63 (+20db - -20db)
+	11         Enabled. zero if disabled, nonzero if enabled.
+	12         Autoload. zero if disabled, nonzero if enabled.
+	
+	0 is +20db, 63 is -20dB
+	Weird, but that's how Winamp handles it internally.
+	Requires Winamp 2.05+
+
+get_length ("class name", "response type")
+	Returns current song's length in seconds.
+
+get_net_status ("class name", "response type")
+	Returns 1 if the Internet connection is available for Winamp.
+	Otherwise it returns 0.
+	Requires Winamp 2.05+
+
+get_number_of_channels ("class name", "response type")
+	Retrieves number of channels of the current song.
+	Requires Winamp 2.05+
+
+get_playback_status ("class name", "response type")
+	Returns the status of playback.
+        Returns 1, if it is playing. 
+	If it returns 3, it is paused.
+	If it returns 0, it is not playing.
+
+get_plist_length ("class name", "response type")
+	Gets playlist length in tracks
+	Requires Winamp 2.0+
+
+get_plist_position ("class name", "response type")
+	Returns the position in the current playlist, in tracks.
+	Requires Winamp 2.05+
+
+get_plist_position1 ("class name", "response type")
+	Writes the current playlist to <winampdir>\\Winamp.m3u, and returns the current playlist position.
+	Requires Winamp 1.666+
+
+get_position ("class name", "response type")
+	Returns the position in milliseconds of the current song.
+	
+get_position_in_sec ("class name", "response type")
+	Returns the position in seconds of the current song.
+
+get_repeat ("class name", "response type")
+	Returns the status of the Repeat option (1 if set).
+	Requires Winamp 2.4+
+	
+get_samplerate ("class name", "response type")
+	Retrieves currents songs sample rate
+	Requires Winamp 2.05+
+
+get_shuffle ("class name", "response type")
+	Returns the status of the Shuffle option (1 if set).
+	Requires Winamp 2.4+
+
+get_version ("class name", "response type")
+	Retrieves the version of Winamp running.
+	That's what Nullsoft says about that:
+		"Version will be 0x20yx for winamp 2.yx. Versions previous to Winamp 2.0
+		typically (but not always) use 0x1zyx for 1.zx versions. Weird, I know."
+	No comments.
+
+jump_to_file_dialog ("class name", "response type")
+	Opens 'Jump to file' dialog.
+
+jump_to_time ("class name", "response type", "time")
+	Jumps to "time" specified in milliseconds.
+	Requires Winamp 1.60+
+
+jump_to_time_dialog ("class name", "response type")
+	Opens 'Jump to time' dialog.
+
+load_default_preset ("class name", "response type")
+	Loads default preset.
+	Doesn't seem to work on Winamp 2.80
+
+load_preset_dialog ("class name", "response type")
+	Opens load presets dialog.
+	Doesn't seem to work on Winamp 2.80
+
+load_preset_from_eq ("class name", "response type")
+	Loads a preset from EQ.
+	Doesn't seem to work on Winamp 2.80
+
+move_10_tracks_back ("class name", "response type")
+	Moves 10 tracks back and starts playing.
+
+next_track ("class name", "response type")
+	Starts next track.
+
+open_file_info_box ("class name", "response type")
+	Opens file info window.
+
+open_about_box ("class name", "response type")
+	Opens 'About Winamp' window.
+
+open_preferences ("class name", "response type")
+	Opens preferences window.
+
+open_skin_selector ("class name", "response type")
+	Opens skin selector window.
+
+open_url_dialog ("class name", "response type")
+	Opens 'Open location' dialog.
+
+open_visual_plugin_options ("class name", "response type")
+	Opens visualization plug-in options.
+
+open_visual_options ("class name", "response type")
+	Opens visualization options.
+	Doesn't seem to work on Winamp 2.80
+
+pause_unpause ("class name", "response type")
+	Pauses, unpauses. (why am i writing this? :))
+
+play_audio_cd ("class name", "response type")
+	Plays audio CD.
+
+play_button ("class name", "response type")
+	Same as hitting play button. There's also play_selected service.
+	According to Nullsoft there are some differences between them.
+
+play_selected ("class name", "response type")
+	Begins play of selected track.
+
+previous_track ("class name", "response type")
+	Starts previous track.
+
+reload_current_skin ("class name", "response type")
+	Reloads current skin.
+
+repeat_off ("class name", "response type")
+	Turns repeat off.
+	Requires Winamp 2.4+
+
+repeat_on ("class name", "response type")
+	Turns repeat on.
+	Requires Winamp 2.4+
+
+restart_winamp ("class name", "response type")
+	Restarts Winamp.
+	Requires Winamp 2.2+
+
+rewind_5sec ("class name", "response type")
+	Rewinds 5 seconds.
+
+save_preset_dialog ("class name", "response type")
+	Opens save preset dialog.
+	Doesn't seem to work on Winamp 2.80
+
+save_preset_to_eqf ("class name", "response type")
+	Saves a preset to EQF.
+	Doesn't seem to work on Winamp 2.80
+
+set_eq_data ("class name", "response type", "position", "value")
+	Sets the value of "position"
+        Position      Meaning
+        ------------------
+	0-9        The 10 bands of EQ data. (+20db - -20db)
+	10         The preamp value. (+20db - -20db)
+	11         Enabled. zero if disabled, nonzero if enabled.
+	12         Autoload. zero if disabled, nonzero if enabled.
+
+	For positions 0-10 you can give any number from between -20 and 20
+	Winamp does not refresh the equalizer window after changing
+	positions 0-10, so we can only hear the change.
+	Requires Winamp 2.05+
+
+set_eq_data63 ("class name", "response type", "position", "value")
+	Sets the value of "position"
+        Position      Meaning
+        ------------------
+	0-9        The 10 bands of EQ data. 0-63 (+20db - -20db)
+	10         The preamp value. 0-63 (+20db - -20db)
+	11         Enabled. zero if disabled, nonzero if enabled.
+	12         Autoload. zero if disabled, nonzero if enabled.
+	
+	0 is +20db, 63 is -20dB
+	Weird, but that's how Winamp handles it internally.
+	Winamp does not refresh the equalizer window after changing
+	positions 0-10, so we can only hear the change.
+	Requires Winamp 2.05+
+
+set_panning ("class name", "response type", "panning")
+	Sets the panning of Winamp (from 0 (left) to 255 (right)).
+	Requires Winamp 2.0+
+
+set_plist_position ("class name", "response type", "position")
+	Sets the playlist position to "position".
+	Requires Winamp 2.0+
+
+set_volume ("class name", "response type", "volume")
+	Sets volume to approximately "volume" (min = 0, max = 100)
+	Requires Winamp 2.0+
+
+set_volume255 ("class name", "response type", "volume")
+	Sets volume to "volume" which can be anything between 0 (min) and 255 (max).
+	This is the way Winamp is really handling volume.
+	Requires Winamp 2.0+
+
+show_edit_bookmarks ("class name", "response type")
+	Shows edit bookmarks window.
+
+shuffle_off ("class name", "response type")
+	Turns shuffle off.
+	Requires Winamp 2.4+
+
+shuffle_on ("class name", "response type")
+	Turns shuffle on.
+	Requires Winamp 2.4+
+
+song_and_number ("class name", "response type")
+	Gets song name with preceding playlist entry number from Winamp's window caption.
+	In order for this to work properly Winamp's option 'Scroll song title in the Windows taskbar'
+	should be disabled. Otherwise you'll get strange results. You've been warned...	
+
+song_name ("class name", "response type")
+	Gets song name from Winamp's window caption.
+	In order for this to work properly Winamp's option 'Scroll song title in the Windows taskbar'
+	should be disabled. Otherwise you'll get strange results. You've been warned...	
+
+start_of_plist ("class name", "response type")
+	Plays the first file on the playlist.
+	When shuffle is on it is the first played file.
+
+stop ("class name", "response type")
+	Stops playback.
+
+stop_after_current ("class name", "response type")
+	Makes Winamp stop after current track.
+
+stop_with_fadeout ("class name", "response type")
+	Stops with fadeout.
+
+toggle_doublesize ("class name", "response type")
+	Toggles double size.
+
+toggle_easymove ("class name", "response type")
+	Toggles easy move.
+
+toggle_eq_window ("class name", "response type")
+	Toggles equalizer window
+
+toggle_main_window ("class name", "response type")
+	Toggles main window visible.
+
+toggle_minibrowser ("class name", "response type")
+	Toggles minibrowser window visible.
+
+toggle_on_top ("class name", "response type")
+	Toggles always on top.
+
+toggle_plist_window ("class name", "response type")
+	Toggles playlist window
+
+toggle_plist_windowshade ("class name", "response type")
+	Toggles Windowshade of playlist window.
+
+toggle_repeat ("class name", "response type")
+	Toggles repeat.
+
+toggle_shuffle ("class name", "response type")
+	Toggles shuffle.
+
+toggle_title_scrolling ("class name", "response type")
+	Toggles title scrolling.
+
+toggle_windowshade ("class name", "response type")
+	Toggles Windowshade of main window.
+
+unblock_minibrowser ("class name", "response type")
+	Will unblock the Minibrowser from updates.
+	Requires Winamp 2.4+
+
+update_info ("class name", "response type")
+	Asks Winamp to update the informations about the current title. 
+	Requires Winamp 2.2+
+
+volume_down ("class name", "response type")
+	Makes Winamp play a little quiter.
+
+volume_up ("class name", "response type")
+	Makes Winamp play a little louder.
+
+CONTACTING THE AUTHOR
+--------------------------------------------------------------------------------
+Use e-mail: x-phile@wp.pl
+or PowerPro group. I don't check it often, usually at weekends. Please be patient.
