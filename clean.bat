@@ -1,2 +1,2 @@
-del resources.o
-del winampc.o
+@del resources.o
+@del winampc.o

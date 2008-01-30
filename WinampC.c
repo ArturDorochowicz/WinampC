@@ -1,25 +1,36 @@
 /*
-  Winamp Control Plugin   version 1.0.2
+  Winamp Control Plugin   version 1.1.0
 
-  Copyright (c) 2003 x-phile
+  Copyright (C) 2003 x-phile
   All Rights Reserved.
 
   All used names are the property of their respective owners.
-  Winamp is Copyright (c) by Nullsoft Inc.
-  PowerPro and plugin template are Copyright (c) by Bruce Switzer.
+  Winamp is Copyright (C) by Nullsoft Inc.
+  PowerPro and plugin template are Copyright (C) by Bruce Switzer.
 */
 
 #include <windows.h>
 #include <string.h>
 #include <stdio.h>
-
-//---INTERNAL ERRORS------------------------------------------------------------------------------------------------------------------------
-#define ALL_CORRECT                     0
-#define NEED_ONE_OR_THREE_ARGUMENTS     10
-#define NEED_TWO_OR_FOUR_ARGUMENTS      11
-#define NEED_ZERO_OR_TWO_ARGUMENTS      12
-
 //---DEFINITIONS----------------------------------------------------------------------------------------------------------------------------
+#define MAX_LENGTH                      531
+
+//---INTERNAL MESSAGES----------------------------------------------------------------------------------------------------------------------
+#define NEEDS_123_ARGUMENTS             10
+#define NEEDS_234_ARGUMENTS             11
+#define NEEDS_012_ARGUMENTS             12
+
+#define NEEDS_TWO_HAS_ZERO              20
+#define NEEDS_TWO_HAS_ONE               21
+#define NEEDS_TWO_HAS_TWO               22
+#define NEEDS_THREE_HAS_ONE             23
+#define NEEDS_THREE_HAS_TWO             24
+#define NEEDS_THREE_HAS_THREE           25
+#define NEEDS_FOUR_HAS_TWO              26
+#define NEEDS_FOUR_HAS_THREE            27
+#define NEEDS_FOUR_HAS_FOUR             28
+
+//---WINAMP API DEFINITIONS-----------------------------------------------------------------------------------------------------------------
 #define BLOCK_MINIBROWSER               30010 // Will block the Minibrowser from updates
 #define GET_BITRATE                     30020 // Returns current track bitrate
 #define GET_CAPTION                     30030 // Gets full Winamp's caption
@@ -170,17 +181,17 @@ typedef struct tagPProServices
 static HWND g_hwndPowerPro;
 
 // Main DLL entry point.  Save handle to main PowerPro window.
-#pragma argsused
-BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvReserved)
+BOOL WINAPI DllMain (HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvReserved)
   {
-   if(dwReason == DLL_PROCESS_ATTACH)
-    {
-		g_hwndPowerPro = FindWindow("PowerProMain",NULL);
-    }
-   else if(dwReason == DLL_PROCESS_DETACH)
-    {
-		// Detaching process
-    }
+   if (dwReason == DLL_PROCESS_ATTACH)
+     {
+      g_hwndPowerPro = FindWindow("PowerProMain",NULL);
+     }
+   else
+      if (dwReason == DLL_PROCESS_DETACH)
+        {
+         // Detaching process
+        }
    return TRUE;
   }
 
@@ -197,55 +208,93 @@ static int CheckArguments (UINT nargs, LPSTR * szargs, UINT sw)
       case IPC_CHDIR:
       case IPC_PLAYFILE:
       case IPC_GETEQDATA:
-      case GET_EQ_DATA:    //these need one (or three) arguments
-         if (nargs != 3)   // && nargs != 1)
+      case GET_EQ_DATA:    //these need 1 or 2 or 3 arguments
+         switch (nargs)
            {
-            return NEED_ONE_OR_THREE_ARGUMENTS;
+            case 1:
+               return NEEDS_THREE_HAS_ONE;
+            case 2:
+               return NEEDS_THREE_HAS_TWO;
+            case 3:
+               return NEEDS_THREE_HAS_ONE;
+            default:
+               return NEEDS_123_ARGUMENTS;
            }
-         return ALL_CORRECT;
       case IPC_SETEQDATA:
-      case SET_EQ_DATA:    //these need two (or four) arguments
-         if (nargs != 4)   // && nargs != 2)
+      case SET_EQ_DATA:    //these need 2 or 3 or 4 arguments
+         switch (nargs)
            {
-            return NEED_TWO_OR_FOUR_ARGUMENTS;
+            case 2:
+               return NEEDS_FOUR_HAS_TWO;
+            case 3:
+               return NEEDS_FOUR_HAS_THREE;
+            case 4:
+               return NEEDS_FOUR_HAS_FOUR;
+            default:
+               return NEEDS_234_ARGUMENTS;
            }
-         return ALL_CORRECT;
-      default:    //the rest needs zero (or two) arguments
-         if (nargs != 2)   // && nargs != 0)
+      default:    //the rest needs 0 or 1 or 2 arguments
+         switch (nargs)
            {
-            return NEED_ZERO_OR_TWO_ARGUMENTS;
+            case 0:
+               return NEEDS_TWO_HAS_ZERO;
+            case 1:
+               return NEEDS_TWO_HAS_ONE;
+            case 2:
+               return NEEDS_TWO_HAS_TWO;
+            default:
+               return NEEDS_012_ARGUMENTS;
            }
-         return ALL_CORRECT;            
      }
   }
 
 static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPROSERVICES * ppsv)
   {
+   HWND hwndWinamp = NULL;
+   char response_type [MAX_LENGTH];
+
    **szargs = '\0';
    switch (CheckArguments (nargs, szargs, sw))
      {
-      case NEED_ZERO_OR_TWO_ARGUMENTS:
-         (ppsv->ErrMessage)("Need two arguments for the service.","");
-      case NEED_ONE_OR_THREE_ARGUMENTS:
-         (ppsv->ErrMessage)("Need three arguments for the service.","");
-      case NEED_TWO_OR_FOUR_ARGUMENTS:
-         (ppsv->ErrMessage)("Need four arguments for the service.","");
+      case NEEDS_012_ARGUMENTS:
+         (ppsv->ErrMessage)("The service needs two arguments when using both optional arguments.\nIt needs one argument when omitting 'class type'.\nIt needs no arguments when omitting 'class type' and 'response type'.","");
+         return; 
+      case NEEDS_123_ARGUMENTS:
+         (ppsv->ErrMessage)("The service needs three arguments when using both optional arguments.\nIt needs two arguments when omitting 'class type'.\nIt needs one argument when omitting 'class type' and 'response type'.","");
+         return;
+      case NEEDS_234_ARGUMENTS:
+         (ppsv->ErrMessage)("The service needs four arguments when using both optional arguments.\nIt needs three arguments when omitting 'class type'.\nIt needs two arguments when omitting 'class type' and 'response type'.","");
+         return;
+      case NEEDS_TWO_HAS_ZERO:
+      case NEEDS_THREE_HAS_ONE:
+      case NEEDS_FOUR_HAS_TWO:     //no optional parameters
+         hwndWinamp = FindWindow("Winamp v1.x",NULL);    //default class name
+         strcpy(response_type, "");    //default response type
+         break;
+      case NEEDS_TWO_HAS_ONE:
+      case NEEDS_THREE_HAS_TWO:
+      case NEEDS_FOUR_HAS_THREE:     //one optional argument - response type
+         hwndWinamp = FindWindow("Winamp v1.x",NULL);    //default class name
+         strcpy(response_type, *(szargs + nargs));    //response type is the last argument
+         break;
+      case NEEDS_TWO_HAS_TWO:
+      case NEEDS_THREE_HAS_THREE:
+      case NEEDS_FOUR_HAS_FOUR:    //two optional arguments - response type, class name
+         if (strcmp(*(szargs + nargs), "") == 0)    //if class name empty -> use default
+           {
+            hwndWinamp = FindWindow ("Winamp v1.x",NULL);
+           }
+         else
+           {
+            hwndWinamp = FindWindow (*(szargs + nargs),NULL);    //class name is the last argument
+           }
+         strcpy(response_type, *(szargs + nargs - 1));    //response type is last but one argument
+         break;
      } 
-
-   HWND hwndWinamp = NULL;
-
-   if (strcmp ((*(szargs+1)),"") == 0)
-     {
-      hwndWinamp = FindWindow("Winamp v1.x",NULL);
-     }
-   else
-     {
-      hwndWinamp = FindWindow((*(szargs+1)),NULL);
-     }
 
    if (hwndWinamp)
      {
-      if (strcmp ((*(szargs+2)),"2") == 0)    //if second argument is 2, set flag f0 to 1
+      if (strcmp (response_type,"2") == 0)    //if response_type is 2, set flag f0 to 1
         {
          (*pFlags) = (*pFlags)|0x00000001;
         }
@@ -259,25 +308,20 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             break;
          case GET_CAPTION:
            {
-            char this_title[280];
+            char this_title[MAX_LENGTH];
             GetWindowText (hwndWinamp, this_title, sizeof (this_title));
-            this_title[263] = '\0';
             strcpy (*szargs, this_title);
            }
             break;
          case GET_EQ_DATA:
-           {
-            char * p;
+           {            
             double ret = 0;
             int param = 0;
-            param = atoi(*(szargs+3));
+            param = atoi(*(szargs + 1));
             ret = SendMessage(hwndWinamp, WM_USER, param, IPC_GETEQDATA);
             if ((param >= 0) && (param <= 10))
               {
-               ret = ret * 40 / 63;
-               ret -= 20;
-               ret = -1 * ret;
-               sprintf (*szargs, "%.1f", ret);
+               sprintf (*szargs, "%.1f", (ret / (-1.575) + 20));
               }
             else
               {
@@ -300,8 +344,7 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             ret = SendMessage(hwndWinamp, WM_USER, 0, IPC_GETOUTPUTTIME);
             if (ret != -1)
               {
-               ret /=1000;
-               sprintf (*szargs,"%.0f",ret);
+               sprintf (*szargs,"%.0f",(ret / 1000));
               }
             else
               {
@@ -314,10 +357,11 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             break;
          case GET_SONG_NAME:
            {
-            char this_title[280],*p;
+            char this_title[MAX_LENGTH],
+                 * p;
 
             GetWindowText(hwndWinamp,this_title,sizeof(this_title));
-            p = this_title+strlen(this_title)-8;
+            p = this_title + strlen(this_title) - 8;
             while (p >= this_title)
               {
                if (!strnicmp(p,"- Winamp",8)) break;
@@ -326,7 +370,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             if (p >= this_title) p--;
             while (p >= this_title && *p == ' ') p--;
             *++p=0;
-            this_title[263] = '\0';
             p = this_title;
             while (*p != ' ')
               {
@@ -338,10 +381,11 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             break;
          case GET_SONG_NAME_AND_NUMBER:
            {
-            char this_title[280],*p;
+            char this_title[MAX_LENGTH],
+                 * p;
 
             GetWindowText(hwndWinamp,this_title,sizeof(this_title));
-            p = this_title+strlen(this_title)-8;
+            p = this_title + strlen(this_title)-8;
             while (p >= this_title)
               {
                if (!strnicmp(p,"- Winamp",8)) break;
@@ -350,7 +394,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             if (p >= this_title) p--;
             while (p >= this_title && *p == ' ') p--;
             *++p=0;
-            this_title[263] = '\0';
             strcpy (*szargs, this_title);
            }
             break;
@@ -371,7 +414,7 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
            {
             COPYDATASTRUCT cds;
             cds.dwData = IPC_CHDIR;
-            cds.lpData = (void *) (*(szargs+3));
+            cds.lpData = (void *) (*(szargs + 1));
             cds.cbData = strlen((char *) cds.lpData)+1;
             SendMessage(hwndWinamp,WM_COPYDATA,(WPARAM)NULL,(LPARAM)&cds);
            }
@@ -386,7 +429,7 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GET_SHUFFLE), *szargs, 10);
             break;
          case IPC_GETEQDATA:
-            itoa (SendMessage(hwndWinamp, WM_USER, atoi(*(szargs+3)), IPC_GETEQDATA), *szargs, 10);
+            itoa (SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_GETEQDATA), *szargs, 10);
             break;
          case IPC_GETLISTLENGTH:
             itoa (SendMessage(hwndWinamp, WM_USER, 1, IPC_GETLISTLENGTH), *szargs, 10);
@@ -404,13 +447,13 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_ISPLAYING), *szargs, 10);
             break;
          case IPC_JUMPTOTIME:
-            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs+3)), IPC_JUMPTOTIME);
+            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_JUMPTOTIME);
             break;
          case IPC_PLAYFILE:
            {
             COPYDATASTRUCT cds;
             cds.dwData = IPC_PLAYFILE;
-            cds.lpData = (void *) (*(szargs+3));
+            cds.lpData = (void *) (*(szargs + 1));
             cds.cbData = strlen((char *) cds.lpData)+1;
             SendMessage(hwndWinamp,WM_COPYDATA,(WPARAM)NULL,(LPARAM)&cds);
            }
@@ -422,17 +465,17 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             SendMessage(hwndWinamp, WM_USER, 0, IPC_RESTART_WINAMP);
             break;
          case IPC_SETEQDATA:
-            SendMessage(hwndWinamp,WM_USER,atoi(*(szargs+3)),IPC_GETEQDATA);
-            SendMessage(hwndWinamp,WM_USER,atoi(*(szargs+4)),IPC_SETEQDATA);
+            SendMessage(hwndWinamp,WM_USER,atoi(*(szargs + 1)),IPC_GETEQDATA);
+            SendMessage(hwndWinamp,WM_USER,atoi(*(szargs + 2)),IPC_SETEQDATA);
             break;
          case IPC_SETPANNING:
-            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs+3)), IPC_SETPANNING);
+            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_SETPANNING);
             break;
          case IPC_SETPLAYLISTPOS:
-            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs+3)), IPC_SETPLAYLISTPOS);
+            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_SETPLAYLISTPOS);
             break;
          case IPC_SETVOLUME:
-            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs+3)), IPC_SETVOLUME);
+            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_SETVOLUME);
             break;
          case IPC_STARTPLAY:
             SendMessage(hwndWinamp, WM_USER, 0, IPC_STARTPLAY);
@@ -476,27 +519,26 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
            {
             int param1 = 0;
             double param2 = 0;
-            param1 = atoi(*(szargs+3));
+            param1 = atoi(*(szargs + 1));
             if ((param1 >= 0) && (param1 <= 10))
               {
-               param2 = atof(*(szargs+4));
-               param2 = (-1) * param2;
-               param2 += 20;
-               param2 = param2 * 63 / 40;
+               param2 = atof(*(szargs + 2));
+               param2 -= 20;
+               param2 = param2 * (-1.575);
               }
             else
               {
-               param2 = atoi(*(szargs+4));
+               param2 = atoi(*(szargs + 2));
               }
             SendMessage(hwndWinamp,WM_USER,param1,IPC_GETEQDATA);
             SendMessage(hwndWinamp,WM_USER,param2,IPC_SETEQDATA);
            }
             break;
          case SET_PANNING:
-            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs+3))*(1.27), IPC_SETPANNING);
+            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)) * 1.27, IPC_SETPANNING);
             break;
          case SET_VOLUME:
-            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs+3))*255/100, IPC_SETVOLUME);
+            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)) * 2.55, IPC_SETVOLUME);
             break;
          case SHUFFLE_OFF:
             SendMessage(hwndWinamp, WM_USER, 0, IPC_SET_SHUFFLE);
@@ -673,15 +715,22 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
      }
    else
      {
-      if (strcmp ((*(szargs+2)),"1") == 0)    //if second argument is 1 then show window with error explanation
+      if (strcmp (response_type, "1") == 0)    //if response type is 1 then show window with error explanation
         {
          (ppsv->ErrMessage)("Specified Winamp window does not exist.","");
         }
-      else      // else, if second argument is 2 then set flag f0 to 0
+      else
         {
-         if (strcmp ((*(szargs+2)),"2") == 0)
+         if (strcmp(response_type, "2") == 0)    //if response type is 2 then set flag f0 to 0
            {
             (*pFlags) = (*pFlags)&0xFFFFFFFE;
+           }
+         else  
+           {
+            if (response_type[0] == '3')    //if response type is 3abcde... then return abcde...
+              {
+               strcpy(*szargs, &(response_type[1]));
+              }
            }
         }
      }           
