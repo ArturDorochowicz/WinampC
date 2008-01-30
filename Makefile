@@ -1,4 +1,4 @@
-GCC=C:\PROGRA~1\mingw
+GCC=c:\PROGRA~1\mingw
 
 WinampC.dll: WinampC.o resources.o
 	$(GCC)\bin\dllwrap --dllname=WinampC.dll --driver_name=$(GCC)\bin\gcc WinampC.o resources.o

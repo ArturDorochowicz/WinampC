@@ -1,8 +1,8 @@
 /*
-  Winamp Control Plugin   version 1.0.0
+  Winamp Control Plugin   version 1.0.1
 
   Copyright (c) 2003 x-phile
-  All rights reserved.
+  All Rights Reserved.
 
   All used names are the property of their respective owners.
   Winamp is Copyright (c) by Nullsoft Inc.
@@ -32,7 +32,7 @@
 #define SET_EQ_DATA                     30014 // Sets equalizer data min = -20 ; max = +20
 #define GET_EQ_DATA                     30015 // Gets equalizer data min = -20 ; max = +20
 #define GET_POSITION_IN_SECONDS         30016 // Gets current track position in seconds
-#define VOLUME_CHANGE_BY                30017 // Changes volume
+#define SET_PANNING                     30017 // Sets the panning, which can be between -100 (all left) and 100 (all right).
 
 //WM_USER
 #define IPC_GETVERSION                  0   // Retrieves the version of Winamp running
@@ -44,7 +44,7 @@
 #define IPC_WRITEPLAYLIST               120 // Writes out the current playlist to Winampdir\winamp.m3u
 #define IPC_SETPLAYLISTPOS              121 // Sets the playlist position
 #define IPC_SETVOLUME                   122 // Sets the volume, which can be between 0 (silent) and 255 (maximum).
-#define IPC_SETPANNING                  123 // Sets the panning, which can be between 0 (all left) and 255 (all right).
+#define IPC_SETPANNING                  123 // Sets the panning, which can be between -127 (all left) and 127 (all right).
 #define IPC_GETLISTLENGTH               124 // Returns length of the current playlist, in tracks.
 #define IPC_GETPOSITION                 125 // Returns the position in the current playlist, in tracks.
 #define IPC_GETINFO                     126 // Retrieves info about the current playing track.
@@ -168,81 +168,84 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvReserved)
     return TRUE;
 }
 
-static void MakeAction(UINT sw, UINT nargs, LPSTR* szargs, DWORD* pFlags, PPROSERVICES* ppsv)
-{
-	//**szargs='\0';  Don't know why this is here.
-	if (nargs!=2 && !(sw==IPC_JUMPTOTIME||sw==IPC_SETPLAYLISTPOS||sw==SET_VOLUME||sw==IPC_SETVOLUME||sw==IPC_SETPANNING
+static void MakeAction(UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPROSERVICES * ppsv)
+  {
+   if (nargs!=2 && !(sw==IPC_JUMPTOTIME||sw==IPC_SETPLAYLISTPOS||sw==SET_VOLUME||sw==IPC_SETVOLUME||sw==IPC_SETPANNING||sw==SET_PANNING
                      ||sw==IPC_CHDIR||sw==IPC_PLAYFILE||sw==IPC_GETEQDATA||sw==IPC_SETEQDATA||sw==SET_EQ_DATA||sw==GET_EQ_DATA))
-      {
-		 (ppsv->ErrMessage)("Need two arguments for the service.","");
-      }
-	else
-      if (nargs != 3 && (sw==IPC_JUMPTOTIME||sw==IPC_SETPLAYLISTPOS||sw==SET_VOLUME||sw==IPC_SETVOLUME||sw==IPC_SETPANNING
-                      ||sw==IPC_CHDIR||sw==IPC_PLAYFILE||sw==IPC_GETEQDATA||sw==GET_EQ_DATA))
-         {
-		    (ppsv->ErrMessage)("Need three arguments for the service.","");
-         }
+     {
+      (ppsv->ErrMessage)("Need two arguments for the service.","");
+     }
+   else
+      if (nargs != 3 && (sw==IPC_JUMPTOTIME||sw==IPC_SETPLAYLISTPOS||sw==SET_VOLUME||sw==IPC_SETVOLUME||sw==IPC_SETPANNING||sw==SET_PANNING
+                         ||sw==IPC_CHDIR||sw==IPC_PLAYFILE||sw==IPC_GETEQDATA||sw==GET_EQ_DATA))
+        {
+         (ppsv->ErrMessage)("Need three arguments for the service.","");
+        }
       else
          if (nargs != 4 && (sw==IPC_SETEQDATA||sw==SET_EQ_DATA))
-            {
-             (ppsv->ErrMessage)("Need four arguments for the service.","");
-            }
-      else
+           {
+            (ppsv->ErrMessage)("Need four arguments for the service.","");
+           }
+         else
 	   {
-       HWND hwndWinamp = NULL;
+            HWND hwndWinamp = NULL;
 
-       if (strcmp ((*(szargs+1)),"") == 0)
-          {
-           hwndWinamp = FindWindow("Winamp v1.x",NULL);
-          }
-       else
-          {
-           hwndWinamp = FindWindow((*(szargs+1)),NULL);
-          }
+            if (strcmp ((*(szargs+1)),"") == 0)
+              {
+               hwndWinamp = FindWindow("Winamp v1.x",NULL);
+              }
+            else
+              {
+               hwndWinamp = FindWindow((*(szargs+1)),NULL);
+              }
 
-		 if (hwndWinamp)
-		    {
-           if (strcmp ((*(szargs+2)),"2") == 0)    //if second argument is 2, set flag f0 to 1
-                  {
-                   (*pFlags) = (*pFlags)|0x00000001;
-                  }
-           switch (sw)
-			     {
-               case GET_POSITION_IN_SECONDS:
-                  {
-                   double ret = 0;
-                   ret = SendMessage(hwndWinamp, WM_USER, 0, IPC_GETOUTPUTTIME);
-                   if (ret != -1)
-                      {
-                       ret /=1000;
-                       sprintf (*szargs,"%.0f",ret);
-                      }
-                   else
-                      {
-                       sprintf (*szargs,"%.0f",ret);
-                      }
-                  }
-                  break;
-               case GET_EQ_DATA:
-                  {
-                   char * p;
-                   double ret = 0;
-                   int param = 0;
-                   param = atoi(*(szargs+3));
-                   ret = SendMessage(hwndWinamp, WM_USER, param, IPC_GETEQDATA);
-                   if ((param >= 0) && (param <= 10))
-                      {
-                       ret = ret * 40 / 63;
-                       ret -= 20;
-                       ret = -1 * ret;
-                       sprintf (*szargs, "%.1f", ret);
-                      }
-                   else
-                      {
-                       itoa (ret, *szargs, 10);
-                      }
-                  }
-                  break;
+            if (hwndWinamp)
+              {
+               if (strcmp ((*(szargs+2)),"2") == 0)    //if second argument is 2, set flag f0 to 1
+                 {
+                  (*pFlags) = (*pFlags)|0x00000001;
+                 }
+               switch (sw)
+                 {
+                  case SET_PANNING:
+                     SendMessage(hwndWinamp, WM_USER, atoi(*(szargs+3))*(1.27), IPC_SETPANNING);
+                     **szargs = '\0';
+                     break;                                 
+                  case GET_POSITION_IN_SECONDS:
+                    {
+                     double ret = 0;
+                     ret = SendMessage(hwndWinamp, WM_USER, 0, IPC_GETOUTPUTTIME);
+                     if (ret != -1)
+                       {
+                        ret /=1000;
+                        sprintf (*szargs,"%.0f",ret);
+                       }
+                     else
+                       {
+                        sprintf (*szargs,"%.0f",ret);
+                       }
+                    }
+                    break;
+                  case GET_EQ_DATA:
+                    {
+                     char * p;
+                     double ret = 0;
+                     int param = 0;
+                     param = atoi(*(szargs+3));
+                     ret = SendMessage(hwndWinamp, WM_USER, param, IPC_GETEQDATA);
+                     if ((param >= 0) && (param <= 10))
+                       {
+                        ret = ret * 40 / 63;
+                        ret -= 20;
+                        ret = -1 * ret;
+                        sprintf (*szargs, "%.1f", ret);
+                       }
+                     else
+                       {
+                        itoa (ret, *szargs, 10);
+                       }
+                    }
+                    break;
                case SET_EQ_DATA:
                   {
                    int param1 = 0;
@@ -737,467 +740,472 @@ static void MakeAction(UINT sw, UINT nargs, LPSTR* szargs, DWORD* pFlags, PPROSE
       }
 }
 
-_declspec(dllexport) void song_name(LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void song_name(LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (GET_SONG_NAME, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void caption(LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void caption(LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (GET_CAPTION, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void song_and_number(LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void song_and_number(LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (GET_SONG_NAME_AND_NUMBER, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void toggle_eq_window (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void toggle_eq_window (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_OPTIONS_EQ, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void toggle_plist_window (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void toggle_plist_window (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_OPTIONS_PLEDIT, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void volume_up (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void volume_up (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_VOLUMEUP, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void volume_down (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void volume_down (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_VOLUMEDOWN, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void forward_5sec (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void forward_5sec (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_FFWD5S, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void rewind_5sec (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void rewind_5sec (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_REW5S, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void previous_track (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void previous_track (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_BUTTON1, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void play_button (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void play_button (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_BUTTON2, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void pause_unpause (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void pause_unpause (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_BUTTON3, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void stop (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void stop (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_BUTTON4, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void next_track (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void next_track (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_BUTTON5, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void stop_with_fadeout (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void stop_with_fadeout (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_BUTTON4_SHIFT, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void start_of_plist (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void start_of_plist (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_BUTTON1_CTRL, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void open_url_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void open_url_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_BUTTON2_CTRL, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void stop_after_current (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void stop_after_current (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_BUTTON4_CTRL, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void end_of_plist (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void end_of_plist (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_BUTTON5_CTRL, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void file_open_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void file_open_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_FILE_PLAY, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void open_preferences (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void open_preferences (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_OPTIONS_PREFS, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void toggle_on_top (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void toggle_on_top (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_T_ALWAYS_ON_TOP, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void open_about_box (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void open_about_box (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_HELP_ABOUT, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void open_file_info_box (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void open_file_info_box (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_FILE_INFO, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void display_elapsed_time (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void display_elapsed_time (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_DISPLAY_ELAPSED, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void display_remaining_time (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void display_remaining_time (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_DISPLAY_REMAINING, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void open_visual_options (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void open_visual_options (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_O_VISUAL_OPTIONS, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void open_visual_plugin_options (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void open_visual_plugin_options (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_O_VISUAL_PLUGIN_OPTIONS, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void execute_visual_plugin (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void execute_visual_plugin (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_EXECUTE_VISUAL_PLUGIN, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void toggle_title_scrolling (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void toggle_title_scrolling (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_T_TITLE_SCROLLING, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void toggle_windowshade (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void toggle_windowshade (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_T_WINDOWSHADE, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void toggle_plist_windowshade (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void toggle_plist_windowshade (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_T_PLIST_WINDOWSHADE, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void toggle_doublesize (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void toggle_doublesize (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_T_DOUBLESIZE, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void toggle_main_window (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void toggle_main_window (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_T_MAIN_WINDOW, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void toggle_minibrowser (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void toggle_minibrowser (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_T_MINIBROWSER, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void toggle_easymove (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void toggle_easymove (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_T_EASYMOVE, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void toggle_repeat (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void toggle_repeat (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_T_REPEAT, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void toggle_shuffle (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void toggle_shuffle (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_T_SHUFFLE, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void jump_to_time_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void jump_to_time_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_O_JUMP_TO_TIME, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void jump_to_file_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void jump_to_file_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_O_JUMP_TO_FILE, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void open_skin_selector (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void open_skin_selector (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_O_SKIN_SELECTOR, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void configure_visual_plugin (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void configure_visual_plugin (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_CONFIG_VISUAL_PLUGIN, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void reload_current_skin (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void reload_current_skin (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_RELOAD_CURRENT_SKIN, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void close_winamp (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void close_winamp (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_CLOSE_WINAMP, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void move_10_tracks_back (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void move_10_tracks_back (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_10_TRACKS_BACK, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void show_edit_bookmarks (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void show_edit_bookmarks (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_SHOW_EDIT_BOOKMARKS, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void add_track_as_bookmark (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void add_track_as_bookmark (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_ADD_CUR_TRACK_BOOKMARK, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void play_audio_cd (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void play_audio_cd (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_PLAY_AUDIO_CD, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void load_preset_from_eq (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void load_preset_from_eq (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_LOAD_PRESET_FROM_EQ, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void save_preset_to_eqf (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void save_preset_to_eqf (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_SAVE_PRESET_TO_EQF, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void load_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void load_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_O_LOAD_PRESET, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void autoload_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void autoload_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_O_LOAD_AUTOPRESET, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void load_default_preset (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void load_default_preset (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_LOAD_DEFAULT_PRESET, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void save_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void save_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_O_SAVE_PRESET, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void autoload_save_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void autoload_save_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_O_AUTOLOAD_SAVE_PRESET, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void delete_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void delete_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_O_DELETE_PRESET, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void delete_autoload_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void delete_autoload_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (WINAMP_O_DELETE_AUTOPRESET, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_version (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_version (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_GETVERSION, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void delete_plist (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void delete_plist (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_DELETE, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void play_selected (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void play_selected (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_STARTPLAY, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_playback_status (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_playback_status (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_ISPLAYING, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_position (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_position (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (GET_POSITION, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_length (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_length (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (GET_LENGTH, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void jump_to_time (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void jump_to_time (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_JUMPTOTIME, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void set_plist_position (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void set_plist_position (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_SETPLAYLISTPOS, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void set_volume (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void set_volume (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (SET_VOLUME, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void set_volume255 (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void set_volume255 (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_SETVOLUME, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void set_panning (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void set_panning127 (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_SETPANNING, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_plist_length (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_plist_length (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_GETLISTLENGTH, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_plist_position (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_plist_position (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_GETPOSITION, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_plist_position1 (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_plist_position1 (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_WRITEPLAYLIST, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_samplerate (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_samplerate (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (GET_SAMPLERATE, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_bitrate (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_bitrate (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (GET_BITRATE, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_number_of_channels (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_number_of_channels (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (GET_NUMBER_OF_CHANNELS, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void restart_winamp (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void restart_winamp (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_RESTART_WINAMP, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_net_status (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_net_status (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_INETAVAILABLE, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void update_info (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void update_info (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_UPDTITLE, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void flush_plist_cache_buffer (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void flush_plist_cache_buffer (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_REFRESHPLCACHE, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_shuffle (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_shuffle (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_GET_SHUFFLE, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_repeat (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_repeat (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_GET_REPEAT, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void repeat_on (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void repeat_on (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (REPEAT_ON, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void repeat_off (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void repeat_off (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (REPEAT_OFF, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void shuffle_on (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void shuffle_on (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (SHUFFLE_ON, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void shuffle_off (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void shuffle_off (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (SHUFFLE_OFF, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void block_minibrowser (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void block_minibrowser (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (BLOCK_MINIBROWSER, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void unblock_minibrowser (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void unblock_minibrowser (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (UNBLOCK_MINIBROWSER, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void change_directory (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void change_directory (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_CHDIR, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void add_file_to_plist (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void add_file_to_plist (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_PLAYFILE, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_eq_data63 (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_eq_data63 (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_GETEQDATA, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void set_eq_data63 (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void set_eq_data63 (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (IPC_SETEQDATA, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_eq_data (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_eq_data (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (GET_EQ_DATA, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void set_eq_data (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void set_eq_data (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (SET_EQ_DATA, nargs, szargs, pFlags, ppsv);
 }
 
-_declspec(dllexport) void get_position_in_sec (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD* pFlags, UINT nargs, LPSTR szargs, PPROSERVICES * ppsv)
+_declspec(dllexport) void get_position_in_sec (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 {
    MakeAction (GET_POSITION_IN_SECONDS, nargs, szargs, pFlags, ppsv);
+}
+
+_declspec(dllexport) void set_panning (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
+{
+   MakeAction (SET_PANNING, nargs, szargs, pFlags, ppsv);
 }
