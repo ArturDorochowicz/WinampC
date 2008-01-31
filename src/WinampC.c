@@ -319,13 +319,13 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             break;
          case GET_EQ_DATA:
            {            
-            double ret = 0;
+            int ret = 0;
             int param = 0;
             param = atoi(*(szargs + 1));
             ret = SendMessage(hwndWinamp, WM_USER, param, IPC_GETEQDATA);
             if ((param >= 0) && (param <= 10))
               {
-               sprintf (*szargs, "%.1f", (ret / (-1.575) + 20));
+               sprintf (*szargs, "%.1f", ( -ret * (20 + 20 ) / 63.0 ) + 20 );
               }
             else
               {
@@ -556,22 +556,21 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             if ((param1 >= 0) && (param1 <= 10))
               {
                param2 = atof(*(szargs + 2));
-               param2 -= 20;
-               param2 = param2 * (-1.575);
+			   param2 = ( -param2 + 20 ) * 63 / ( 20.0 + 20.0 );
               }
             else
               {
                param2 = atoi(*(szargs + 2));
               }
             SendMessage(hwndWinamp,WM_USER,param1,IPC_GETEQDATA);
-            SendMessage(hwndWinamp,WM_USER,param2,IPC_SETEQDATA);
+            SendMessage(hwndWinamp,WM_USER,(WPARAM) param2,IPC_SETEQDATA);
            }
             break;
          case SET_PANNING:
-            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)) * 1.27, IPC_SETPANNING);
+            SendMessage(hwndWinamp, WM_USER, (WPARAM) (atoi(*(szargs + 1)) * 1.27 ), IPC_SETPANNING);
             break;
          case SET_VOLUME:
-            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)) * 2.55, IPC_SETVOLUME);
+            SendMessage(hwndWinamp, WM_USER, (WPARAM) (atoi(*(szargs + 1)) * 2.55), IPC_SETVOLUME);
             break;
          case SHUFFLE_OFF:
             SendMessage(hwndWinamp, WM_USER, 0, IPC_SET_SHUFFLE);
