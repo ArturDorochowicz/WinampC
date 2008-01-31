@@ -308,7 +308,7 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             SendMessage(hwndWinamp, WM_USER, 1, IPC_MBBLOCK);
             break;
          case GET_BITRATE:
-            itoa (SendMessage(hwndWinamp, WM_USER, 1, IPC_GETINFO), *szargs, 10);
+            _itoa (SendMessage(hwndWinamp, WM_USER, 1, IPC_GETINFO), *szargs, 10);
             break;
          case GET_CAPTION:
            {
@@ -329,18 +329,18 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
               }
             else
               {
-               itoa (ret, *szargs, 10);
+               _itoa (ret, *szargs, 10);
               }
            }
             break;
          case GET_LENGTH:
-            itoa (SendMessage(hwndWinamp, WM_USER, 1, IPC_GETOUTPUTTIME), *szargs, 10);
+            _itoa (SendMessage(hwndWinamp, WM_USER, 1, IPC_GETOUTPUTTIME), *szargs, 10);
             break;
          case GET_NUMBER_OF_CHANNELS:
-            itoa (SendMessage(hwndWinamp, WM_USER, 2, IPC_GETINFO), *szargs, 10);
+            _itoa (SendMessage(hwndWinamp, WM_USER, 2, IPC_GETINFO), *szargs, 10);
             break;
          case GET_POSITION:
-            itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETOUTPUTTIME), *szargs, 10);
+            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETOUTPUTTIME), *szargs, 10);
             break;
          case GET_POSITION_IN_SECONDS:
            {
@@ -357,7 +357,7 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
            }
             break;
          case GET_SAMPLERATE:
-            itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETINFO), *szargs, 10);
+            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETINFO), *szargs, 10);
             break;
          case IPC_GETPLAYLISTFILE:
 			{
@@ -397,7 +397,7 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             p = this_title + strlen(this_title) - 8;
             while (p >= this_title)
               {
-               if (!strnicmp(p,"- Winamp",8)) break;
+               if (!_strnicmp(p,"- Winamp",8)) break;
                p--;
               }
             if (p >= this_title) p--;
@@ -421,7 +421,7 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             p = this_title + strlen(this_title)-8;
             while (p >= this_title)
               {
-               if (!strnicmp(p,"- Winamp",8)) break;
+               if (!_strnicmp(p,"- Winamp",8)) break;
                p--;
               }
             if (p >= this_title) p--;
@@ -434,7 +434,7 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
            {
             int tmp_int;
 
-            itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETVERSION), *szargs, 16);
+            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETVERSION), *szargs, 16);
             for (tmp_int = 3; tmp_int > 1; tmp_int--)
               {
                (*szargs)[tmp_int] = (*szargs)[tmp_int-1];
@@ -456,28 +456,28 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             SendMessage(hwndWinamp, WM_USER, 0, IPC_DELETE);
             break;
          case IPC_GET_REPEAT:
-            itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GET_REPEAT), *szargs, 10);
+            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GET_REPEAT), *szargs, 10);
             break;
          case IPC_GET_SHUFFLE:
-            itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GET_SHUFFLE), *szargs, 10);
+            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GET_SHUFFLE), *szargs, 10);
             break;
          case IPC_GETEQDATA:
-            itoa (SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_GETEQDATA), *szargs, 10);
+            _itoa (SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_GETEQDATA), *szargs, 10);
             break;
          case IPC_GETLISTLENGTH:
-            itoa (SendMessage(hwndWinamp, WM_USER, 1, IPC_GETLISTLENGTH), *szargs, 10);
+            _itoa (SendMessage(hwndWinamp, WM_USER, 1, IPC_GETLISTLENGTH), *szargs, 10);
             break;
          case IPC_GETPOSITION:
-            itoa (SendMessage(hwndWinamp, WM_USER, 1, IPC_GETPOSITION) + 1, *szargs, 10);
+            _itoa (SendMessage(hwndWinamp, WM_USER, 1, IPC_GETPOSITION) + 1, *szargs, 10);
             break;
          case IPC_GETVERSION:
-            itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETVERSION), *szargs, 16);
+            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETVERSION), *szargs, 16);
             break;
          case IPC_INETAVAILABLE:
-            itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_INETAVAILABLE), *szargs, 10);
+            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_INETAVAILABLE), *szargs, 10);
             break;
          case IPC_ISPLAYING:
-            itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_ISPLAYING), *szargs, 10);
+            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_ISPLAYING), *szargs, 10);
             break;
          case IPC_JUMPTOTIME:
             SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_JUMPTOTIME);
@@ -517,7 +517,7 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             SendMessage(hwndWinamp, WM_USER, 0, IPC_UPDTITLE);
             break;
          case IPC_WRITEPLAYLIST:
-            itoa (SendMessage(hwndWinamp, WM_USER, 1, IPC_WRITEPLAYLIST), *szargs, 10);
+            _itoa (SendMessage(hwndWinamp, WM_USER, 1, IPC_WRITEPLAYLIST), *szargs, 10);
             break;
          case MINIMIZE:
             PostMessage(hwndWinamp, WM_SYSCOMMAND, SC_MINIMIZE, 0);
