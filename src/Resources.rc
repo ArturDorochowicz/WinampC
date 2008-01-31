@@ -1,13 +1,16 @@
 #include <windows.h>
 
+#include "version.h"
+
+
 // English (U.K.) resources
 #ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 #endif
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION     1,1,2,0
-PRODUCTVERSION  1,1,2,0
+FILEVERSION     WINAMPC_VERSION_MAJOR,WINAMPC_VERSION_MINOR,WINAMPC_VERSION_BUILD,WINAMPC_VERSION_REVISION
+PRODUCTVERSION  WINAMPC_VERSION_MAJOR,WINAMPC_VERSION_MINOR,WINAMPC_VERSION_BUILD,WINAMPC_VERSION_REVISION
 FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
 FILEOS          VOS__WINDOWS32
 FILETYPE        VFT_DLL
@@ -20,12 +23,12 @@ BEGIN
       //add standard values
       VALUE "CompanyName",      ""
       VALUE "FileDescription",  "Winamp Control Plugin"
-      VALUE "FileVersion",      "1.1.2"
+      VALUE "FileVersion",      WINAMPC_VERSION_STRING
       VALUE "InternalName",     "Winamp Control Plugin"
-      VALUE "LegalCopyright",   "Copyright © 2003-2007 Artur Dorochowicz"    
+      VALUE "LegalCopyright",   "Copyright © " WINAMPC_COPYRIGHT_YEARS_STRING " Artur Dorochowicz"    
       VALUE "OriginalFilename", "WinampC.dll"
       VALUE "ProductName",      "Winamp Control Plugin"
-      VALUE "ProductVersion",   "1.1.2"
+      VALUE "ProductVersion",   WINAMPC_VERSION_STRING
     END
   END
   BLOCK "VarFileInfo"

@@ -1,0 +1,1 @@
+configure_file( "WinampC.txt.cmake" "${CMAKE_CURRENT_BINARY_DIR}/WinampC.txt" )

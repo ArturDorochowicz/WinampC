@@ -1,6 +1,6 @@
-Winamp Control Plugin   version 1.1.2
+Winamp Control Plugin   version ${WINAMPC_VERSION_MAJOR}.${WINAMPC_VERSION_MINOR}.${WINAMPC_VERSION_BUILD}
 
-Copyright (C) 2003-2007 Artur Dorochowicz
+Copyright (C) ${WINAMPC_COPYRIGHT_YEARS_TEXT} Artur Dorochowicz
 All Rights Reserved.
 
 TABLE OF CONTENTS

@@ -1,7 +1,7 @@
 /*
-  Winamp Control Plugin   version 1.1.2
+  Winamp Control Plugin
 
-  Copyright (C) 2003-2007 Artur Dorochowicz
+  Copyright Artur Dorochowicz
   All Rights Reserved.
 
   All used names are the property of their respective owners.
