@@ -16,6 +16,8 @@ endif( )
 configure_file( "version.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/version.h" )
 include_directories( BEFORE "${CMAKE_CURRENT_BINARY_DIR}" )
 
+include_directories( "${CMAKE_CURRENT_SOURCE_DIR}/include/Winamp SDK/Winamp" )
+
 set( SOURCES
 	"WinampC.c"
 	"Resources.rc"
