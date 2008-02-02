@@ -20,21 +20,6 @@
 //---DEFINITIONS----------------------------------------------------------------------------------------------------------------------------
 #define MAX_LENGTH                      531
 
-//---INTERNAL MESSAGES----------------------------------------------------------------------------------------------------------------------
-#define NEEDS_123_ARGUMENTS             10
-#define NEEDS_234_ARGUMENTS             11
-#define NEEDS_012_ARGUMENTS             12
-
-#define NEEDS_TWO_HAS_ZERO              20
-#define NEEDS_TWO_HAS_ONE               21
-#define NEEDS_TWO_HAS_TWO               22
-#define NEEDS_THREE_HAS_ONE             23
-#define NEEDS_THREE_HAS_TWO             24
-#define NEEDS_THREE_HAS_THREE           25
-#define NEEDS_FOUR_HAS_TWO              26
-#define NEEDS_FOUR_HAS_THREE            27
-#define NEEDS_FOUR_HAS_FOUR             28
-
 //---WINAMP API DEFINITIONS-----------------------------------------------------------------------------------------------------------------
 #define BLOCK_MINIBROWSER               30010 // Will block the Minibrowser from updates
 #define GET_BITRATE                     30020 // Returns current track bitrate
@@ -79,7 +64,6 @@
 #define IPC_SETPANNING                  123 // Sets the panning, which can be between -127 (all left) and 127 (all right).
 #define IPC_SETPLAYLISTPOS              121 // Sets the playlist position
 #define IPC_SETVOLUME                   122 // Sets the volume, which can be between 0 (silent) and 255 (maximum).
-#define IPC_STARTPLAY                   102 // Begins play of selected track.
 #define IPC_UPDTITLE                    243 // Asks Winamp to update the informations about the current title.
 #define IPC_WRITEPLAYLIST               120 // Writes out the current playlist to Winampdir\winamp.m3u
 
@@ -90,10 +74,6 @@
 #define IPC_MBOPEN                      241 // Will open a new URL in the minibrowser. if url is NULL, it will open the Minibrowser window.
 #define IPC_MBOPENREAL                  249 // Works the same as IPC_MBOPEN except that it will work even if IPC_MBBLOCK has been set to 1
 //------------------------------------------------------------------------------------------------------------------------------------------
-
-//WM_COPY_DATA
-#define IPC_CHDIR                       103 // This will make Winamp change to the specified directory
-#define IPC_PLAYFILE                    100 // This will play specified file
 
 //WM_COMMAND
 #define WINAMP_10_TRACKS_BACK           40197 // Moves back 10 tracks in playlist 40197
@@ -435,15 +415,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             *++p=0;
             strcpy (*szargs, this_title);
            }       
-         case IPC_CHDIR:
-           {
-            COPYDATASTRUCT cds;
-            cds.dwData = IPC_CHDIR;
-            cds.lpData = (void *) (*(szargs + 1));
-            cds.cbData = strlen((char *) cds.lpData)+1;
-            SendMessage(hwndWinamp,WM_COPYDATA,(WPARAM)NULL,(LPARAM)&cds);
-           }
-            break;
          case IPC_GET_REPEAT:
             _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GET_REPEAT), *szargs, 10);
             break;
@@ -487,9 +458,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             break;
          case IPC_SETVOLUME:
             SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_SETVOLUME);
-            break;
-         case IPC_STARTPLAY:
-            SendMessage(hwndWinamp, WM_USER, 0, IPC_STARTPLAY);
             break;
          case IPC_UPDTITLE:
             SendMessage(hwndWinamp, WM_USER, 0, IPC_UPDTITLE);
@@ -845,23 +813,29 @@ WINAMPC_SERVICE( get_plist_selected_path )
 			{
 				/* file_name may or may not be NULL terminated! */
 				strncpy( retval, file_name, ( bytes_read > MAX_LENGTH ? MAX_LENGTH : bytes_read ) );
-				retval[MAX_LENGTH-1] = '\0';   /* make sure it's null-terminated */
+				retval[MAX_LENGTH - 1] = '\0';   /* make sure it's null-terminated */
 			}
 		}
 	}
 }
 
 
-//_declspec(dllexport) void change_directory (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_CHDIR, nargs, szargs, pFlags, ppsv);
-//}
-
+WINAMPC_SERVICE( change_directory )
+{
+	COPYDATASTRUCT cds;
+	
+	STARTUP( 1 );
+	
+	cds.dwData = IPC_CHDIR;
+	cds.lpData = args[0];
+	cds.cbData = strlen( args[0] ) + 1;
+	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
+}
 
 WINAMPC_SERVICE( clear_plist )
 {
 	STARTUP( 0 );
-	SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_DELETE );
+	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_DELETE );
 }
 
 
@@ -1055,9 +1029,12 @@ WINAMPC_SERVICE( get_version )
 
 WINAMPC_SERVICE( get_version_hex )
 {
+	LRESULT version;
+
 	STARTUP( 0 );
 
-	_itoa( SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETVERSION ), retval, 16);
+	version = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETVERSION );
+	sprintf( retval, "%X", version );
 }
 
 
@@ -1165,12 +1142,13 @@ WINAMPC_SERVICE( get_version_hex )
 //{
 //   MakeAction (WINAMP_BUTTON2, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void play_selected (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_STARTPLAY, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+WINAMPC_SERVICE( play_selected )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_STARTPLAY );
+}
+
 //_declspec(dllexport) void previous_track (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_BUTTON1, nargs, szargs, pFlags, ppsv);
