@@ -61,7 +61,6 @@
 #define PLAY_ANY_AUDIO_CD		30210 // Play specified audio cd
 
 //WM_USER
-#define IPC_DELETE                      101 // Clears Winamp's internal playlist.
 #define IPC_GET_REPEAT                  251 // Returns the status of the Repeat option (1 if set)
 #define IPC_GET_SHUFFLE                 250 // Returns the status of the Shuffle option (1 if set)
 #define IPC_GETINFO                     126 // Retrieves info about the current playing track.
@@ -444,9 +443,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             cds.cbData = strlen((char *) cds.lpData)+1;
             SendMessage(hwndWinamp,WM_COPYDATA,(WPARAM)NULL,(LPARAM)&cds);
            }
-            break;
-         case IPC_DELETE:
-            SendMessage(hwndWinamp, WM_USER, 0, IPC_DELETE);
             break;
          case IPC_GET_REPEAT:
             _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GET_REPEAT), *szargs, 10);
@@ -860,7 +856,15 @@ WINAMPC_SERVICE( get_plist_selected_path )
 //{
 //   MakeAction (IPC_CHDIR, nargs, szargs, pFlags, ppsv);
 //}
-//
+
+
+WINAMPC_SERVICE( clear_plist )
+{
+	STARTUP( 0 );
+	SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_DELETE );
+}
+
+
 //_declspec(dllexport) void close_winamp (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_CLOSE_WINAMP, nargs, szargs, pFlags, ppsv);
@@ -875,12 +879,8 @@ WINAMPC_SERVICE( get_plist_selected_path )
 //{
 //   MakeAction (WINAMP_O_DELETE_AUTOPRESET, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void delete_plist (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_DELETE, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+
 //_declspec(dllexport) void delete_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_O_DELETE_PRESET, nargs, szargs, pFlags, ppsv);

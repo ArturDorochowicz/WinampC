@@ -55,10 +55,10 @@ autoload_save_preset_dialog
 block_minibrowser
 caption
 change_directory
+clear_plist
 close_winamp
 configure_visual_plugin
 delete_autoload_preset_dialog
-delete_plist
 delete_preset_dialog
 display_elapsed_time
 display_remaining_time
@@ -221,6 +221,9 @@ caption ("response type", "class name")
 change_directory ("directory", "response type", "class name")
         Makes Winamp change to the specified directory.
 
+clear_plist ("response type", "class name")
+        Cleares Winamp's internal playlist.
+
 close_winamp ("response type", "class name")
         Closes Winamp. (unbelievable, isn't it :)
 
@@ -230,9 +233,6 @@ configure_visual_plugin ("response type", "class name")
 delete_autoload_preset_dialog ("response type", "class name")
         Opens delete an auto load preset dialog.
         Doesn't seem to work on Winamp 2.80
-
-delete_plist ("response type", "class name")
-        Cleares Winamp's playlist.
 
 delete_preset_dialog ("response type", "class name")
         Opens delete preset dialog.
