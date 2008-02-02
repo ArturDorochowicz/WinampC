@@ -47,7 +47,6 @@
 #define GET_SAMPLERATE                  30090 // Returns current track sample rate
 #define GET_SONG_NAME                   30100 // Retrieves song's name
 #define GET_SONG_NAME_AND_NUMBER        30110 // Gets song's name with number
-#define GET_VERSION                     30120 // Returns Winamp version as x.yz
 #define MINIMIZE                        30125 // Minimizes Winamp
 #define MINIMIZE_RESTORE                30127 // Minimizes Winamp when not minimized, restores when minimized
 #define REPEAT_OFF                      30130 // Turns repeat off
@@ -69,7 +68,6 @@
 #define IPC_GETLISTLENGTH               124 // Returns length of the current playlist, in tracks.
 #define IPC_GETOUTPUTTIME               105 // Gets length of track or position in miliseconds
 #define IPC_GETPOSITION                 125 // Returns the position in the current playlist, in tracks.
-#define IPC_GETVERSION                  0   // Retrieves the version of Winamp as a hexadecimal number
 #define IPC_INETAVAILABLE               242 // Returns 1 if the internet connecton is available for Winamp
 #define IPC_ISPLAYING                   104 // Returns the status of playback.
 #define IPC_JUMPTOTIME                  106 // Seeks within the current track.
@@ -437,21 +435,7 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             while (p >= this_title && *p == ' ') p--;
             *++p=0;
             strcpy (*szargs, this_title);
-           }
-            break;
-         case GET_VERSION:
-           {
-            int tmp_int;
-
-            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETVERSION), *szargs, 16);
-            for (tmp_int = 3; tmp_int > 1; tmp_int--)
-              {
-               (*szargs)[tmp_int] = (*szargs)[tmp_int-1];
-              }
-            (*szargs)[1] = '.';
-            (*szargs)[4] = '\0';
-           }
-            break;           
+           }       
          case IPC_CHDIR:
            {
             COPYDATASTRUCT cds;
@@ -478,9 +462,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             break;
          case IPC_GETPOSITION:
             _itoa (SendMessage(hwndWinamp, WM_USER, 1, IPC_GETPOSITION) + 1, *szargs, 10);
-            break;
-         case IPC_GETVERSION:
-            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETVERSION), *szargs, 16);
             break;
          case IPC_INETAVAILABLE:
             _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_INETAVAILABLE), *szargs, 10);
@@ -1040,18 +1021,27 @@ WINAMPC_SERVICE( get_eq_data )
 //{
 //   MakeAction (IPC_GET_SHUFFLE, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void get_version (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (GET_VERSION, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void get_version_hex (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_GETVERSION, nargs, szargs, pFlags, ppsv);
-//}
-//
-//
+
+
+WINAMPC_SERVICE( get_version )
+{
+	LRESULT version;
+
+	STARTUP( 0 );
+
+	version = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETVERSION );
+	sprintf( retval, "%X.%X", WINAMP_VERSION_MAJOR( version ), WINAMP_VERSION_MINOR( version ) );
+}
+
+
+WINAMPC_SERVICE( get_version_hex )
+{
+	STARTUP( 0 );
+
+	_itoa( SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETVERSION ), retval, 16);
+}
+
+
 //_declspec(dllexport) void jump_to_file_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_O_JUMP_TO_FILE, nargs, szargs, pFlags, ppsv);

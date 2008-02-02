@@ -22,7 +22,8 @@ set( SOURCES
 	"WinampC.c"
 	"Resources.rc"
 	"version.h.cmake"
-	"${CMAKE_CURRENT_BINARY_DIR}/version.h" )
+	"${CMAKE_CURRENT_BINARY_DIR}/version.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/Winamp SDK/Winamp/wa_ipc.h" )
 
 add_library( "WinampC" SHARED ${SOURCES} )
 set_target_properties( "WinampC" PROPERTIES LINK_FLAGS_DISTRIBUTION "${LINK_FLAGS_DISTRIBUTION}" )
