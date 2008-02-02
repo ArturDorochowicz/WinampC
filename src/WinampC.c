@@ -472,15 +472,7 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
          case IPC_JUMPTOTIME:
             SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_JUMPTOTIME);
             break;
-         case IPC_PLAYFILE:
-           {
-            COPYDATASTRUCT cds;
-            cds.dwData = IPC_PLAYFILE;
-            cds.lpData = (void *) (*(szargs + 1));
-            cds.cbData = strlen((char *) cds.lpData)+1;
-            SendMessage(hwndWinamp,WM_COPYDATA,(WPARAM)NULL,(LPARAM)&cds);
-           }
-            break;
+
          case IPC_REFRESHPLCACHE:
             SendMessage(hwndWinamp, WM_USER, 0, IPC_REFRESHPLCACHE);
             break;
@@ -807,7 +799,6 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
 	if( NULL == winamp_wnd ) return;
 
 
-//WINAMPC_SERVICE( add_file_to_plist, IPC_PLAYFILE )
 //WINAMPC_SERVICE( add_track_as_bookmark, WINAMP_ADD_CUR_TRACK_BOOKMARK )
 //
 //_declspec(dllexport) void autoload_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
@@ -909,7 +900,21 @@ WINAMPC_SERVICE( get_plist_selected_path )
 //{
 //   MakeAction (WINAMP_BUTTON5_CTRL, nargs, szargs, pFlags, ppsv);
 //}
-//
+
+
+WINAMPC_SERVICE( enqueue_file )
+{
+	COPYDATASTRUCT cds;
+
+	STARTUP( 1 );
+
+	cds.dwData = IPC_ENQUEUEFILE;
+	cds.lpData = args[0];
+	cds.cbData = strlen( args[0] ) + 1;
+	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
+}
+
+
 //_declspec(dllexport) void execute_visual_plugin (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_EXECUTE_VISUAL_PLUGIN, nargs, szargs, pFlags, ppsv);

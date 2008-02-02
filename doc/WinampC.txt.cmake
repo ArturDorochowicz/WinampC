@@ -49,7 +49,6 @@ PowerPro and plugin template are Copyright (C) by Bruce Switzer.
 
 3. LIST OF SERVICES
 --------------------------------------------------------------------------------
-add_file_to_plist
 add_track_as_bookmark
 autoload_preset_dialog
 autoload_save_preset_dialog
@@ -64,6 +63,7 @@ delete_preset_dialog
 display_elapsed_time
 display_remaining_time
 end_of_plist
+enqueue_file
 execute_visual_plugin
 file_open_dialog
 flush_plist_cache_buffer
@@ -199,9 +199,6 @@ If you want to specify "class name" you must give "response type" argument also.
 --------------------------------------------------------------------------------
 Remember that in every service "response type" and "class name" may be omitted.
 
-add_file_to_plist ("file", "response type", "class name")
-        Makes Winamp add "file" to playlist.
-
 add_track_as_bookmark ("response type", "class name")
         Adds current track as bookmark
 
@@ -250,6 +247,9 @@ display_remaining_time ("response type", "class name")
 end_of_plist ("response type", "class name")
         Plays the last file on the playlist.
         When shuffle is on it is the last played file.
+
+enqueue_file ("file", "response type", "class name")
+        Enqueues specified file.
 
 execute_visual_plugin ("response type", "class name")
         Executes current visualization plugin.
