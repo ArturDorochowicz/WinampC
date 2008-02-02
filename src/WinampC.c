@@ -25,10 +25,7 @@
 #define GET_BITRATE                     30020 // Returns current track bitrate
 #define GET_CAPTION                     30030 // Gets full Winamp's caption
 #define GET_EQ_DATA                     30040 // Gets equalizer data min = -20 ; max = +20
-#define GET_LENGTH                      30050 // Returns current track length in seconds WM_USER, id=105, data =1
 #define GET_NUMBER_OF_CHANNELS          30060 // Returns current track number of channels
-#define GET_POSITION                    30070 // Returns current track position in miliseconds WM_USER id=105, data=0
-#define GET_POSITION_IN_SECONDS         30080 // Gets current track position in seconds
 #define GET_SAMPLERATE                  30090 // Returns current track sample rate
 #define GET_SONG_NAME                   30100 // Retrieves song's name
 #define GET_SONG_NAME_AND_NUMBER        30110 // Gets song's name with number
@@ -50,10 +47,8 @@
 #define IPC_GET_SHUFFLE                 250 // Returns the status of the Shuffle option (1 if set)
 #define IPC_GETINFO                     126 // Retrieves info about the current playing track.
 #define IPC_GETLISTLENGTH               124 // Returns length of the current playlist, in tracks.
-#define IPC_GETOUTPUTTIME               105 // Gets length of track or position in miliseconds
 #define IPC_GETPOSITION                 125 // Returns the position in the current playlist, in tracks.
 #define IPC_INETAVAILABLE               242 // Returns 1 if the internet connecton is available for Winamp
-#define IPC_ISPLAYING                   104 // Returns the status of playback.
 #define IPC_JUMPTOTIME                  106 // Seeks within the current track.
 #define IPC_MBBLOCK                     248 // Will block the Minibrowser from updates if value is set to 1
 #define IPC_REFRESHPLCACHE              247 // Will flush the playlist cache buffer.
@@ -348,28 +343,8 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             strcpy (*szargs, this_title);
            }
             break;
-         case GET_LENGTH:
-            _itoa (SendMessage(hwndWinamp, WM_USER, 1, IPC_GETOUTPUTTIME), *szargs, 10);
-            break;
          case GET_NUMBER_OF_CHANNELS:
             _itoa (SendMessage(hwndWinamp, WM_USER, 2, IPC_GETINFO), *szargs, 10);
-            break;
-         case GET_POSITION:
-            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETOUTPUTTIME), *szargs, 10);
-            break;
-         case GET_POSITION_IN_SECONDS:
-           {
-            double ret = 0;
-            ret = SendMessage(hwndWinamp, WM_USER, 0, IPC_GETOUTPUTTIME);
-            if (ret != -1)
-              {
-               sprintf (*szargs,"%.0f",(ret / 1000));
-              }
-            else
-              {
-               sprintf (*szargs,"%.0f",ret);
-              }
-           }
             break;
          case GET_SAMPLERATE:
             _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GETINFO), *szargs, 10);
@@ -432,9 +407,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             break;
          case IPC_INETAVAILABLE:
             _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_INETAVAILABLE), *szargs, 10);
-            break;
-         case IPC_ISPLAYING:
-            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_ISPLAYING), *szargs, 10);
             break;
          case IPC_JUMPTOTIME:
             SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_JUMPTOTIME);
@@ -954,12 +926,17 @@ WINAMPC_SERVICE( get_eq_data )
 //{
 //   MakeAction (IPC_GETEQDATA, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void get_length (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (GET_LENGTH, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+WINAMPC_SERVICE( get_length )
+{
+	LRESULT length;
+
+	STARTUP( 0 );
+
+	length = SendMessage( winamp_wnd, WM_WA_IPC, 1, IPC_GETOUTPUTTIME );
+	sprintf( retval, "%d", length );
+}
+
 //_declspec(dllexport) void get_net_status (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (IPC_INETAVAILABLE, nargs, szargs, pFlags, ppsv);
@@ -969,12 +946,17 @@ WINAMPC_SERVICE( get_eq_data )
 //{
 //   MakeAction (GET_NUMBER_OF_CHANNELS, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void get_playback_status (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_ISPLAYING, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+WINAMPC_SERVICE( get_playback_status )
+{
+	LRESULT status;
+
+	STARTUP( 0 );
+
+	status = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_ISPLAYING );
+	sprintf( retval, "%d", status );
+}
+
 //_declspec(dllexport) void get_plist_length (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (IPC_GETLISTLENGTH, nargs, szargs, pFlags, ppsv);
@@ -989,17 +971,28 @@ WINAMPC_SERVICE( get_eq_data )
 //{
 //   MakeAction (IPC_WRITEPLAYLIST, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void get_position (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (GET_POSITION, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void get_position_in_sec (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (GET_POSITION_IN_SECONDS, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+WINAMPC_SERVICE( get_position )
+{
+	LRESULT position;
+	
+	STARTUP( 0 );
+
+	position = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETOUTPUTTIME );
+	sprintf( retval, "%d", position );
+}
+
+
+WINAMPC_SERVICE( get_position_in_sec )
+{
+	LRESULT position;
+	
+	STARTUP( 0 );
+
+	position = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETOUTPUTTIME );
+	sprintf( retval, "%d", ( position != -1 ? ( position / 1000 ) : position ) );
+}
+
 //_declspec(dllexport) void get_repeat (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (IPC_GET_REPEAT, nargs, szargs, pFlags, ppsv);
