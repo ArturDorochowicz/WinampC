@@ -74,6 +74,8 @@ get_eq_data63
 get_length
 get_net_status
 get_number_of_channels
+get_panning
+get_panning127
 get_playback_status
 get_plist_selected_path
 get_plist_length
@@ -307,6 +309,15 @@ get_net_status ("response type", "class name")
 get_number_of_channels ("response type", "class name")
         Retrieves number of channels of the current song.
         Requires Winamp 2.05+
+
+get_panning ("response type", "class name")
+        Retrieves the panning of Winamp (from -100 (left) to 100 (right)).
+        Requires Winamp 2.0+
+
+get_panning127 ("response type", "class name")
+        Retrieves the panning of Winamp (from -127 (left) to 127 (right)).
+        This is the way Winamp is really handling panning.
+        Requires Winamp 2.0+
 
 get_playback_status ("response type", "class name")
         Returns the status of playback.

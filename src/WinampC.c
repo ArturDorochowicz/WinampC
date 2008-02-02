@@ -35,7 +35,6 @@
 #define REPEAT_ON                       30140 // Turns repeat on
 #define RESTORE                         30145 // Restores Winamp window
 #define SET_EQ_DATA                     30150 // Sets equalizer data min = -20 ; max = +20
-#define SET_PANNING                     30160 // Sets the panning, which can be between -100 (all left) and 100 (all right).
 #define SHUFFLE_OFF                     30180 // Turns shuffle off
 #define SHUFFLE_ON                      30190 // Turns shuffle on
 #define UNBLOCK_MINIBROWSER             30200 // Will unblock the Minibrowser
@@ -54,7 +53,6 @@
 #define IPC_SET_REPEAT                  253 // Sets the status of the Repeat option (1 to turn it on)
 #define IPC_SET_SHUFFLE                 252 // Sets the status of the Shuffle option (1 to turn it on)
 #define IPC_SETEQDATA                   128 // Sets the value of the last position retrieved by IPC_GETEQDATA.
-#define IPC_SETPANNING                  123 // Sets the panning, which can be between -127 (all left) and 127 (all right).
 #define IPC_UPDTITLE                    243 // Asks Winamp to update the informations about the current title.
 
 //---NOT IMPLEMENTED------------------------------------------------------------------------------------------------------------------------
@@ -413,9 +411,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             SendMessage(hwndWinamp,WM_USER,atoi(*(szargs + 1)),IPC_GETEQDATA);
             SendMessage(hwndWinamp,WM_USER,atoi(*(szargs + 2)),IPC_SETEQDATA);
             break;
-         case IPC_SETPANNING:
-            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_SETPANNING);
-            break;
          case IPC_UPDTITLE:
             SendMessage(hwndWinamp, WM_USER, 0, IPC_UPDTITLE);
             break;
@@ -465,9 +460,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             SendMessage(hwndWinamp,WM_USER,param1,IPC_GETEQDATA);
             SendMessage(hwndWinamp,WM_USER,(WPARAM) param2,IPC_SETEQDATA);
            }
-            break;
-         case SET_PANNING:
-            SendMessage(hwndWinamp, WM_USER, (WPARAM) (atoi(*(szargs + 1)) * 1.27 ), IPC_SETPANNING);
             break;
          case SHUFFLE_OFF:
             SendMessage(hwndWinamp, WM_USER, 0, IPC_SET_SHUFFLE);
@@ -926,6 +918,29 @@ WINAMPC_SERVICE( get_length )
 //   MakeAction (GET_NUMBER_OF_CHANNELS, nargs, szargs, pFlags, ppsv);
 //}
 
+
+WINAMPC_SERVICE( get_panning )
+{
+	LRESULT panning;
+
+	STARTUP( 0 );
+
+	panning = SendMessage( winamp_wnd, WM_WA_IPC, -666, IPC_SETPANNING );
+	sprintf( retval, "%d", panning * 100 / 127 );
+}
+
+
+WINAMPC_SERVICE( get_panning127 )
+{
+	LRESULT panning;
+
+	STARTUP( 0 );
+
+	panning = SendMessage( winamp_wnd, WM_WA_IPC, -666, IPC_SETPANNING );
+	sprintf( retval, "%d", panning );
+}
+
+
 WINAMPC_SERVICE( get_playback_status )
 {
 	LRESULT status;
@@ -1213,16 +1228,28 @@ WINAMPC_SERVICE( play_selected )
 //{
 //   MakeAction (IPC_SETEQDATA, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void set_panning (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (SET_PANNING, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void set_panning127 (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_SETPANNING, nargs, szargs, pFlags, ppsv);
-//}
+
+
+WINAMPC_SERVICE( set_panning )
+{
+	long panning;
+
+	STARTUP( 1 );
+
+	panning = strtol( args[0], NULL, 10 );
+	PostMessage( winamp_wnd, WM_WA_IPC, (WPARAM) ( panning * 1.27 ), IPC_SETPANNING );
+}
+
+
+WINAMPC_SERVICE( set_panning127 )
+{
+	WPARAM panning;
+
+	STARTUP( 1 );
+
+	panning = strtol( args[0], NULL, 10 );
+	PostMessage( winamp_wnd, WM_WA_IPC, panning, IPC_SETPANNING );
+}
 
 
 WINAMPC_SERVICE( set_plist_position )
