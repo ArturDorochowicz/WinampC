@@ -915,6 +915,20 @@ WINAMPC_SERVICE( enqueue_file )
 }
 
 
+/* Works but requires Unicode input */
+WINAMPC_SERVICE( enqueue_file_w )
+{
+	COPYDATASTRUCT cds;
+
+	STARTUP( 1 );
+
+	cds.dwData = IPC_PLAYFILEW;
+	cds.lpData = args[0];
+	cds.cbData = ( wcslen( (wchar_t*) args[0] ) + 1 ) * sizeof( wchar_t);
+	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
+}
+
+
 //_declspec(dllexport) void execute_visual_plugin (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_EXECUTE_VISUAL_PLUGIN, nargs, szargs, pFlags, ppsv);
