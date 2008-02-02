@@ -36,7 +36,6 @@
 #define RESTORE                         30145 // Restores Winamp window
 #define SET_EQ_DATA                     30150 // Sets equalizer data min = -20 ; max = +20
 #define SET_PANNING                     30160 // Sets the panning, which can be between -100 (all left) and 100 (all right).
-#define SET_VOLUME                      30170 // Sets volume min = 0, max = 100
 #define SHUFFLE_OFF                     30180 // Turns shuffle off
 #define SHUFFLE_ON                      30190 // Turns shuffle on
 #define UNBLOCK_MINIBROWSER             30200 // Will unblock the Minibrowser
@@ -56,7 +55,6 @@
 #define IPC_SET_SHUFFLE                 252 // Sets the status of the Shuffle option (1 to turn it on)
 #define IPC_SETEQDATA                   128 // Sets the value of the last position retrieved by IPC_GETEQDATA.
 #define IPC_SETPANNING                  123 // Sets the panning, which can be between -127 (all left) and 127 (all right).
-#define IPC_SETVOLUME                   122 // Sets the volume, which can be between 0 (silent) and 255 (maximum).
 #define IPC_UPDTITLE                    243 // Asks Winamp to update the informations about the current title.
 
 //---NOT IMPLEMENTED------------------------------------------------------------------------------------------------------------------------
@@ -418,9 +416,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
          case IPC_SETPANNING:
             SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_SETPANNING);
             break;
-         case IPC_SETVOLUME:
-            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_SETVOLUME);
-            break;
          case IPC_UPDTITLE:
             SendMessage(hwndWinamp, WM_USER, 0, IPC_UPDTITLE);
             break;
@@ -473,9 +468,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             break;
          case SET_PANNING:
             SendMessage(hwndWinamp, WM_USER, (WPARAM) (atoi(*(szargs + 1)) * 1.27 ), IPC_SETPANNING);
-            break;
-         case SET_VOLUME:
-            SendMessage(hwndWinamp, WM_USER, (WPARAM) (atoi(*(szargs + 1)) * 2.55), IPC_SETVOLUME);
             break;
          case SHUFFLE_OFF:
             SendMessage(hwndWinamp, WM_USER, 0, IPC_SET_SHUFFLE);
@@ -1026,6 +1018,29 @@ WINAMPC_SERVICE( get_version_hex )
 }
 
 
+WINAMPC_SERVICE( get_volume )
+{
+	LRESULT volume;
+
+	STARTUP( 0 );
+
+	volume = SendMessage( winamp_wnd, WM_WA_IPC, -666, IPC_SETVOLUME );
+	sprintf( retval, "%d", volume * 100 / 255 );
+}
+
+
+WINAMPC_SERVICE( get_volume255 )
+{
+	LRESULT volume;
+
+	STARTUP( 0 );
+
+	volume = SendMessage( winamp_wnd, WM_WA_IPC, -666, IPC_SETVOLUME );
+	sprintf( retval, "%d", volume );
+}
+
+
+
 //_declspec(dllexport) void jump_to_file_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_O_JUMP_TO_FILE, nargs, szargs, pFlags, ppsv);
@@ -1218,20 +1233,35 @@ WINAMPC_SERVICE( set_plist_position )
 
 	/* change 1-based input into Winamp's 0-based */
 	position = strtoul( args[0], NULL, 10 ) - 1;
-	SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETPLAYLISTPOS );
+	PostMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETPLAYLISTPOS );
 }
 
 
-//_declspec(dllexport) void set_volume (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (SET_VOLUME, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void set_volume255 (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_SETVOLUME, nargs, szargs, pFlags, ppsv);
-//}
-//
+WINAMPC_SERVICE( set_volume )
+{
+	WPARAM volume;
+	WPARAM volume255;
+
+	STARTUP( 1 );
+	
+	volume = strtoul( args[0], NULL, 10 );
+	volume255 = (WPARAM) ( volume * 2.55 );
+	if( volume255 / 2.55 < volume )
+		++volume255;
+	PostMessage( winamp_wnd, WM_WA_IPC, volume255, IPC_SETVOLUME );
+}
+
+
+WINAMPC_SERVICE( set_volume255 )
+{
+	WPARAM volume;
+
+	STARTUP( 1 );
+
+	volume = strtoul( args[0], NULL, 10 );
+	PostMessage( winamp_wnd, WM_WA_IPC, volume, IPC_SETVOLUME );
+}
+
 //_declspec(dllexport) void show_edit_bookmarks (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_SHOW_EDIT_BOOKMARKS, nargs, szargs, pFlags, ppsv);
