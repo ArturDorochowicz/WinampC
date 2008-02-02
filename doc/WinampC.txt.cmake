@@ -86,6 +86,8 @@ get_samplerate
 get_shuffle
 get_version
 get_version_hex
+get_volume
+get_volume255
 jump_to_file_dialog
 jump_to_time
 jump_to_time_dialog
@@ -357,6 +359,13 @@ get_version_hex ("response type", "class name")
         That's what Nullsoft says about that:
                 "Version will be 0x20yx for winamp 2.yx. Versions previous to Winamp 2.0
                 typically (but not always) use 0x1zyx for 1.zx versions. Weird, I know."
+
+get_volume ("response type", "class name")
+        Retrieves volume level as a value from 0 (mute) to 100 (max).
+
+get_volume255 ("response type", "class name")
+        Retrieves volume level as a value from 0 (mute) to 255 (max).
+        This is the way Winamp is really storing volume.
 
 jump_to_file_dialog ("response type", "class name")
         Opens 'Jump to file' dialog.
