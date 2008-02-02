@@ -363,6 +363,7 @@ jump_to_file_dialog ("response type", "class name")
 
 jump_to_time ("time", "response type", "class name")
         Jumps to "time" specified in milliseconds.
+        Returns -1 if Winamp is not playing, 1 on end of file, or 0 if it was successful.
         Requires Winamp 1.60+
 
 jump_to_time_dialog ("response type", "class name")

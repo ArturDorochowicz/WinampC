@@ -49,7 +49,6 @@
 #define IPC_GETLISTLENGTH               124 // Returns length of the current playlist, in tracks.
 #define IPC_GETPOSITION                 125 // Returns the position in the current playlist, in tracks.
 #define IPC_INETAVAILABLE               242 // Returns 1 if the internet connecton is available for Winamp
-#define IPC_JUMPTOTIME                  106 // Seeks within the current track.
 #define IPC_MBBLOCK                     248 // Will block the Minibrowser from updates if value is set to 1
 #define IPC_REFRESHPLCACHE              247 // Will flush the playlist cache buffer.
 #define IPC_RESTART_WINAMP              135 // Restarts Winamp
@@ -57,10 +56,8 @@
 #define IPC_SET_SHUFFLE                 252 // Sets the status of the Shuffle option (1 to turn it on)
 #define IPC_SETEQDATA                   128 // Sets the value of the last position retrieved by IPC_GETEQDATA.
 #define IPC_SETPANNING                  123 // Sets the panning, which can be between -127 (all left) and 127 (all right).
-#define IPC_SETPLAYLISTPOS              121 // Sets the playlist position
 #define IPC_SETVOLUME                   122 // Sets the volume, which can be between 0 (silent) and 255 (maximum).
 #define IPC_UPDTITLE                    243 // Asks Winamp to update the informations about the current title.
-#define IPC_WRITEPLAYLIST               120 // Writes out the current playlist to Winampdir\winamp.m3u
 
 //---NOT IMPLEMENTED------------------------------------------------------------------------------------------------------------------------
 #define IPC_ADD_BOOKMARK                129 // Adds the specified file to the Winamp bookmark list
@@ -408,10 +405,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
          case IPC_INETAVAILABLE:
             _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_INETAVAILABLE), *szargs, 10);
             break;
-         case IPC_JUMPTOTIME:
-            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_JUMPTOTIME);
-            break;
-
          case IPC_REFRESHPLCACHE:
             SendMessage(hwndWinamp, WM_USER, 0, IPC_REFRESHPLCACHE);
             break;
@@ -425,17 +418,11 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
          case IPC_SETPANNING:
             SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_SETPANNING);
             break;
-         case IPC_SETPLAYLISTPOS:
-            SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_SETPLAYLISTPOS);
-            break;
          case IPC_SETVOLUME:
             SendMessage(hwndWinamp, WM_USER, atoi(*(szargs + 1)), IPC_SETVOLUME);
             break;
          case IPC_UPDTITLE:
             SendMessage(hwndWinamp, WM_USER, 0, IPC_UPDTITLE);
-            break;
-         case IPC_WRITEPLAYLIST:
-            _itoa (SendMessage(hwndWinamp, WM_USER, 1, IPC_WRITEPLAYLIST), *szargs, 10);
             break;
          case MINIMIZE:
             PostMessage(hwndWinamp, WM_SYSCOMMAND, SC_MINIMIZE, 0);
@@ -966,11 +953,19 @@ WINAMPC_SERVICE( get_playback_status )
 //{
 //   MakeAction (IPC_GETPOSITION, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void get_plist_position1 (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_WRITEPLAYLIST, nargs, szargs, pFlags, ppsv);
-//}
+
+
+WINAMPC_SERVICE( get_plist_position1 )
+{
+	LRESULT position;
+
+	STARTUP( 0 );
+
+	/* change Winamp's 0-based into 1-based */
+	position = 1 + SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_WRITEPLAYLIST );
+	sprintf( retval, "%d", position );
+}
+
 
 WINAMPC_SERVICE( get_position )
 {
@@ -1035,12 +1030,19 @@ WINAMPC_SERVICE( get_version_hex )
 //{
 //   MakeAction (WINAMP_O_JUMP_TO_FILE, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void jump_to_time (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_JUMPTOTIME, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+WINAMPC_SERVICE( jump_to_time )
+{
+	WPARAM position;
+	LRESULT result;
+
+	STARTUP( 1 );
+
+	position = strtoul( args[0], NULL, 10 );
+	result = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_JUMPTOTIME );
+	sprintf( retval, "%d", result );
+}
+
 //_declspec(dllexport) void jump_to_time_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_O_JUMP_TO_TIME, nargs, szargs, pFlags, ppsv);
@@ -1206,12 +1208,20 @@ WINAMPC_SERVICE( play_selected )
 //{
 //   MakeAction (IPC_SETPANNING, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void set_plist_position (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_SETPLAYLISTPOS, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+
+WINAMPC_SERVICE( set_plist_position )
+{
+	WPARAM position;
+
+	STARTUP( 1 );
+
+	/* change 1-based input into Winamp's 0-based */
+	position = strtoul( args[0], NULL, 10 ) - 1;
+	SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETPLAYLISTPOS );
+}
+
+
 //_declspec(dllexport) void set_volume (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (SET_VOLUME, nargs, szargs, pFlags, ppsv);
