@@ -864,7 +864,7 @@ WINAMPC_SERVICE( get_eq_data )
 
 	STARTUP( 1 );
 
-	position = strtoul( args[0], NULL, 10 );
+	position = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
 	data = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_GETEQDATA );
 	if( position >= 0 && position <= 10 )
 	{
@@ -884,7 +884,7 @@ WINAMPC_SERVICE( get_eq_data63 )
 
 	STARTUP( 1 );
 
-	position = strtoul( args[0], NULL, 10 );
+	position = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
 	data = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_GETEQDATA );
 	sprintf( retval, "%d", data );
 }
@@ -966,7 +966,7 @@ WINAMPC_SERVICE( get_plist_position )
 	
 	STARTUP( 0 );
 
-	/* change Winamp's 0-based into 1-based */
+	/* change Winamp's 0-based index into 1-based */
 	position = 1 + SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETLISTPOS );
 	sprintf( retval, "%d", position );
 }
@@ -978,7 +978,7 @@ WINAMPC_SERVICE( get_plist_position1 )
 
 	STARTUP( 0 );
 
-	/* change Winamp's 0-based into 1-based */
+	/* change Winamp's 0-based index into 1-based */
 	position = 1 + SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_WRITEPLAYLIST );
 	sprintf( retval, "%d", position );
 }
@@ -1118,7 +1118,7 @@ WINAMPC_SERVICE( jump_to_time )
 
 	STARTUP( 1 );
 
-	position = strtoul( args[0], NULL, 10 );
+	position = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
 	result = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_JUMPTOTIME );
 	sprintf( retval, "%d", result );
 }
@@ -1278,15 +1278,15 @@ WINAMPC_SERVICE( set_eq_data )
 
 	STARTUP( 2 );
 
-	pos = (BYTE) strtol( args[0], NULL, 10 );
+	pos = (BYTE) ppro_svcs->DecodeFloat( args[0] );
 	if( pos >= 0 && pos <= 10 )
 	{
-		double value = strtod( args[1], NULL );
+		double value = ppro_svcs->DecodeFloat( args[1] );
 		value63 = (WORD) ( ( -value + 20 ) * 63 / ( 20.0 + 20.0 ) );
 	}
 	else
 	{
-		value63 = (WORD) strtol( args[1], NULL, 10 );
+		value63 = (WORD) ppro_svcs->DecodeFloat( args[1] );
 	}
 	position = MAKEWPARAM( value63, MAKEWORD( pos, 0xDB ) );
 	PostMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETEQDATA );
@@ -1301,8 +1301,8 @@ WINAMPC_SERVICE( set_eq_data63 )
 
 	STARTUP( 2 );
 
-	pos = (BYTE) strtol( args[0], NULL, 10 );
-	value = (WORD) strtol( args[1], NULL, 10 );
+	pos = (BYTE) ppro_svcs->DecodeFloat( args[0] );
+	value = (WORD) ppro_svcs->DecodeFloat( args[1] );
 	position = MAKEWPARAM( value, MAKEWORD( pos, 0xDB ) );
 	PostMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETEQDATA );
 }
@@ -1310,12 +1310,12 @@ WINAMPC_SERVICE( set_eq_data63 )
 
 WINAMPC_SERVICE( set_panning )
 {
-	long panning;
+	WPARAM panning;
 
 	STARTUP( 1 );
 
-	panning = strtol( args[0], NULL, 10 );
-	PostMessage( winamp_wnd, WM_WA_IPC, (WPARAM) ( panning * 1.27 ), IPC_SETPANNING );
+	panning = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
+	PostMessage( winamp_wnd, WM_WA_IPC, panning * 100 / 127, IPC_SETPANNING );
 }
 
 
@@ -1325,7 +1325,7 @@ WINAMPC_SERVICE( set_panning127 )
 
 	STARTUP( 1 );
 
-	panning = strtol( args[0], NULL, 10 );
+	panning = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
 	PostMessage( winamp_wnd, WM_WA_IPC, panning, IPC_SETPANNING );
 }
 
@@ -1336,8 +1336,8 @@ WINAMPC_SERVICE( set_plist_position )
 
 	STARTUP( 1 );
 
-	/* change 1-based input into Winamp's 0-based */
-	position = strtoul( args[0], NULL, 10 ) - 1;
+	/* change 1-based input into Winamp's 0-based index */
+	position = (WPARAM) ( ppro_svcs->DecodeFloat( args[0] ) - 1 );
 	PostMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETPLAYLISTPOS );
 }
 
@@ -1349,7 +1349,7 @@ WINAMPC_SERVICE( set_volume )
 
 	STARTUP( 1 );
 	
-	volume = strtoul( args[0], NULL, 10 );
+	volume = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
 	volume255 = (WPARAM) ( volume * 2.55 );
 	if( volume255 / 2.55 < volume )
 		++volume255;
@@ -1363,7 +1363,7 @@ WINAMPC_SERVICE( set_volume255 )
 
 	STARTUP( 1 );
 
-	volume = strtoul( args[0], NULL, 10 );
+	volume = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
 	PostMessage( winamp_wnd, WM_WA_IPC, volume, IPC_SETVOLUME );
 }
 
