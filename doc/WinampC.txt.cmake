@@ -85,6 +85,7 @@ get_position
 get_position_in_sec
 get_repeat
 get_samplerate
+get_samplerate_hz
 get_shuffle
 get_version
 get_version_hex
@@ -352,8 +353,12 @@ get_repeat ("response type", "class name")
         Requires Winamp 2.4+
 
 get_samplerate ("response type", "class name")
-        Retrieves currents songs sample rate
+        Retrieves current song sample rate in kHz
         Requires Winamp 2.05+
+
+get_samplerate_hz ("response type", "class name")
+        Retrieves current song sample rate in Hz 
+        Requires Winamp 5.25+
 
 get_shuffle ("response type", "class name")
         Returns the status of the Shuffle option (1 if set).
@@ -370,6 +375,14 @@ get_version_hex ("response type", "class name")
         That's what Nullsoft says about that:
                 "Version will be 0x20yx for winamp 2.yx. Versions previous to Winamp 2.0
                 typically (but not always) use 0x1zyx for 1.zx versions. Weird, I know."
+
+get_video_width ("response type", "class name")
+        Retrieves the width of current video.
+        Requires Winamp 5+
+
+get_video_height ("response type", "class name")
+        Retrieves the height of current video.
+        Requires Winamp 5+
 
 get_volume ("response type", "class name")
         Retrieves volume level as a value from 0 (mute) to 100 (max).
@@ -501,7 +514,7 @@ set_eq_data ("position", "value", "response type", "class name")
         For positions 0-10 you can give any number from between -20.0 and 20.0
         Winamp does not refresh the equalizer window after changing
         positions 0-10, so we can only hear the change.
-        Requires Winamp 2.05+
+        Requires Winamp 2.92+
 
 set_eq_data63 ("position", "value", "response type", "class name")
         Sets the value of "position"
@@ -516,7 +529,7 @@ set_eq_data63 ("position", "value", "response type", "class name")
         Weird, but that's how Winamp handles it internally.
         Winamp does not refresh the equalizer window after changing
         positions 0-10, so we can only hear the change.
-        Requires Winamp 2.05+
+        Requires Winamp 2.92+
 
 set_panning ("panning", "response type", "class name")
         Sets the panning of Winamp (from -100 (left) to 100 (right)).
