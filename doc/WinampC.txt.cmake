@@ -88,6 +88,7 @@ get_repeat
 get_samplerate
 get_samplerate_hz
 get_shuffle
+get_time_display_mode
 get_version
 get_version_hex
 get_volume
@@ -370,6 +371,9 @@ get_samplerate_hz ("response type", "class name")
 get_shuffle ("response type", "class name")
         Returns the status of the Shuffle option (1 if set).
         Requires Winamp 2.4+
+
+get_time_display_mode ("response type", "class name")
+        Gets time display mode. Returns 0 if displaying elapsed time or 1 if displaying remaining time.
 
 get_version ("response type", "class name")
         Retrieves the version of Winamp as x.yz

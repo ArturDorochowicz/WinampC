@@ -55,10 +55,7 @@
 #define WINAMP_BUTTON5                  40048 // Next track button 40048
 #define WINAMP_BUTTON5_CTRL             40158 // Go to end of playlist  40158
 #define WINAMP_BUTTON5_SHIFT            40148 // Fast-forward 5 seconds 40148
-#define WINAMP_CLOSE_WINAMP             40001 // Close Winamp 40001
 #define WINAMP_CONFIG_VISUAL_PLUGIN     40221 // Configure current visualization plug-in 40221
-#define WINAMP_DISPLAY_ELAPSED          40037 // Set time display mode to elapsed 40037
-#define WINAMP_DISPLAY_REMAINING        40038 // Set time display mode to remaining 40038
 #define WINAMP_EXECUTE_VISUAL_PLUGIN    40192 // Execute current visualization plug-in 40192
 #define WINAMP_FFWD5S                   40060 // fast forwards 5 seconds
 #define WINAMP_FILE_INFO                40188 // Open file info box 40188
@@ -82,12 +79,8 @@
 #define WINAMP_T_MAIN_WINDOW            40258 // Toggle main window visible 40258
 #define WINAMP_T_MINIBROWSER            40298 // Toggle minibrowser 40298
 #define WINAMP_T_PLIST_WINDOWSHADE      40266 // Toggle Playlist Windowshade 40266
-#define WINAMP_T_REPEAT                 40022 // Toggle repeat 40022
-#define WINAMP_T_SHUFFLE                40023 // Toggle shuffle 40023
 #define WINAMP_T_TITLE_SCROLLING        40189 // Toggle title Autoscrolling 40189
 #define WINAMP_T_WINDOWSHADE            40064 // toggle Windowshade 40064
-#define WINAMP_VOLUMEDOWN               40059 // Lower volume by 1%
-#define WINAMP_VOLUMEUP                 40058 // Raise volume by 1%
 
 #define WINAMP_LOAD_DEFAULT_PRESET      40174 // Load default preset 40174
 #define WINAMP_LOAD_PRESET_FROM_EQ      40243 // Load a preset from EQ 40253
@@ -314,15 +307,9 @@ static void PerformResponse( ResponseType response_type, const char *response_ms
 static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPROSERVICES * ppsv)
   {
    HWND hwndWinamp = NULL;
-   char response_type [MAX_VAR_LENGTH];
 
-   **szargs = '\0';
    if (hwndWinamp)
      {
-      if (strcmp (response_type,"2") == 0)    //if response_type is 2, set flag f0 to 1
-        {
-         (*pFlags) = (*pFlags)|0x00000001;
-        }
       switch (sw)
         {
          case BLOCK_MINIBROWSER:
@@ -438,17 +425,8 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
          case WINAMP_BUTTON5_CTRL:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_BUTTON5_CTRL, 0);
             break;
-         case WINAMP_CLOSE_WINAMP:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_CLOSE_WINAMP, 0);
-            break;
          case WINAMP_CONFIG_VISUAL_PLUGIN:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_CONFIG_VISUAL_PLUGIN, 0);
-            break;
-         case WINAMP_DISPLAY_ELAPSED:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_DISPLAY_ELAPSED, 0);
-            break;
-         case WINAMP_DISPLAY_REMAINING:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_DISPLAY_REMAINING, 0);
             break;
          case WINAMP_EXECUTE_VISUAL_PLUGIN:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_EXECUTE_VISUAL_PLUGIN, 0);
@@ -557,47 +535,14 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
          case WINAMP_T_PLIST_WINDOWSHADE:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_T_PLIST_WINDOWSHADE, 0);
             break;
-         case WINAMP_T_REPEAT:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_T_REPEAT, 0);
-            break;
-         case WINAMP_T_SHUFFLE:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_T_SHUFFLE, 0);
-            break;
          case WINAMP_T_TITLE_SCROLLING:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_T_TITLE_SCROLLING, 0);
             break;
          case WINAMP_T_WINDOWSHADE:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_T_WINDOWSHADE, 0);
             break;
-         case WINAMP_VOLUMEDOWN:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_VOLUMEDOWN, 0);
-            break;
-         case WINAMP_VOLUMEUP:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_VOLUMEUP, 0);
-            break;
         }
      }
-   else
-     {
-      //if (strcmp (response_type, "1") == 0)    //if response type is 1 then show window with error explanation
-      //  {
-      //   (ppsv->ErrMessage)("Specified Winamp window does not exist.","");
-      //  }
-      //else
-      //  {
-      //   if (strcmp(response_type, "2") == 0)    //if response type is 2 then set flag f0 to 0
-      //     {
-      //      (*pFlags) = (*pFlags)&0xFFFFFFFE;
-      //     }
-      //   else  
-      //     {
-      //      if (response_type[0] == '3')    //if response type is 3abcde... then return abcde...
-      //        {
-      //         strcpy(*szargs, &(response_type[1]));
-      //        }
-      //     }
-      //  }
-     }           
   }
 
 
@@ -741,11 +686,13 @@ WINAMPC_SERVICE( clear_plist )
 }
 
 
-//_declspec(dllexport) void close_winamp (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_CLOSE_WINAMP, nargs, szargs, pFlags, ppsv);
-//}
-//
+WINAMPC_SERVICE( close_winamp )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_FILE_QUIT, 0 );
+}
+
+
 //_declspec(dllexport) void configure_visual_plugin (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_CONFIG_VISUAL_PLUGIN, nargs, szargs, pFlags, ppsv);
@@ -761,17 +708,22 @@ WINAMPC_SERVICE( clear_plist )
 //{
 //   MakeAction (WINAMP_O_DELETE_PRESET, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void display_elapsed_time (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_DISPLAY_ELAPSED, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void display_remaining_time (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_DISPLAY_REMAINING, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+
+WINAMPC_SERVICE( display_elapsed_time )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_ELAPSED, 0 );
+}
+
+
+WINAMPC_SERVICE( display_remaining_time )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_REMAINING, 0 );
+}
+
+
 //_declspec(dllexport) void end_of_plist (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_BUTTON5_CTRL, nargs, szargs, pFlags, ppsv);
@@ -1037,6 +989,17 @@ WINAMPC_SERVICE( get_shuffle )
 	
 	shuffle = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GET_SHUFFLE );
 	sprintf( retval, "%d", shuffle );
+}
+
+
+WINAMPC_SERVICE( get_time_display_mode )
+{
+	LRESULT mode;
+
+	STARTUP( 0 );
+
+	mode = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETTIMEDISPLAYMODE );
+	sprintf( retval, "%d", mode );
 }
 
 
@@ -1468,17 +1431,22 @@ WINAMPC_SERVICE( shuffle_on )
 //{
 //   MakeAction (WINAMP_T_PLIST_WINDOWSHADE, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void toggle_repeat (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_T_REPEAT, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void toggle_shuffle (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_T_SHUFFLE, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+
+WINAMPC_SERVICE( toggle_repeat )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_FILE_REPEAT, 0 );
+}
+
+
+WINAMPC_SERVICE( toggle_shuffle )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_FILE_SHUFFLE, 0 );
+}
+
+
 //_declspec(dllexport) void toggle_title_scrolling (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_T_TITLE_SCROLLING, nargs, szargs, pFlags, ppsv);
@@ -1501,15 +1469,20 @@ WINAMPC_SERVICE( update_info )
 	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_UPDTITLE );
 }
 
-//_declspec(dllexport) void volume_down (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_VOLUMEDOWN, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void volume_up (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_VOLUMEUP, nargs, szargs, pFlags, ppsv);
-//}
+
+WINAMPC_SERVICE( volume_down )
+{
+	STARTUP( 0 );
+
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_VOLUMEDOWN, 0 );
+}
+
+
+WINAMPC_SERVICE( volume_up )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_VOLUMEUP, 0 );
+}
 
 
 WINAMPC_SERVICE( windows_disable )
