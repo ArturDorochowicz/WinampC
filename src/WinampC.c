@@ -1255,7 +1255,7 @@ WINAMPC_SERVICE( restart_winamp )
 {
 	STARTUP( 0 );
 
-	SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_RESTARTWINAMP );
+	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_RESTARTWINAMP );
 }
 
 
