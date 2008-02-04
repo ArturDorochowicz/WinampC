@@ -22,18 +22,13 @@
 #define MAX_VAR_LENGTH                      531
 
 //---WINAMP API DEFINITIONS-----------------------------------------------------------------------------------------------------------------
-#define BLOCK_MINIBROWSER               30010 // Will block the Minibrowser from updates
 #define GET_CAPTION                     30030 // Gets full Winamp's caption
 #define GET_SONG_NAME                   30100 // Retrieves song's name
 #define GET_SONG_NAME_AND_NUMBER        30110 // Gets song's name with number
 #define MINIMIZE                        30125 // Minimizes Winamp
 #define MINIMIZE_RESTORE                30127 // Minimizes Winamp when not minimized, restores when minimized
 #define RESTORE                         30145 // Restores Winamp window
-#define UNBLOCK_MINIBROWSER             30200 // Will unblock the Minibrowser
 #define PLAY_ANY_AUDIO_CD		30210 // Play specified audio cd
-
-//WM_USER
-#define IPC_MBBLOCK                     248 // Will block the Minibrowser from updates if value is set to 1
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -312,9 +307,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
      {
       switch (sw)
         {
-         case BLOCK_MINIBROWSER:
-            SendMessage(hwndWinamp, WM_USER, 1, IPC_MBBLOCK);
-            break;
          case GET_CAPTION:
            {
             char this_title[MAX_VAR_LENGTH];
@@ -385,9 +377,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
               }
             (ppsv->Show)(hwndWinamp);
             SetForegroundWindow(hwndWinamp);
-            break;
-         case UNBLOCK_MINIBROWSER:
-            SendMessage(hwndWinamp, WM_USER, 0, IPC_MBBLOCK);
             break;
          case WINAMP_10_TRACKS_BACK:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_10_TRACKS_BACK, 0);
@@ -621,12 +610,14 @@ WINAMPC_SERVICE( add_bookmark_w )
 //{
 //   MakeAction (WINAMP_O_AUTOLOAD_SAVE_PRESET, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void block_minibrowser (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (BLOCK_MINIBROWSER, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+WINAMPC_SERVICE( block_minibrowser )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_WA_IPC, 1, IPC_MBBLOCK );
+}
+
+
 //_declspec(dllexport) void caption(LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (GET_CAPTION, nargs, szargs, pFlags, ppsv);
@@ -945,6 +936,17 @@ WINAMPC_SERVICE( get_position_in_sec )
 
 	position = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETOUTPUTTIME );
 	sprintf( retval, "%d", ( position != -1 ? ( position / 1000 ) : position ) );
+}
+
+
+WINAMPC_SERVICE( get_rating )
+{
+	LRESULT rating;
+
+	STARTUP( 0 );
+
+	rating = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETRATING );
+	sprintf( retval, "%d", rating );
 }
 
 
@@ -1316,6 +1318,17 @@ WINAMPC_SERVICE( set_plist_position )
 }
 
 
+WINAMPC_SERVICE( set_rating )
+{
+	WPARAM rating;
+
+	STARTUP( 1 );
+	
+	rating = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
+	PostMessage( winamp_wnd, WM_WA_IPC, rating, IPC_SETRATING );
+}
+
+
 WINAMPC_SERVICE( set_volume )
 {
 	WPARAM volume;
@@ -1455,11 +1468,14 @@ WINAMPC_SERVICE( toggle_shuffle )
 //{
 //   MakeAction (WINAMP_T_WINDOWSHADE, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void unblock_minibrowser (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (UNBLOCK_MINIBROWSER, nargs, szargs, pFlags, ppsv);
-//}
+
+
+WINAMPC_SERVICE( unblock_minibrowser )
+{
+	STARTUP( 0 );
+
+	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_MBBLOCK );
+}
 
 
 WINAMPC_SERVICE( update_info )

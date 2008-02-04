@@ -84,6 +84,7 @@ get_plist_position
 get_plist_position1
 get_position
 get_position_in_sec
+get_rating
 get_repeat
 get_samplerate
 get_samplerate_hz
@@ -129,6 +130,7 @@ set_eq_data63
 set_panning
 set_panning127
 set_plist_position
+set_rating
 set_volume
 set_volume255
 show_edit_bookmarks
@@ -356,6 +358,10 @@ get_position ("response type", "class name")
 get_position_in_sec ("response type", "class name")
         Returns the position in seconds of the current song.
 
+get_rating ("response type", "class name")
+        Returns the current item's rating as a value from 0 (no rating) to 5.
+        Requires Winamp 5.04+ with Media Library.
+
 get_repeat ("response type", "class name")
         Returns the status of the Repeat option (1 if set).
         Requires Winamp 2.4+
@@ -554,6 +560,10 @@ set_panning127 ("panning", "response type", "class name")
 set_plist_position ("position", "response type", "class name")
         Sets the playlist position to "position".
         Requires Winamp 2.0+
+
+set_rating ("rating", "response type", "class name")
+        Sets the current item's rating to "rating" which is a number from 0 (no rating) to 5.
+        Requires Winamp 5.04+ with Media Library.
 
 set_volume ("volume", "response type", "class name")
         Sets volume to approximately "volume" (min = 0, max = 100)
