@@ -16,14 +16,22 @@ endif( )
 configure_file( "version.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/version.h" )
 include_directories( BEFORE "${CMAKE_CURRENT_BINARY_DIR}" )
 
-include_directories( "${CMAKE_CURRENT_SOURCE_DIR}/include/Winamp SDK/Winamp" )
+include_directories( "${CMAKE_CURRENT_SOURCE_DIR}/include/Winamp SDK" )
+
+set( WinampSdkFiles
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/Winamp SDK/Winamp/wa_ipc.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/Winamp SDK/lang_b/resource.h" )
+
+# Add source group (filter in Visual Studio) that contains Winamp SDK files.
+SOURCE_GROUP( "Winamp SDK" FILES ${WinampSdkFiles} )
 
 set( SOURCES
 	"WinampC.c"
 	"Resources.rc"
 	"version.h.cmake"
 	"${CMAKE_CURRENT_BINARY_DIR}/version.h"
-	"${CMAKE_CURRENT_SOURCE_DIR}/include/Winamp SDK/Winamp/wa_ipc.h" )
+	${WinampSdkFiles} )
+
 
 add_library( "WinampC" SHARED ${SOURCES} )
 set_target_properties( "WinampC" PROPERTIES LINK_FLAGS_DISTRIBUTION "${LINK_FLAGS_DISTRIBUTION}" )

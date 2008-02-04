@@ -14,7 +14,8 @@
 #include <stdio.h>
 
 /* Winamp SDK */
-#include <wa_ipc.h>
+#include <Winamp/wa_ipc.h>
+#include <lang_b/resource.h>
 
 
 /* Maximum length of PowerPro variable in single byte characters */
