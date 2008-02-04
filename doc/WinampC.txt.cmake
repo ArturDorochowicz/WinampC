@@ -78,7 +78,10 @@ get_number_of_channels
 get_panning
 get_panning127
 get_playback_status
+get_plist_entry_path
+get_plist_entry_title
 get_plist_selected_path
+get_plist_selected_title
 get_plist_length
 get_plist_position
 get_plist_position1
@@ -336,8 +339,20 @@ get_playback_status ("response type", "class name")
         If it returns 3, it is paused.
         If it returns 0, it is not playing.
 
+get_plist_entry_path ("index", "response type", "class name")
+        Gets full path of playlist entry at specified position.
+        Requires Winamp 2.04+
+
+get_plist_entry_title ("index", "response type", "class name")
+        Gets title of playlist entry at specified position.
+        Requires Winamp 2.04+
+
 get_plist_selected_path ("response type", "class name")
         Gets full path of currently selected playlist entry.
+        Requires Winamp 2.04+
+
+get_plist_selected_title ("response type", "class name")
+        Gets title of currently selected playlist entry.
         Requires Winamp 2.04+
 
 get_plist_length ("response type", "class name")

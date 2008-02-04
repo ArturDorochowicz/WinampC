@@ -298,6 +298,38 @@ static void PerformResponse( ResponseType response_type, const char *response_ms
 }
 
 
+/** Read a string from process memory.
+*  @param wnd The window handle by which the process is found.
+*  @param src_start The address of the beginning of the string.
+*  @param dst The destination buffer.
+*  @param dst_size The size of the destination buffer.
+**/
+void ReadStringFromProcessMemory( HWND wnd, void *src_start, char *dst, size_t dst_size )
+{
+	if( dst_size > 0 )
+	{
+		DWORD process_id;
+		HANDLE process;
+
+		dst[0] = '\0';
+
+		GetWindowThreadProcessId( wnd, &process_id );
+		process = OpenProcess( PROCESS_VM_READ, 0, process_id );
+		if( process != INVALID_HANDLE_VALUE )
+		{
+			SIZE_T bytes_read;
+
+			ReadProcessMemory( process, src_start, dst, dst_size, &bytes_read );
+			CloseHandle( process );
+
+			if( bytes_read > 0 )
+			{
+				dst[bytes_read - 1] = '\0';
+			}
+		}
+	}
+}
+
 
 static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPROSERVICES * ppsv)
   {
@@ -572,6 +604,7 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
 	if( NULL == winamp_wnd ) return;
 
 
+
 WINAMPC_SERVICE( add_bookmark )
 {
 	COPYDATASTRUCT cds;
@@ -623,37 +656,69 @@ WINAMPC_SERVICE( block_minibrowser )
 //   MakeAction (GET_CAPTION, nargs, szargs, pFlags, ppsv);
 //}
 
+
+WINAMPC_SERVICE( get_plist_entry_path )
+{
+	WPARAM index;
+	char *file_path;
+
+	STARTUP( 1 );
+
+	/* change 1-based input into Winamp's 0-based index */
+	index = (WPARAM) ppro_svcs->DecodeFloat( args[0] ) - 1;
+	file_path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
+	if( file_path != NULL )
+	{
+		ReadStringFromProcessMemory( winamp_wnd, file_path, retval, MAX_VAR_LENGTH + 1 );
+	}
+}
+
+
+WINAMPC_SERVICE( get_plist_entry_title )
+{
+	WPARAM index;
+	char *title;
+
+	STARTUP( 1 );
+
+	/* change 1-based input into Winamp's 0-based index */
+	index = (WPARAM) ppro_svcs->DecodeFloat( args[0] ) - 1;
+	title = (char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTTITLE );
+	if( title != NULL )
+	{
+		ReadStringFromProcessMemory( winamp_wnd, title, retval, MAX_VAR_LENGTH + 1 );
+	}
+}
+
+
 WINAMPC_SERVICE( get_plist_selected_path )
 {
 	LRESULT index;
-	char *pfname;
+	char *file_path;
 	
 	STARTUP( 0 );
 
 	index = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETLISTPOS );
-	pfname = (char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
-	if( pfname != NULL )
+	file_path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
+	if( file_path != NULL )
 	{
-		DWORD process_id;
-		HANDLE process;
+		ReadStringFromProcessMemory( winamp_wnd, file_path, retval, MAX_VAR_LENGTH + 1 );
+	}
+}
 
-		GetWindowThreadProcessId( winamp_wnd, &process_id );
-		process = OpenProcess( PROCESS_VM_READ, 0, process_id );
-		if( process != INVALID_HANDLE_VALUE )
-		{
-			SIZE_T bytes_read;
-			char file_name[MAX_PATH + 1];
 
-			ReadProcessMemory( process, pfname, file_name, sizeof( file_name ), &bytes_read );
-			CloseHandle( process );
+WINAMPC_SERVICE( get_plist_selected_title )
+{
+	LRESULT index;
+	char *title;
 
-			if( bytes_read > 0 )
-			{
-				/* file_name may or may not be NULL terminated! */
-				strncpy( retval, file_name, ( bytes_read > MAX_VAR_LENGTH ? MAX_VAR_LENGTH : bytes_read ) );
-				retval[MAX_VAR_LENGTH - 1] = '\0';   /* make sure it's null-terminated */
-			}
-		}
+	STARTUP( 0 );
+
+	index = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETLISTPOS );
+	title = (char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTTITLE );
+	if( title != NULL )
+	{
+		ReadStringFromProcessMemory( winamp_wnd, title, retval, MAX_VAR_LENGTH + 1 );
 	}
 }
 
