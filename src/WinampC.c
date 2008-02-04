@@ -27,31 +27,13 @@
 #define GET_SONG_NAME_AND_NUMBER        30110 // Gets song's name with number
 #define MINIMIZE                        30125 // Minimizes Winamp
 #define MINIMIZE_RESTORE                30127 // Minimizes Winamp when not minimized, restores when minimized
-#define REPEAT_OFF                      30130 // Turns repeat off
-#define REPEAT_ON                       30140 // Turns repeat on
 #define RESTORE                         30145 // Restores Winamp window
-#define SHUFFLE_OFF                     30180 // Turns shuffle off
-#define SHUFFLE_ON                      30190 // Turns shuffle on
 #define UNBLOCK_MINIBROWSER             30200 // Will unblock the Minibrowser
 #define PLAY_ANY_AUDIO_CD		30210 // Play specified audio cd
 
 //WM_USER
-#define IPC_GET_REPEAT                  251 // Returns the status of the Repeat option (1 if set)
-#define IPC_GET_SHUFFLE                 250 // Returns the status of the Shuffle option (1 if set)
-#define IPC_INETAVAILABLE               242 // Returns 1 if the internet connecton is available for Winamp
 #define IPC_MBBLOCK                     248 // Will block the Minibrowser from updates if value is set to 1
-#define IPC_REFRESHPLCACHE              247 // Will flush the playlist cache buffer.
-#define IPC_RESTART_WINAMP              135 // Restarts Winamp
-#define IPC_SET_REPEAT                  253 // Sets the status of the Repeat option (1 to turn it on)
-#define IPC_SET_SHUFFLE                 252 // Sets the status of the Shuffle option (1 to turn it on)
-#define IPC_UPDTITLE                    243 // Asks Winamp to update the informations about the current title.
 
-//---NOT IMPLEMENTED------------------------------------------------------------------------------------------------------------------------
-#define IPC_ADD_BOOKMARK                129 // Adds the specified file to the Winamp bookmark list
-#define IPC_CHANGECURRENTFILE           245 // Will set the current playlist item.
-#define IPC_GETMBURL                    246 // will retrieve the current Minibrowser URL
-#define IPC_MBOPEN                      241 // Will open a new URL in the minibrowser. if url is NULL, it will open the Minibrowser window.
-#define IPC_MBOPENREAL                  249 // Works the same as IPC_MBOPEN except that it will work even if IPC_MBBLOCK has been set to 1
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 //WM_COMMAND
@@ -393,24 +375,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             *++p=0;
             strcpy (*szargs, this_title);
            }       
-         case IPC_GET_REPEAT:
-            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GET_REPEAT), *szargs, 10);
-            break;
-         case IPC_GET_SHUFFLE:
-            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_GET_SHUFFLE), *szargs, 10);
-            break;
-         case IPC_INETAVAILABLE:
-            _itoa (SendMessage(hwndWinamp, WM_USER, 0, IPC_INETAVAILABLE), *szargs, 10);
-            break;
-         case IPC_REFRESHPLCACHE:
-            SendMessage(hwndWinamp, WM_USER, 0, IPC_REFRESHPLCACHE);
-            break;
-         case IPC_RESTART_WINAMP:
-            SendMessage(hwndWinamp, WM_USER, 0, IPC_RESTART_WINAMP);
-            break;
-         case IPC_UPDTITLE:
-            SendMessage(hwndWinamp, WM_USER, 0, IPC_UPDTITLE);
-            break;
          case MINIMIZE:
             PostMessage(hwndWinamp, WM_SYSCOMMAND, SC_MINIMIZE, 0);
             break;
@@ -426,12 +390,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
                PostMessage(hwndWinamp, WM_SYSCOMMAND, SC_MINIMIZE, 0);
               }
             break;
-         case REPEAT_OFF:
-            SendMessage(hwndWinamp, WM_USER, 0, IPC_SET_REPEAT);
-            break;
-         case REPEAT_ON:
-            SendMessage(hwndWinamp, WM_USER, 1, IPC_SET_REPEAT);
-            break;
          case RESTORE:
             if (IsZoomed(hwndWinamp) || IsIconic(hwndWinamp))
               {
@@ -439,12 +397,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
               }
             (ppsv->Show)(hwndWinamp);
             SetForegroundWindow(hwndWinamp);
-            break;
-         case SHUFFLE_OFF:
-            SendMessage(hwndWinamp, WM_USER, 0, IPC_SET_SHUFFLE);
-            break;
-         case SHUFFLE_ON:
-            SendMessage(hwndWinamp, WM_USER, 1, IPC_SET_SHUFFLE);
             break;
          case UNBLOCK_MINIBROWSER:
             SendMessage(hwndWinamp, WM_USER, 0, IPC_MBBLOCK);
@@ -685,6 +637,33 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
 	if( NULL == winamp_wnd ) return;
 
 
+WINAMPC_SERVICE( add_bookmark )
+{
+	COPYDATASTRUCT cds;
+
+	STARTUP( 1 );
+
+	cds.dwData = IPC_ADDBOOKMARK;
+	cds.lpData = args[0];
+	cds.cbData = strlen( args[0] ) + 1;
+	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
+}
+
+
+/* Works but requires Unicode input */
+WINAMPC_SERVICE( add_bookmark_w )
+{
+	COPYDATASTRUCT cds;
+
+	STARTUP( 1 );
+
+	cds.dwData = IPC_ADDBOOKMARKW;
+	cds.lpData = args[0];
+	cds.cbData = ( wcslen( (wchar_t*) args[0] ) + 1 ) * sizeof( wchar_t);
+	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
+}
+
+
 //WINAMPC_SERVICE( add_track_as_bookmark, WINAMP_ADD_CUR_TRACK_BOOKMARK )
 //
 //_declspec(dllexport) void autoload_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
@@ -834,12 +813,16 @@ WINAMPC_SERVICE( enqueue_file_w )
 //{
 //   MakeAction (WINAMP_FILE_PLAY, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void flush_plist_cache_buffer (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_REFRESHPLCACHE, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+
+WINAMPC_SERVICE( flush_plist_cache_buffer )
+{
+	STARTUP( 0 );
+	
+	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_REFRESHPLCACHE );
+}
+
+
 //_declspec(dllexport) void forward_5sec (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_FFWD5S, nargs, szargs, pFlags, ppsv);
@@ -900,10 +883,16 @@ WINAMPC_SERVICE( get_length )
 	sprintf( retval, "%d", length );
 }
 
-//_declspec(dllexport) void get_net_status (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_INETAVAILABLE, nargs, szargs, pFlags, ppsv);
-//}
+
+WINAMPC_SERVICE( get_net_status )
+{
+	LRESULT status;
+
+	STARTUP( 0 );
+
+	status = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_INETAVAILABLE );
+	sprintf( retval, "%d", status );
+}
 
 
 WINAMPC_SERVICE( get_number_of_channels )
@@ -1005,10 +994,16 @@ WINAMPC_SERVICE( get_position_in_sec )
 	sprintf( retval, "%d", ( position != -1 ? ( position / 1000 ) : position ) );
 }
 
-//_declspec(dllexport) void get_repeat (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_GET_REPEAT, nargs, szargs, pFlags, ppsv);
-//}
+
+WINAMPC_SERVICE( get_repeat )
+{
+	LRESULT repeat;
+
+	STARTUP( 0 );
+
+	repeat = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GET_REPEAT );
+	sprintf( retval, "%d", repeat );
+}
 
 
 WINAMPC_SERVICE( get_samplerate )
@@ -1033,10 +1028,15 @@ WINAMPC_SERVICE( get_samplerate_hz )
 }
 
 
-//_declspec(dllexport) void get_shuffle (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_GET_SHUFFLE, nargs, szargs, pFlags, ppsv);
-//}
+WINAMPC_SERVICE( get_shuffle )
+{
+	LRESULT shuffle;
+
+	STARTUP( 0 );
+	
+	shuffle = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GET_SHUFFLE );
+	sprintf( retval, "%d", shuffle );
+}
 
 
 WINAMPC_SERVICE( get_version )
@@ -1233,22 +1233,32 @@ WINAMPC_SERVICE( play_selected )
 //{
 //   MakeAction (WINAMP_RELOAD_CURRENT_SKIN, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void repeat_off (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (REPEAT_OFF, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void repeat_on (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (REPEAT_ON, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void restart_winamp (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_RESTART_WINAMP, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+
+WINAMPC_SERVICE( repeat_off )
+{
+	STARTUP( 0 );
+
+	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_SET_REPEAT );
+}
+
+
+WINAMPC_SERVICE( repeat_on )
+{
+	STARTUP( 0 );
+
+	PostMessage( winamp_wnd, WM_WA_IPC, 1, IPC_SET_REPEAT );
+}
+
+
+WINAMPC_SERVICE( restart_winamp )
+{
+	STARTUP( 0 );
+
+	SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_RESTARTWINAMP );
+}
+
+
 //_declspec(dllexport) void restore (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (RESTORE, nargs, szargs, pFlags, ppsv);
@@ -1371,17 +1381,23 @@ WINAMPC_SERVICE( set_volume255 )
 //{
 //   MakeAction (WINAMP_SHOW_EDIT_BOOKMARKS, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void shuffle_off (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (SHUFFLE_OFF, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void shuffle_on (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (SHUFFLE_ON, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+WINAMPC_SERVICE( shuffle_off )
+{
+	STARTUP( 0 );
+
+	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_SET_SHUFFLE );
+}
+
+
+WINAMPC_SERVICE( shuffle_on )
+{
+	STARTUP( 0 );
+
+	PostMessage( winamp_wnd, WM_WA_IPC, 1, IPC_SET_SHUFFLE );
+}
+
+
 //_declspec(dllexport) void song_and_number(LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (GET_SONG_NAME_AND_NUMBER, nargs, szargs, pFlags, ppsv);
@@ -1475,12 +1491,15 @@ WINAMPC_SERVICE( set_volume255 )
 //{
 //   MakeAction (UNBLOCK_MINIBROWSER, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void update_info (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (IPC_UPDTITLE, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+
+WINAMPC_SERVICE( update_info )
+{
+	STARTUP( 0 );
+
+	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_UPDTITLE );
+}
+
 //_declspec(dllexport) void volume_down (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_VOLUMEDOWN, nargs, szargs, pFlags, ppsv);
@@ -1490,3 +1509,18 @@ WINAMPC_SERVICE( set_volume255 )
 //{
 //   MakeAction (WINAMP_VOLUMEUP, nargs, szargs, pFlags, ppsv);
 //}
+
+
+WINAMPC_SERVICE( windows_disable )
+{
+	STARTUP( 0 );
+
+	PostMessage( winamp_wnd, WM_WA_IPC, 0xdeadbeef, IPC_ENABLEDISABLE_ALL_WINDOWS );
+}
+
+WINAMPC_SERVICE( windows_enable )
+{
+	STARTUP( 0 );
+
+	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_ENABLEDISABLE_ALL_WINDOWS );
+}

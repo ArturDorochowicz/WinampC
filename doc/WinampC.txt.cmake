@@ -49,6 +49,7 @@ PowerPro and plugin template are Copyright (C) by Bruce Switzer.
 
 3. LIST OF SERVICES
 --------------------------------------------------------------------------------
+add_bookmark
 add_track_as_bookmark
 autoload_preset_dialog
 autoload_save_preset_dialog
@@ -154,6 +155,8 @@ unblock_minibrowser
 update_info
 volume_down
 volume_up
+windows_disable
+windows_enable
 
 4. INSTALLATION
 --------------------------------------------------------------------------------
@@ -203,6 +206,10 @@ If you want to specify "class name" you must give "response type" argument also.
 6. DESCRIPTION OF SERVICES
 --------------------------------------------------------------------------------
 Remember that in every service "response type" and "class name" may be omitted.
+
+add_bookmark ( "file" "response type", "class name")
+        Adds specified file/url to Winamp's bookmark list.
+        Requires Winamp 2.4+
 
 add_track_as_bookmark ("response type", "class name")
         Adds current track as bookmark
@@ -636,6 +643,14 @@ volume_down ("response type", "class name")
 
 volume_up ("response type", "class name")
         Makes Winamp play a little louder.
+
+windows_disable ("response type", "class name")
+        Disables all Winamp windows. Works with simple skin only.
+        Requires Winamp 2.9+
+
+windows_enable ("response type", "class name")
+        Enables back all Winamp windows. Works with simple skin only.
+        Requires Winamp 2.9+
 
 7. HISTORY
 --------------------------------------------------------------------------------
