@@ -2,6 +2,7 @@
 <xsl:stylesheet
 	version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:htm="http://www.w3.org/1999/xhtml"
 	exclude-result-prefixes="htm">
 
@@ -86,7 +87,59 @@
 	</xsl:template>
 
 	<!-- Generate descriptions of services -->
-	<xsl:template match="node()[@id='descriptionsOfServices']" >
-		
+	<xsl:template match="node()[@id='descriptionsOfServices']">
+		<xsl:for-each select="$services/service">
+			<xsl:sort select="@name" order="ascending"/>
+			<div class="serviceDescription" id="{generate-id()}">
+				<div class="serviceDefinition">
+					<xsl:value-of select="@name"/>
+					<xsl:text> ( </xsl:text>
+					<xsl:for-each select="argument">
+						<xsl:value-of select="@name"/>
+					</xsl:for-each>
+					<xsl:text> )</xsl:text>
+				</div>
+				<div class="serviceDescriptionText">
+					<xsl:value-of select="description"/>
+				</div>
+
+				<xsl:if test="count(argument) > 0">
+					<h4>Parameters</h4>
+					<dl class="serviceArgumentsList">
+						<xsl:for-each select="argument">
+							<dt>
+								<xsl:value-of select="@name"/>
+							</dt>
+							<dd>
+								<xsl:choose>
+									<xsl:when test="@optional='true'">
+										[optional]
+									</xsl:when>
+									<xsl:otherwise>
+										[required]
+									</xsl:otherwise>
+								</xsl:choose>
+								[<xsl:value-of select="@type"/>]
+								<xsl:value-of select="."/>
+							</dd>
+						</xsl:for-each>
+					</dl>
+				</xsl:if>
+
+				<h4>Return value</h4>
+				<div class="serviceDescriptionText">
+					<xsl:choose>
+						<xsl:when test="count(return-value) > 0">
+							[<xsl:value-of select="return-value/@type"/>]
+							<xsl:value-of select="return-value"/>
+						</xsl:when>
+						<xsl:otherwise>
+							No return value.
+						</xsl:otherwise>
+					</xsl:choose>
+				</div>
+			</div>
+		</xsl:for-each>
 	</xsl:template>
+	
 </xsl:stylesheet>

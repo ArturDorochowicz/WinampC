@@ -5,6 +5,106 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<title>WinampC Plugin for PowerPro</title>
+		<style type="text/css">
+			body, h1, h2, h3, h4, h5, h6 {
+				padding: 0;
+				margin: 0;
+			}
+
+			body {
+				font-size: 14px;
+				line-height: 135%;
+				font-family: Verdana, Arial, Helvetica, sans-serif;
+				width: 80%;
+				margin: 10px auto;
+				text-align:justify;
+			}
+
+			hr {
+				margin: 10px 0;
+			}
+
+			h1 {
+				margin-top: 20px;
+				margin-bottom: 2px;
+				font-size: 130%;
+				font-weight: bold;
+			}
+
+			p {
+				margin-bottom: 3px;
+			}
+
+			.softwareName {
+				font-size: 120%;
+				font-weight: bold;
+			}
+
+			#tableOfContents {
+			}
+
+			#listOfServices {
+			}
+
+			h1.section {
+				font-size: 18px;
+				font-weight: bold;
+				margin-top: 20px;
+				margin-bottom: 2px;
+			}
+
+			.serviceDescription {
+				margin-top: 18px;
+			}
+
+			.serviceDefinition {
+				background-color: #eee;
+				color: inherit;
+				padding: 2px 5px;
+				font-weight: bold;
+				font-family: "Courier New", Courier, monospace;
+				font-size: 110%;
+				margin-bottom: 3px;
+			}
+
+			.serviceDescription h4 {
+				margin-top: 5px;
+				margin-left: 5px;
+				font-size: 85%;
+				font-weight: bold;
+			}
+
+			.serviceDescriptionText {
+				margin-left: 20px;				
+			}
+
+			.serviceArgumentsList {  
+				list-style-type: none;
+				margin-top: 0;
+				margin-left: 20px;
+			}
+
+			.serviceArgumentsList dt {
+				font-size: 95%;
+				font-style: italic;
+			}
+
+			.serviceArgumentsList dd {
+				margin-left: 30px;
+			}
+
+			.versionsList {
+				list-style-type: square;
+				margin-left: 35px;
+			}
+			
+			.versionsList > li {
+				margin-bottom: 10px;
+			}
+
+			.changesList {
+			}
+		</style>
 	</head>
 	<body>
 		<p class="softwareName">WinampC <span id="pluginVersion">version</span></p>
@@ -18,30 +118,21 @@
 		<h1>Table of contents</h1>
 
 		<ol id="tableOfContents">
-			<li><a href="#dummy">dummy</a></li>
+			<li><a href="#section">table of contents entries</a></li>
 		</ol>
 		
 		<hr/>
 
-		<h1 class="section"> <a>Over<a>aaa</a>view</a> sad <a>bbb</a> ccc
-		</h1>
+		<h1 class="section">Overview</h1>
 
 		<p>Xutils plugin for PowerPro is a set of miscellaneous services. <br/>It has been tested on Windows XP only. Some of the services require Windows XP or newer operating system.</p>
 
 		<h1 class="section">List of services</h1>
 
-        <ul id="listOfServices">
-        	<li>list of services</li>
-        <!--
-			<li><a href="#EjectCd">EjectCd</a></li>
-			<li><a href="#LoadCd">LoadCd</a></li>
-			<li><a href="#EnableIdleTimers">EnableIdleTimers</a></li>
-			<li><a href="#DisableIdleTimers">DisableIdleTimers</a></li>
-			<li><a href="#RunAs">RunAs</a></li>
-			<li><a href="#SuDo">SuDo</a></li>
-			<li><a href="#ScrollDown">ScrollDown</a></li>
-			<li><a href="#ScrollUp">ScrollUp</a></li>
-        -->
+		<ul id="listOfServices">
+			<li>
+				<a href="#service">list of services</a>
+			</li>
 		</ul>
 
 		<h1 class="section">Installation</h1>
