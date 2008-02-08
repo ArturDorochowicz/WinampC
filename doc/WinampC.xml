@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="WinampC.xsl"?>
+<!--<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<title>WinampC Plugin for PowerPro</title>
+	</head>
+	<body>
+		<p class="softwareName">WinampC <span id="pluginVersion">version</span></p>
+
+		<p>Copyright © 2003–<span id="lastCopyrightYear">year</span> Artur Dorochowicz</p>
+		<hr/>
+		<p>Released under the terms of the <a href="License.txt">GNU Lesser General Public License</a>.</p>
+		<p>This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details. You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA </p>
+		<hr/>
+
+		<h1>Table of contents</h1>
+
+		<ol id="tableOfContents">
+			<li><a href="#dummy">dummy</a></li>
+		</ol>
+		
+		<hr/>
+
+		<h1 class="section"><a>Overview</a></h1>
+
+		<p>Xutils plugin for PowerPro is a set of miscellaneous services. <br/>It has been tested on Windows XP only. Some of the services require Windows XP or newer operating system.</p>
+
+		<h1 class="section">List of services</h1>
+
+        <ul id="servicesList">
+        	<li>dummy</li>
+        <!--
+			<li><a href="#EjectCd">EjectCd</a></li>
+			<li><a href="#LoadCd">LoadCd</a></li>
+			<li><a href="#EnableIdleTimers">EnableIdleTimers</a></li>
+			<li><a href="#DisableIdleTimers">DisableIdleTimers</a></li>
+			<li><a href="#RunAs">RunAs</a></li>
+			<li><a href="#SuDo">SuDo</a></li>
+			<li><a href="#ScrollDown">ScrollDown</a></li>
+			<li><a href="#ScrollUp">ScrollUp</a></li>
+        -->
+		</ul>
+
+		<h1 class="section">Installation</h1>
+
+		<p>The plugin must be placed in PowerPro's 'plugins' directory. After that its services can be used just like services of any other plugin. Read PowerPro's help for general information on using plugins.</p>
+
+		<h1 class="section">Description of services</h1>
+
+		<h1 class="section">History</h1>
+
+		<ul class="versionsList">
+
+			<li>v 1.0.1  2007-01-01
+				<ul class="changesList">
+					<li>Fixed: Resource leak in RunAs functionality.</li>
+				</ul>
+			</li>
+			<li>v 1.0  2005-11-22
+				<ul class="changesList">
+					<li>Initial release.</li>
+					<li>Hardly any error reporting.</li>
+
+				</ul>
+			</li>
+		</ul>
+
+		<h1 class="section">Contacting the author</h1>
+
+		<p>All comments, feature requests, bug reports are welcome and greatly appreciated.<br/>
+			Please use Yahoo PowerPro group for any of the above.
+		</p>
+
+	</body>
+</html>

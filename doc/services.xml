@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<services version="1.3.0">
+	<service name="service1">
+		<argument name="argument 1 name" type="string" optional="false">
+			argument 1 description
+		</argument>
+		<return-value type="int">
+			return value description goes here
+		</return-value>
+		<description>service description goes here</description>
+		<requirements>these are the requirements</requirements>
+	</service>
+</services>
