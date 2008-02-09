@@ -15,11 +15,13 @@
 		doctype-public="-//W3C//DTD XHTML 1.1//EN"
 		doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"/>
 
-	<xsl:param name="lastCopyrightYear" select="'2009'"/>
+	<!-- declare parameters and their default values -->
+	<xsl:param name="lastCopyrightYear" select="'9999'"/>
+	<xsl:param name="servicesPath" select="'services.xml'"/>
 
 	<xsl:variable
 		name="services"
-		select="document('@CMAKE_PATH_SERVICES_XML@')/services"/>
+		select="document($servicesPath)/services"/>
 
 	<!-- copy input to output -->
 	<xsl:template match="*|@*">
