@@ -603,18 +603,17 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
 
 /* Argument types used in documentation are:
    string - string value, possible PowerPro arguments: integer (is converted to string), string 
-   integer - integer value, possible PowerPro arguments: integer, string (containing an integer), float (is truncated to integer)
+   int - integer value, possible PowerPro arguments: integer, string (containing an integer), float (is truncated to integer)
    float - float value, possible PowerPro arguments: integer, string (containing a float), float
 */
 
 /*! <services version="1.3.0"> */
 
 /*! <service name="add_bookmark">
-/*!  <argument name="file" type="string">File path.</argument>
-/*!  <description>Add specified file/url to Winamp's bookmark list.</description>
-/*!  <requirements>Requires Winamp 2.4+.</requirements>
-/*! </service>
-/*!*/
+/*!  <description>Add specified file/URL to Winamp's bookmark list.</description>
+/*!  <requirements>Winamp 2.4+</requirements>
+/*!  <argument name="file" type="string">File path or URL.</argument>
+/*! </service> */
 WINAMPC_SERVICE( add_bookmark )
 {
 	COPYDATASTRUCT cds;
@@ -654,6 +653,11 @@ WINAMPC_SERVICE( add_bookmark_w )
 //   MakeAction (WINAMP_O_AUTOLOAD_SAVE_PRESET, nargs, szargs, pFlags, ppsv);
 //}
 
+
+/*! <service name="block_minibrowser">
+/*!  <description>Block the Minibrowser from updates.</description>
+/*!  <requirements>Winamp 2.4+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( block_minibrowser )
 {
 	STARTUP( 0 );
@@ -667,6 +671,12 @@ WINAMPC_SERVICE( block_minibrowser )
 //}
 
 
+/*! <service name="get_plist_entry_path">
+/*!  <description>Get full path of playlist entry at specified position.</description>
+/*!  <requirements>Winamp 2.04+</requirements>
+/*!  <argument name="index" type="int">The position. First entry is at 1.</argument>
+/*!  <return-value type="string">The path.</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_plist_entry_path )
 {
 	WPARAM index;
@@ -684,6 +694,12 @@ WINAMPC_SERVICE( get_plist_entry_path )
 }
 
 
+/*! <service name="get_plist_entry_title">
+/*!  <description>Get title of playlist entry at specified position.</description>
+/*!  <requirements>Winamp 2.04+</requirements>
+/*!  <argument name="index" type="int">The position. First entry is at 1.</argument>
+/*!  <return-value type="string">The title.</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_plist_entry_title )
 {
 	WPARAM index;
@@ -701,6 +717,11 @@ WINAMPC_SERVICE( get_plist_entry_title )
 }
 
 
+/*! <service name="get_plist_selected_path">
+/*!  <description> Get full path of currently selected playlist entry.</description>
+/*!  <requirements>Winamp 2.04+</requirements>
+/*!  <return-value type="string">The path.</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_plist_selected_path )
 {
 	LRESULT index;
@@ -717,6 +738,11 @@ WINAMPC_SERVICE( get_plist_selected_path )
 }
 
 
+/*! <service name="get_plist_selected_title">
+/*!  <description> Get title of currently selected playlist entry.</description>
+/*!  <requirements>Winamp 2.04+</requirements>
+/*!  <return-value type="string">The title.</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_plist_selected_title )
 {
 	LRESULT index;
@@ -733,6 +759,10 @@ WINAMPC_SERVICE( get_plist_selected_title )
 }
 
 
+/*! <service name="change_directory">
+/*!  <description>Change Winamp's current working directory.</description>
+/*!  <argument name="directory" type="string">The new working directory.</argument>
+/*! </service> */
 WINAMPC_SERVICE( change_directory )
 {
 	COPYDATASTRUCT cds;
@@ -745,6 +775,10 @@ WINAMPC_SERVICE( change_directory )
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
 
+
+/*! <service name="clear_plist">
+/*!  <description>Clear Winamp's internal playlist.</description>
+/*! </service> */
 WINAMPC_SERVICE( clear_plist )
 {
 	STARTUP( 0 );
@@ -752,6 +786,9 @@ WINAMPC_SERVICE( clear_plist )
 }
 
 
+/*! <service name="close_winamp">
+/*!  <description>Close Winamp.</description>
+/*! </service> */
 WINAMPC_SERVICE( close_winamp )
 {
 	STARTUP( 0 );
@@ -776,6 +813,9 @@ WINAMPC_SERVICE( close_winamp )
 //}
 
 
+/*! <service name="display_elapsed_time">
+/*!  <description>Set time display mode to elapsed time.</description>
+/*! </service> */
 WINAMPC_SERVICE( display_elapsed_time )
 {
 	STARTUP( 0 );
@@ -783,6 +823,9 @@ WINAMPC_SERVICE( display_elapsed_time )
 }
 
 
+/*! <service name="display_remaining_time">
+/*!  <description>Set time display mode to remaining time.</description>
+/*! </service> */
 WINAMPC_SERVICE( display_remaining_time )
 {
 	STARTUP( 0 );
@@ -796,6 +839,10 @@ WINAMPC_SERVICE( display_remaining_time )
 //}
 
 
+/*! <service name="enqueue_file">
+/*!  <description>Enqueue file.</description>
+/*!  <argument name="file" type="string">The file to enqueue.</argument>
+/*! </service> */
 WINAMPC_SERVICE( enqueue_file )
 {
 	COPYDATASTRUCT cds;
