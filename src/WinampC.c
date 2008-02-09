@@ -1,13 +1,10 @@
 /*
-  Winamp Control Plugin
+/*  Winamp Control Plugin
+/*
+/*  Copyright Artur Dorochowicz
+/*
+/**/
 
-  Copyright Artur Dorochowicz
-  All Rights Reserved.
-
-  All used names are the property of their respective owners.
-  Winamp is Copyright (C) by Nullsoft Inc.
-  PowerPro and plugin template are Copyright (C) by Bruce Switzer.
-*/
 
 #include <windows.h>
 #include <string.h>
@@ -28,7 +25,7 @@
 #define MINIMIZE                        30125 // Minimizes Winamp
 #define MINIMIZE_RESTORE                30127 // Minimizes Winamp when not minimized, restores when minimized
 #define RESTORE                         30145 // Restores Winamp window
-#define PLAY_ANY_AUDIO_CD		30210 // Play specified audio cd
+#define PLAY_ANY_AUDIO_CD               30210 // Play specified audio cd
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -604,14 +601,20 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
 	if( NULL == winamp_wnd ) return;
 
 
+/* Argument types used in documentation are:
+   string - string value, possible PowerPro arguments: integer (is converted to string), string 
+   integer - integer value, possible PowerPro arguments: integer, string (containing an integer), float (is truncated to integer)
+   float - float value, possible PowerPro arguments: integer, string (containing a float), float
+*/
+
 /*! <services version="1.3.0"> */
 
-
 /*! <service name="add_bookmark">
-/*! <argument name="file" type="string">File path.</argument>
-/*! <description>Add specified file/url to Winamp's bookmark list.</description>
-/*! <requirements>Requires Winamp 2.4+.</requirements>
-/*! </service> */
+/*!  <argument name="file" type="string">File path.</argument>
+/*!  <description>Add specified file/url to Winamp's bookmark list.</description>
+/*!  <requirements>Requires Winamp 2.4+.</requirements>
+/*! </service>
+/*!*/
 WINAMPC_SERVICE( add_bookmark )
 {
 	COPYDATASTRUCT cds;

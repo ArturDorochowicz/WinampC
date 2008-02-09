@@ -95,7 +95,7 @@
 			<div class="serviceDescription" id="{generate-id()}">
 				<div class="serviceDefinition">
 					<xsl:value-of select="@name"/>
-					<xsl:text> ( </xsl:text>
+					<xsl:text>( </xsl:text>
 					<xsl:for-each select="argument">
 						<xsl:value-of select="@name"/>
 					</xsl:for-each>
@@ -104,6 +104,13 @@
 				<div class="serviceDescriptionText">
 					<xsl:value-of select="description"/>
 				</div>
+
+				<xsl:if test="count(requirements) > 0">
+					<h4>Requirements</h4>
+					<div class="serviceDescriptionText">
+						<xsl:value-of select="requirements"/>
+					</div>
+				</xsl:if>
 
 				<xsl:if test="count(argument) > 0">
 					<h4>Parameters</h4>
