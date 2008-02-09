@@ -1,4 +1,7 @@
 
+# pcregrep.exe and pcre3.dll are in package PCRE for Windows
+# http://gnuwin32.sourceforge.net/packages/pcre.htm
+# Normal grep won't handle lookarounds in the regex used here
 find_program( PCREGREP "pcregrep"
 	PATHS "${CMAKE_CURRENT_SOURCE_DIR}/tool" )
 
@@ -6,11 +9,11 @@ if( NOT PCREGREP )
 	message( "Cannot find 'pcregrep' executable." )
 endif( )
 
-find_program( MSXSL "msxsl"
+find_program( XSLTPROC "xsltproc"
 	PATHS "${CMAKE_CURRENT_SOURCE_DIR}/tool" )
 
-if( NOT MSXSL )
-	message( "Cannot find 'msxsl' executable." )
+if( NOT XSLTPROC )
+	message( "Cannot find 'xsltproc' executable." )
 endif( )
 
 # Command that creates services.xml by grepping the source code file.
@@ -24,14 +27,13 @@ add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/services.xml"
 	DEPENDS
 		"${CMAKE_CURRENT_SOURCE_DIR}/../src/WinampC.c" )
 
-# Command that creates final documentation by running XSL transform
-# in WinampC.xsl on WinampC.xml. The transform uses services.xml.
 add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml"
 	COMMAND
-		"${MSXSL}"
-			"${CMAKE_CURRENT_SOURCE_DIR}/WinampC.xml"
+		"${XSLTPROC}"
+			"--output \"${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml\""
+			"--novalid"
 			"${CMAKE_CURRENT_BINARY_DIR}/WinampC.xsl"
-			"-o \"${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml\""
+			"${CMAKE_CURRENT_SOURCE_DIR}/WinampC.xml"
 	DEPENDS
 		"${CMAKE_CURRENT_BINARY_DIR}/WinampC.xsl"
 		"${CMAKE_CURRENT_BINARY_DIR}/services.xml" )
