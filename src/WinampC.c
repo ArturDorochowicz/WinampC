@@ -299,10 +299,10 @@ static void PerformResponse( ResponseType response_type, const char *response_ms
 
 
 /** Read a string from process memory.
-*  @param wnd The window handle by which the process is found.
-*  @param src_start The address of the beginning of the string.
-*  @param dst The destination buffer.
-*  @param dst_size The size of the destination buffer.
+ *  @param wnd The window handle by which the process is found.
+ *  @param src_start The address of the beginning of the string.
+ *  @param dst The destination buffer.
+ *  @param dst_size The size of the destination buffer.
 **/
 void ReadStringFromProcessMemory( HWND wnd, void *src_start, char *dst, size_t dst_size )
 {
@@ -604,7 +604,14 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
 	if( NULL == winamp_wnd ) return;
 
 
+/*! <services version="1.3.0"> */
 
+
+/*! <service name="add_bookmark">
+/*! <argument name="file" type="string">File path.</argument>
+/*! <description>Add specified file/url to Winamp's bookmark list.</description>
+/*! <requirements>Requires Winamp 2.4+.</requirements>
+/*! </service> */
 WINAMPC_SERVICE( add_bookmark )
 {
 	COPYDATASTRUCT cds;
@@ -1579,3 +1586,6 @@ WINAMPC_SERVICE( windows_enable )
 
 	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_ENABLEDISABLE_ALL_WINDOWS );
 }
+
+
+/*! </services> */

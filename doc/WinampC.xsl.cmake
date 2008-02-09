@@ -19,7 +19,7 @@
 
 	<xsl:variable
 		name="services"
-		select="document('services.xml')/services"/>
+		select="document('@CMAKE_PATH_SERVICES_XML@')/services"/>
 
 	<!-- copy input to output -->
 	<xsl:template match="*|@*">
