@@ -27,8 +27,6 @@
 #define RESTORE                         30145 // Restores Winamp window
 #define PLAY_ANY_AUDIO_CD               30210 // Play specified audio cd
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-
 //WM_COMMAND
 #define WINAMP_10_TRACKS_BACK           40197 // Moves back 10 tracks in playlist 40197
 #define WINAMP_ADD_CUR_TRACK_BOOKMARK   40321 // Adds current track as a bookmark 40321
@@ -166,7 +164,7 @@ static HWND FindWinampWindow( const char *window_class )
 
 
 /** Safe string copy.
- *  Destination string is always null-terminated (unless its size is 0 ).
+ *  Destination string is always null-terminated (unless its buffer size is 0 ).
  *  @param dst The destination.
  *  @param dst_size The destination buffer size in bytes.
  *  @param src The source.
@@ -881,6 +879,9 @@ WINAMPC_SERVICE( enqueue_file_w )
 //}
 
 
+/*! <service name="flush_plist_cache_buffer">
+/*!  <description>Flushes the playlist cache buffer.</description>
+/*! </service> */
 WINAMPC_SERVICE( flush_plist_cache_buffer )
 {
 	STARTUP( 0 );
@@ -895,6 +896,11 @@ WINAMPC_SERVICE( flush_plist_cache_buffer )
 //}
 
 
+/*! <service name="get_bitrate">
+/*!  <description>Get momentary bitrate of current song.</description>
+/*!  <requirements>Winamp 2.05+</requirements>
+/*!  <return-value type="int">The bitrate in kbs.</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_bitrate )
 {
 	LRESULT bitrate;
@@ -906,6 +912,17 @@ WINAMPC_SERVICE( get_bitrate )
 }
 
 
+/*! <service name="get_eq_data">
+/*!  <description>Query the status of equaliser.</description>
+/*!  <argument name="position" type="int">Specifies the information to query.
+/*!    0&#8211;9 - The 10 bands of EQ data, 10 - the preamp value, 11 - enabled status, 12 - autoload status.
+/*!  </argument>
+/*!  <return-value>The value depends on the specified argument.
+/*!    For 0&#8211;10 - return value is a float from -20.0 to 20.0 (db).
+/*!    For 11&#8211;12 - return value is 0 (disabled) or nonzero (enabled).
+/*!  </return-value>
+/*!  <requirements>Winamp 2.05+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( get_eq_data )
 {
 	WPARAM position;
@@ -926,6 +943,17 @@ WINAMPC_SERVICE( get_eq_data )
 }
 
 
+/*! <service name="get_eq_data63">
+/*!  <description>Query the status of equaliser. Data is returned exactly as received from Winamp.</description>
+/*!  <argument name="position" type="int">Specifies the information to query.
+/*!    0&#8211;9 - The 10 bands of EQ data, 10 - the preamp value, 11 - enabled status, 12 - autoload status.
+/*!  </argument>
+/*!  <return-value>The value depends on the specified argument.
+/*!    For 0&#8211;10 - return value is an integer from 63 to 0 (which corresponds to -20.0&#8211;20.0 db).
+/*!    For 11&#8211;12 - return value is 0 (disabled) or nonzero (enabled).
+/*!  </return-value>
+/*!  <requirements>Winamp 2.05+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( get_eq_data63 )
 {
 	WPARAM position;
@@ -939,6 +967,10 @@ WINAMPC_SERVICE( get_eq_data63 )
 }
 
 
+/*! <service name="get_length">
+/*!  <description>Get length of the current song.</description>
+/*!  <return-value type="int">The length in seconds.</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_length )
 {
 	LRESULT length;
@@ -950,6 +982,14 @@ WINAMPC_SERVICE( get_length )
 }
 
 
+/*! <service name="get_net_status">
+/*!  <description>Check if the Internet connection is available for Winamp.
+/*!   Relates to the Internet connection type setting on the main general
+/*!   preferences page in the Winamp preferences.
+/*!  </description>
+/*!  <requirements>Winamp 2.05+</requirements>
+/*!  <return-value type="int">Returns 1 when connection is available, 0 otherwise.</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_net_status )
 {
 	LRESULT status;
@@ -961,6 +1001,11 @@ WINAMPC_SERVICE( get_net_status )
 }
 
 
+/*! <service name="get_number_of_channels">
+/*!  <description>Get number of channels of the current song.</description>
+/*!  <requirements>Winamp 2.05+</requirements>
+/*!  <return-value type="int">Number of channels.</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_number_of_channels )
 {
 	LRESULT channels;
@@ -972,6 +1017,11 @@ WINAMPC_SERVICE( get_number_of_channels )
 }
 
 
+/*! <service name="get_panning">
+/*!  <description>Get value describing panning setting.</description>
+/*!  <requirements>Winamp 2.0+</requirements>
+/*!  <return-value type="int">The panning value from -100 (all left) to +100 (all right).</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_panning )
 {
 	LRESULT panning;
@@ -983,6 +1033,11 @@ WINAMPC_SERVICE( get_panning )
 }
 
 
+/*! <service name="get_panning127">
+/*!  <description>Get value describing panning setting. Data is returned exactly as received from Winamp.</description>
+/*!  <requirements>Winamp 2.0+</requirements>
+/*!  <return-value type="int">The panning value from -127 (all left) to +127 (all right).</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_panning127 )
 {
 	LRESULT panning;
@@ -994,6 +1049,10 @@ WINAMPC_SERVICE( get_panning127 )
 }
 
 
+/*! <service name="get_playback_status">
+/*!  <description>Get status of the playback.</description>
+/*!  <return-value type="int">Returns 1 when Winamp is playing, 3 when paused, 0 when it is not playing.</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_playback_status )
 {
 	LRESULT status;
@@ -1004,6 +1063,12 @@ WINAMPC_SERVICE( get_playback_status )
 	sprintf( retval, "%d", status );
 }
 
+
+/*! <service name="get_plist_length">
+/*!  <description>Gets playlist length in tracks.</description>
+/*!  <return-value type="int">Number of tracks in the playlist.</return-value>
+/*!  <requirements>Winamp 2.0+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( get_plist_length )
 {
 	LRESULT length;
@@ -1015,6 +1080,11 @@ WINAMPC_SERVICE( get_plist_length )
 }
 
 
+/*! <service name="get_plist_position">
+/*!  <description>Get position in the current playlist, in tracks.</description>
+/*!  <return-value type="int">The position of the current track in the playlist. First track is at 1.</return-value>
+/*!  <requirements>Winamp 2.05+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( get_plist_position )
 {
 	LRESULT position;
@@ -1027,6 +1097,11 @@ WINAMPC_SERVICE( get_plist_position )
 }
 
 
+/*! <service name="get_plist_position1">
+/*!  <description>Write current playlist to %winamp.ini.dir%\Winamp.m3u and return position in the playlist.</description>
+/*!  <return-value type="int">The position of the current track in the playlist. First track is at 1.</return-value>
+/*!  <requirements>Winamp 1.666+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( get_plist_position1 )
 {
 	LRESULT position;
@@ -1039,6 +1114,10 @@ WINAMPC_SERVICE( get_plist_position1 )
 }
 
 
+/*! <service name="get_position">
+/*!  <description>Get position in the current track.</description>
+/*!  <return-value type="int">The position in miliseconds.</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_position )
 {
 	LRESULT position;
@@ -1049,7 +1128,10 @@ WINAMPC_SERVICE( get_position )
 	sprintf( retval, "%d", position );
 }
 
-
+/*! <service name="get_position">
+/*!  <description>Get position in the current track.</description>
+/*!  <return-value type="int">The position in seconds.</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_position_in_sec )
 {
 	LRESULT position;
@@ -1061,6 +1143,11 @@ WINAMPC_SERVICE( get_position_in_sec )
 }
 
 
+/*! <service name="get_rating">
+/*!  <description>Get rating of the current track.</description>
+/*!  <return-value type="int">Rating value from 0 (no rating) to 5.</return-value>
+/*!  <requirements>Winamp 5.04+ with Media Library</requirements>
+/*! </service> */
 WINAMPC_SERVICE( get_rating )
 {
 	LRESULT rating;
@@ -1072,6 +1159,11 @@ WINAMPC_SERVICE( get_rating )
 }
 
 
+/*! <service name="get_repeat">
+/*!  <description>Get status of the repeat option.</description>
+/*!  <return-value type="int">1 - enabled or 0 - disabled.</return-value>
+/*!  <requirements>Winamp 2.4+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( get_repeat )
 {
 	LRESULT repeat;
@@ -1083,6 +1175,11 @@ WINAMPC_SERVICE( get_repeat )
 }
 
 
+/*! <service name="get_samplerate">
+/*!  <description>Get sample rate of the current track.</description>
+/*!  <return-value type="int">Sample rate in kHz.</return-value>
+/*!  <requirements>Winamp 2.05+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( get_samplerate )
 {
 	LRESULT samplerate;
@@ -1094,6 +1191,11 @@ WINAMPC_SERVICE( get_samplerate )
 }
 
 
+/*! <service name="get_samplerate_hz">
+/*!  <description>Get sample rate of the current track.</description>
+/*!  <return-value type="int">Sample rate in Hz.</return-value>
+/*!  <requirements>Winamp 5.25+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( get_samplerate_hz )
 {
 	LRESULT samplerate;
@@ -1105,6 +1207,11 @@ WINAMPC_SERVICE( get_samplerate_hz )
 }
 
 
+/*! <service name="get_shuffle">
+/*!  <description>Get status of the shuffle option.</description>
+/*!  <return-value type="int">1 - enabled or 0 - disabled.</return-value>
+/*!  <requirements>Winamp 2.4+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( get_shuffle )
 {
 	LRESULT shuffle;
@@ -1116,6 +1223,11 @@ WINAMPC_SERVICE( get_shuffle )
 }
 
 
+/*! <service name="get_time_display_mode">
+/*!  <description>Get time display mode.</description>
+/*!  <return-value type="int">1 - displaying elapsed time, 0 - displaying remaining time.</return-value>
+/*!  <requirements>Winamp 2.05+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( get_time_display_mode )
 {
 	LRESULT mode;
@@ -1127,6 +1239,14 @@ WINAMPC_SERVICE( get_time_display_mode )
 }
 
 
+/*! <service name="get_version">
+/*!  <description>Get Winamp's version number.</description>
+/*!  <return-value type="string">The version number in X.YZ format.
+/*!   Because of the wealth of hexadecimal Winamp version formats (see get_version_hex) this service
+/*!   may not always return correct results. It works by simply replacing second
+/*!   digit in hexadecimal version number (which should be 0) with a dot.
+/*!  </return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_version )
 {
 	LRESULT version;
@@ -1138,6 +1258,18 @@ WINAMPC_SERVICE( get_version )
 }
 
 
+/*! <service name="get_version_hex">
+/*!  <description>Get Winamp's version number.</description>
+/*!  <return-value type="string">The version number as returned from Winamp.
+/*!   Usual, expected format is X0YZ for version X.YZ. A quote from Winamp SDK:
+/*!   "The version returned will be 0x20yx for Winamp 2.yx.
+/*!   Versions previous to Winamp 2.0 typically (but not always) use 0x1zyx for 1.zx.
+/*!   Just a bit weird but that's the way it goes.
+/*!   For Winamp 5.x it uses the format 0x50yx for Winamp 5.yx, e.g. 5.01 -> 0x5001, 5.09 -> 0x5009, 5.1 -> 0x5010.
+/*!   Notes: For 5.02 this api will return the same value as for a 5.01 build.
+/*!   For 5.07 this api will return the same value as for a 5.06 build."
+/*!  </return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_version_hex )
 {
 	LRESULT version;
@@ -1149,6 +1281,11 @@ WINAMPC_SERVICE( get_version_hex )
 }
 
 
+/*! <service name="get_video_height">
+/*!  <description>Get height of the current video.</description>
+/*!  <return-value type="int">The height.</return-value>
+/*!  <requirements>Winamp 5+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( get_video_height )
 {
 	LRESULT size;
@@ -1160,6 +1297,11 @@ WINAMPC_SERVICE( get_video_height )
 }
 
 
+/*! <service name="get_video_width">
+/*!  <description>Get width of the current video.</description>
+/*!  <return-value type="int">The width.</return-value>
+/*!  <requirements>Winamp 5+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( get_video_width )
 {
 	LRESULT size;
@@ -1171,6 +1313,10 @@ WINAMPC_SERVICE( get_video_width )
 }
 
 
+/*! <service name="get_volume">
+/*!  <description>Get value of the volume setting.</description>
+/*!  <return-value type="int">The volume as a value from 0 (mute) to 100.</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_volume )
 {
 	LRESULT volume;
@@ -1182,6 +1328,10 @@ WINAMPC_SERVICE( get_volume )
 }
 
 
+/*! <service name="get_volume255">
+/*!  <description>Get value of the volume setting. Data is returned exactly as received from Winamp.</description>
+/*!  <return-value type="int">The volume as a value from 0 (mute) to 255.</return-value>
+/*! </service> */
 WINAMPC_SERVICE( get_volume255 )
 {
 	LRESULT volume;
@@ -1199,6 +1349,13 @@ WINAMPC_SERVICE( get_volume255 )
 //   MakeAction (WINAMP_O_JUMP_TO_FILE, nargs, szargs, pFlags, ppsv);
 //}
 
+
+/*! <service name="jump_to_time">
+/*!  <description>Jump to specified position in the current track.</description>
+/*!  <argument name="position" type="int">Requested position in miliseconds.</argument>
+/*!  <return-value type="int">Returns -1 if Winamp is not playing, 1 on end of file, or 0 if it was successful.</return-value>
+/*!  <requirements>Winamp 1.60+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( jump_to_time )
 {
 	WPARAM position;
@@ -1306,6 +1463,10 @@ WINAMPC_SERVICE( jump_to_time )
 //   MakeAction (WINAMP_BUTTON2, nargs, szargs, pFlags, ppsv);
 //}
 
+
+/*! <service name="play_selected">
+/*!  <description>Begin playing selected track.</description>
+/*! </service> */
 WINAMPC_SERVICE( play_selected )
 {
 	STARTUP( 0 );
