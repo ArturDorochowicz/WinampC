@@ -14,6 +14,8 @@ if( NOT GREP )
 	message( "Cannot find 'pcregrep' executable." )
 endif( )
 
+# xsltproc.exe is part of libxml2 library
+# http://www.zlatkovic.com/pub/libxml/
 find_program( XSLT "xsltproc"
 	PATHS "${CMAKE_CURRENT_SOURCE_DIR}/tool" )
 
