@@ -914,12 +914,15 @@ WINAMPC_SERVICE( get_bitrate )
 
 /*! <service name="get_eq_data">
 /*!  <description>Query the status of equaliser.</description>
-/*!  <argument name="position" type="int">Specifies the information to query.
-/*!    0&#8211;9 - The 10 bands of EQ data, 10 - the preamp value, 11 - enabled status, 12 - autoload status.
+/*!  <argument name="position" type="int">Specifies the information to query. <br />
+/*!    0&#8211;9 - The 10 bands of EQ data, <br />
+/*!    10 - the preamp value, <br />
+/*!    11 - enabled status, <br />
+/*!    12 - autoload status.
 /*!  </argument>
-/*!  <return-value>The value depends on the specified argument.
-/*!    For 0&#8211;10 - return value is a float from -20.0 to 20.0 (db).
-/*!    For 11&#8211;12 - return value is 0 (disabled) or nonzero (enabled).
+/*!  <return-value>The value depends on the specified argument. <br />
+/*!    For 0&#8211;10 - return value is a float from -20.0 to 20.0 (db). <br />
+/*!    For 11&#8211;12 - return value is 0 (disabled) or nonzero (enabled). <br />
 /*!  </return-value>
 /*!  <requirements>Winamp 2.05+</requirements>
 /*! </service> */
@@ -944,13 +947,16 @@ WINAMPC_SERVICE( get_eq_data )
 
 
 /*! <service name="get_eq_data63">
-/*!  <description>Query the status of equaliser. Data is returned exactly as received from Winamp.</description>
-/*!  <argument name="position" type="int">Specifies the information to query.
-/*!    0&#8211;9 - The 10 bands of EQ data, 10 - the preamp value, 11 - enabled status, 12 - autoload status.
+/*!  <description>Query the status of equaliser.Data is returned exactly as received from Winamp.</description>
+/*!  <argument name="position" type="int">Specifies the information to query. <br />
+/*!    0&#8211;9 - The 10 bands of EQ data, <br />
+/*!    10 - the preamp value, <br />
+/*!    11 - enabled status, <br />
+/*!    12 - autoload status.
 /*!  </argument>
-/*!  <return-value>The value depends on the specified argument.
-/*!    For 0&#8211;10 - return value is an integer from 63 to 0 (which corresponds to -20.0&#8211;20.0 db).
-/*!    For 11&#8211;12 - return value is 0 (disabled) or nonzero (enabled).
+/*!  <return-value>The value depends on the specified argument. <br />
+/*!    For 0&#8211;10 - return value is an integer from 63 to 0 (which corresponds to -20.0&#8211;20.0 db).<br />
+/*!    For 11&#8211;12 - return value is 0 (disabled) or nonzero (enabled).<br />
 /*!  </return-value>
 /*!  <requirements>Winamp 2.05+</requirements>
 /*! </service> */
@@ -1261,12 +1267,14 @@ WINAMPC_SERVICE( get_version )
 /*! <service name="get_version_hex">
 /*!  <description>Get Winamp's version number.</description>
 /*!  <return-value type="string">The version number as returned from Winamp.
-/*!   Usual, expected format is X0YZ for version X.YZ. A quote from Winamp SDK:
+/*!   Usual, expected format is X0YZ for version X.YZ. <br />
+/*!   A quote from Winamp SDK: <br />
 /*!   "The version returned will be 0x20yx for Winamp 2.yx.
 /*!   Versions previous to Winamp 2.0 typically (but not always) use 0x1zyx for 1.zx.
-/*!   Just a bit weird but that's the way it goes.
-/*!   For Winamp 5.x it uses the format 0x50yx for Winamp 5.yx, e.g. 5.01 -> 0x5001, 5.09 -> 0x5009, 5.1 -> 0x5010.
-/*!   Notes: For 5.02 this api will return the same value as for a 5.01 build.
+/*!   Just a bit weird but that's the way it goes. <br />
+/*!   For Winamp 5.x it uses the format 0x50yx for Winamp 5.yx, e.g. 5.01 -> 0x5001, 5.09 -> 0x5009, 5.1 -> 0x5010. <br />
+/*!   Notes: <br />
+/*!   For 5.02 this api will return the same value as for a 5.01 build. <br />
 /*!   For 5.07 this api will return the same value as for a 5.06 build."
 /*!  </return-value>
 /*! </service> */
@@ -1473,6 +1481,7 @@ WINAMPC_SERVICE( play_selected )
 	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_STARTPLAY );
 }
 
+
 //_declspec(dllexport) void previous_track (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_BUTTON1, nargs, szargs, pFlags, ppsv);
@@ -1482,7 +1491,6 @@ WINAMPC_SERVICE( play_selected )
 //{
 //   MakeAction (WINAMP_RELOAD_CURRENT_SKIN, nargs, szargs, pFlags, ppsv);
 //}
-
 
 
 /*! <service name="repeat_off">
@@ -1544,11 +1552,15 @@ WINAMPC_SERVICE( restart_winamp )
 
 /*! <service name="set_eq_data">
 /*!  <description>Change the status of equaliser.</description>
-/*!  <argument name="position" type="int">Specifies the information to alter.
-/*!    0&#8211;9 - The 10 bands of EQ data, 10 - the preamp value, 11 - enabled status, 12 - autoload status.
+/*!  <argument name="position" type="int">Specifies the information to alter. <br />
+/*!    0&#8211;9 - The 10 bands of EQ data, <br />
+/*!    10 - the preamp value, <br />
+/*!    11 - enabled status, <br />
+/*!    12 - autoload status.
 /*!  </argument>
-/*!  <argument name="value">For position 0&#8211;10 a number from -20.0 to +20.0 (db).
-/*!   For 11&#8211;12 specify 0 to disable, nonzero to enable.</argument>
+/*!  <argument name="value">For position 0&#8211;10 a number from -20.0 to +20.0 (db). <br />
+/*!   For 11&#8211;12 specify 0 to disable, nonzero to enable.
+/*!  </argument>
 /*!  <requirements>Winamp 2.92+</requirements>
 /*! </service> */
 WINAMPC_SERVICE( set_eq_data )
@@ -1576,11 +1588,15 @@ WINAMPC_SERVICE( set_eq_data )
 
 /*! <service name="set_eq_data63">
 /*!  <description>Change the status of equaliser using Winamp's data format.</description>
-/*!  <argument name="position" type="int">Specifies the information to alter.
-/*!    0&#8211;9 - The 10 bands of EQ data, 10 - the preamp value, 11 - enabled status, 12 - autoload status.
+/*!  <argument name="position" type="int">Specifies the information to alter. <br />
+/*!    0&#8211;9 - The 10 bands of EQ data, <br />
+/*!    10 - the preamp value, <br />
+/*!    11 - enabled status, <br />
+/*!    12 - autoload status.
 /*!  </argument>
-/*!  <argument name="value">For position 0&#8211;10 a number from 63 to 0 (which corresponds to -20.0&#8211;20.0 db).
-/*!   For 11&#8211;12 specify 0 to disable, nonzero to enable.</argument>
+/*!  <argument name="value">For position 0&#8211;10 a number from 63 to 0 (which corresponds to -20.0&#8211;20.0 db). <br />
+/*!   For 11&#8211;12 specify 0 to disable, nonzero to enable.
+/*!  </argument>
 /*!  <requirements>Winamp 2.92+</requirements>
 /*! </service> */
 WINAMPC_SERVICE( set_eq_data63 )

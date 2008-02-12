@@ -25,7 +25,7 @@
 
 	<!-- copy input to output -->
 	<xsl:template match="*|@*">
-		<xsl:copy>
+		<xsl:copy xml:space="default">
 			<xsl:apply-templates select="node()|@*"/>
 		</xsl:copy>
 	</xsl:template>
@@ -105,7 +105,7 @@
 					<xsl:text> )</xsl:text>
 				</div>
 				<div class="serviceDescriptionText">
-					<xsl:value-of select="normalize-space(description)"/>
+					<xsl:apply-templates select="description"/>
 				</div>
 
 				<xsl:if test="count(requirements) > 0">
@@ -120,19 +120,21 @@
 					<dl class="serviceArgumentsList">
 						<xsl:for-each select="argument">
 							<dt>
-								<xsl:value-of select="normalize-space(@name)"/>
-							</dt>
-							<dd>
 								<xsl:choose>
 									<xsl:when test="normalize-space(@optional)='true'">
-										[optional]
+										<xsl:text>[optional] </xsl:text>
 									</xsl:when>
 									<xsl:otherwise>
-										[required]
+										<xsl:text>[required] </xsl:text>
 									</xsl:otherwise>
 								</xsl:choose>
-								[<xsl:value-of select="normalize-space(@type)"/>]
-								<xsl:value-of select="normalize-space(.)"/>
+								<xsl:text>[</xsl:text>
+								<xsl:value-of select="normalize-space(@type)"/>
+								<xsl:text>] </xsl:text>
+								<xsl:value-of select="normalize-space(@name)"/>
+							</dt>
+							<dd>								
+								<xsl:apply-templates select="self::node()"/>
 							</dd>
 						</xsl:for-each>
 					</dl>
@@ -143,7 +145,7 @@
 					<xsl:choose>
 						<xsl:when test="count(return-value) > 0">
 							[<xsl:value-of select="normalize-space(return-value/@type)"/>]
-							<xsl:value-of select="normalize-space(return-value)"/>
+							<xsl:apply-templates select="return-value"/>
 						</xsl:when>
 						<xsl:otherwise>
 							No return value.
@@ -151,6 +153,20 @@
 					</xsl:choose>
 				</div>
 			</div>
+		</xsl:for-each>
+	</xsl:template>
+
+	<!-- Copy description/argument/return-value text contents creating <br/> tags as indicated in the source -->
+	<xsl:template match="description|argument|return-value">
+		<xsl:for-each select="child::node()">
+		<xsl:choose>
+			<xsl:when test="local-name()='br'">
+				<br />
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="normalize-space()"/>
+			</xsl:otherwise>
+		</xsl:choose>
 		</xsl:for-each>
 	</xsl:template>
 	
