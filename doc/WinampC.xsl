@@ -98,6 +98,9 @@
 					<xsl:text>( </xsl:text>
 					<xsl:for-each select="argument">
 						<xsl:value-of select="normalize-space(@name)"/>
+						<xsl:if test="last() > position()">
+							<xsl:text>, </xsl:text>
+						</xsl:if>
 					</xsl:for-each>
 					<xsl:text> )</xsl:text>
 				</div>

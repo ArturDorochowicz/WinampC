@@ -1353,7 +1353,7 @@ WINAMPC_SERVICE( get_volume255 )
 /*! <service name="jump_to_time">
 /*!  <description>Jump to specified position in the current track.</description>
 /*!  <argument name="position" type="int">Requested position in miliseconds.</argument>
-/*!  <return-value type="int">Returns -1 if Winamp is not playing, 1 on end of file, or 0 if it was successful.</return-value>
+/*!  <return-value type="int">Returns -1 if Winamp is not playing, 1 on end of file, or 0 if call was successful.</return-value>
 /*!  <requirements>Winamp 1.60+</requirements>
 /*! </service> */
 WINAMPC_SERVICE( jump_to_time )
@@ -1484,6 +1484,11 @@ WINAMPC_SERVICE( play_selected )
 //}
 
 
+
+/*! <service name="repeat_off">
+/*!  <description>Turn repeat off.</description>
+/*!  <requirements>Winamp 2.4+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( repeat_off )
 {
 	STARTUP( 0 );
@@ -1492,6 +1497,10 @@ WINAMPC_SERVICE( repeat_off )
 }
 
 
+/*! <service name="repeat_on">
+/*!  <description>Turn repeat on.</description>
+/*!  <requirements>Winamp 2.4+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( repeat_on )
 {
 	STARTUP( 0 );
@@ -1500,6 +1509,10 @@ WINAMPC_SERVICE( repeat_on )
 }
 
 
+/*! <service name="restart_winamp">
+/*!  <description>Restart Winamp.</description>
+/*!  <requirements>Winamp 2.2+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( restart_winamp )
 {
 	STARTUP( 0 );
@@ -1529,6 +1542,15 @@ WINAMPC_SERVICE( restart_winamp )
 //}
 
 
+/*! <service name="set_eq_data">
+/*!  <description>Change the status of equaliser.</description>
+/*!  <argument name="position" type="int">Specifies the information to alter.
+/*!    0&#8211;9 - The 10 bands of EQ data, 10 - the preamp value, 11 - enabled status, 12 - autoload status.
+/*!  </argument>
+/*!  <argument name="value">For position 0&#8211;10 a number from -20.0 to +20.0 (db).
+/*!   For 11&#8211;12 specify 0 to disable, nonzero to enable.</argument>
+/*!  <requirements>Winamp 2.92+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( set_eq_data )
 {
 	BYTE pos;
@@ -1552,6 +1574,15 @@ WINAMPC_SERVICE( set_eq_data )
 }
 
 
+/*! <service name="set_eq_data63">
+/*!  <description>Change the status of equaliser using Winamp's data format.</description>
+/*!  <argument name="position" type="int">Specifies the information to alter.
+/*!    0&#8211;9 - The 10 bands of EQ data, 10 - the preamp value, 11 - enabled status, 12 - autoload status.
+/*!  </argument>
+/*!  <argument name="value">For position 0&#8211;10 a number from 63 to 0 (which corresponds to -20.0&#8211;20.0 db).
+/*!   For 11&#8211;12 specify 0 to disable, nonzero to enable.</argument>
+/*!  <requirements>Winamp 2.92+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( set_eq_data63 )
 {
 	BYTE pos;
@@ -1567,6 +1598,11 @@ WINAMPC_SERVICE( set_eq_data63 )
 }
 
 
+/*! <service name="set_panning">
+/*!  <description>Change panning setting.</description>
+/*!  <argument name="panning" type="int">The panning value from -100 (all left) to +100 (all right).</argument>
+/*!  <requirements>Winamp 2.0+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( set_panning )
 {
 	WPARAM panning;
@@ -1578,6 +1614,11 @@ WINAMPC_SERVICE( set_panning )
 }
 
 
+/*! <service name="set_panning127">
+/*!  <description>Change panning setting using Winamp's data format.</description>
+/*!  <argument name="panning" type="int">The panning value from -127 (all left) to +127 (all right).</argument>
+/*!  <requirements>Winamp 2.0+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( set_panning127 )
 {
 	WPARAM panning;
@@ -1589,6 +1630,11 @@ WINAMPC_SERVICE( set_panning127 )
 }
 
 
+/*! <service name="set_plist_position">
+/*!  <description>Set position in the playlist.</description>
+/*!  <argument name="position" type="int">The position to set. First playlist entry is at 1.</argument>
+/*!  <requirements>Winamp 2.0+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( set_plist_position )
 {
 	WPARAM position;
@@ -1601,6 +1647,11 @@ WINAMPC_SERVICE( set_plist_position )
 }
 
 
+/*! <service name="set_rating">
+/*!  <description>Set rating of the current track.</description>
+/*!  <argument name="rating" type="int">The rating value from 0 (no rating) to 5.</argument>
+/*!  <requirements>Winamp 5.04+ with Media Library</requirements>
+/*! </service> */
 WINAMPC_SERVICE( set_rating )
 {
 	WPARAM rating;
@@ -1612,6 +1663,11 @@ WINAMPC_SERVICE( set_rating )
 }
 
 
+/*! <service name="set_volume">
+/*!  <description>Change volume.</description>
+/*!  <argument name="volume" type="int">The volume value from 0 (mute) to 100.</argument>
+/*!  <requirements>Winamp 2.0+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( set_volume )
 {
 	WPARAM volume;
@@ -1627,6 +1683,11 @@ WINAMPC_SERVICE( set_volume )
 }
 
 
+/*! <service name="set_volume255">
+/*!  <description>Change volume using Winamp's data format.</description>
+/*!  <argument name="volume" type="int">The volume value from 0 (mute) to 255.</argument>
+/*!  <requirements>Winamp 2.0+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( set_volume255 )
 {
 	WPARAM volume;
@@ -1642,6 +1703,11 @@ WINAMPC_SERVICE( set_volume255 )
 //   MakeAction (WINAMP_SHOW_EDIT_BOOKMARKS, nargs, szargs, pFlags, ppsv);
 //}
 
+
+/*! <service name="shuffle_off">
+/*!  <description>Turn shuffle off.</description>
+/*!  <requirements>Winamp 2.4+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( shuffle_off )
 {
 	STARTUP( 0 );
@@ -1650,6 +1716,10 @@ WINAMPC_SERVICE( shuffle_off )
 }
 
 
+/*! <service name="shuffle_on">
+/*!  <description>Turn shuffle n.</description>
+/*!  <requirements>Winamp 2.4+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( shuffle_on )
 {
 	STARTUP( 0 );
@@ -1729,6 +1799,9 @@ WINAMPC_SERVICE( shuffle_on )
 //}
 
 
+/*! <service name="toggle_repeat">
+/*!  <description>Toggle repeat setting.</description>
+/*! </service> */
 WINAMPC_SERVICE( toggle_repeat )
 {
 	STARTUP( 0 );
@@ -1736,6 +1809,9 @@ WINAMPC_SERVICE( toggle_repeat )
 }
 
 
+/*! <service name="toggle_shuffle">
+/*!  <description>Toggle shuffle setting.</description>
+/*! </service> */
 WINAMPC_SERVICE( toggle_shuffle )
 {
 	STARTUP( 0 );
@@ -1753,6 +1829,10 @@ WINAMPC_SERVICE( toggle_shuffle )
 //}
 
 
+/*! <service name="unblock_minibrowser">
+/*!  <description>Unblock the Minibrowser from updates.</description>
+/*!  <requirements>Winamp 2.4+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( unblock_minibrowser )
 {
 	STARTUP( 0 );
@@ -1761,6 +1841,10 @@ WINAMPC_SERVICE( unblock_minibrowser )
 }
 
 
+/*! <service name="update_info">
+/*!  <description>Make Winamp update the information about the current track.</description>
+/*!  <requirements>Winamp 2.2+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( update_info )
 {
 	STARTUP( 0 );
@@ -1769,6 +1853,9 @@ WINAMPC_SERVICE( update_info )
 }
 
 
+/*! <service name="volume_down">
+/*!  <description>Decrease the volume a bit.</description>
+/*! </service> */
 WINAMPC_SERVICE( volume_down )
 {
 	STARTUP( 0 );
@@ -1777,6 +1864,9 @@ WINAMPC_SERVICE( volume_down )
 }
 
 
+/*! <service name="volume_up">
+/*!  <description>Increase the volume a bit.</description>
+/*! </service> */
 WINAMPC_SERVICE( volume_up )
 {
 	STARTUP( 0 );
@@ -1784,6 +1874,10 @@ WINAMPC_SERVICE( volume_up )
 }
 
 
+/*! <service name="windows_disable">
+/*!  <description>Disable all main Winamp windows. Works with simple skin only.</description>
+/*!  <requirements>Winamp 2.9+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( windows_disable )
 {
 	STARTUP( 0 );
@@ -1791,6 +1885,11 @@ WINAMPC_SERVICE( windows_disable )
 	PostMessage( winamp_wnd, WM_WA_IPC, 0xdeadbeef, IPC_ENABLEDISABLE_ALL_WINDOWS );
 }
 
+
+/*! <service name="windows_enable">
+/*!  <description>Enable back Winamp windows.</description>
+/*!  <requirements>Winamp 2.9+</requirements>
+/*! </service> */
 WINAMPC_SERVICE( windows_enable )
 {
 	STARTUP( 0 );
