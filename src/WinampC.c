@@ -19,9 +19,6 @@
 #define MAX_VAR_LENGTH                      531
 
 //---WINAMP API DEFINITIONS-----------------------------------------------------------------------------------------------------------------
-#define GET_CAPTION                     30030 // Gets full Winamp's caption
-#define GET_SONG_NAME                   30100 // Retrieves song's name
-#define GET_SONG_NAME_AND_NUMBER        30110 // Gets song's name with number
 #define MINIMIZE                        30125 // Minimizes Winamp
 #define MINIMIZE_RESTORE                30127 // Minimizes Winamp when not minimized, restores when minimized
 #define RESTORE                         30145 // Restores Winamp window
@@ -333,55 +330,7 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
    if (hwndWinamp)
      {
       switch (sw)
-        {
-         case GET_CAPTION:
-           {
-            char this_title[MAX_VAR_LENGTH];
-            GetWindowText (hwndWinamp, this_title, sizeof (this_title));
-            strcpy (*szargs, this_title);
-           }
-            break;
-         case GET_SONG_NAME:
-           {
-            char this_title[MAX_VAR_LENGTH],
-                 * p;
-
-            GetWindowText(hwndWinamp,this_title,sizeof(this_title));
-            p = this_title + strlen(this_title) - 8;
-            while (p >= this_title)
-              {
-               if (!_strnicmp(p,"- Winamp",8)) break;
-               p--;
-              }
-            if (p >= this_title) p--;
-            while (p >= this_title && *p == ' ') p--;
-            *++p=0;
-            p = this_title;
-            while (*p != ' ')
-              {
-               p++;
-              }
-            p++;
-            strcpy (*szargs, p);
-           }
-            break;
-         case GET_SONG_NAME_AND_NUMBER:
-           {
-            char this_title[MAX_VAR_LENGTH],
-                 * p;
-
-            GetWindowText(hwndWinamp,this_title,sizeof(this_title));
-            p = this_title + strlen(this_title)-8;
-            while (p >= this_title)
-              {
-               if (!_strnicmp(p,"- Winamp",8)) break;
-               p--;
-              }
-            if (p >= this_title) p--;
-            while (p >= this_title && *p == ' ') p--;
-            *++p=0;
-            strcpy (*szargs, this_title);
-           }       
+        {            
          case MINIMIZE:
             PostMessage(hwndWinamp, WM_SYSCOMMAND, SC_MINIMIZE, 0);
             break;
@@ -663,10 +612,18 @@ WINAMPC_SERVICE( block_minibrowser )
 }
 
 
-//_declspec(dllexport) void caption(LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (GET_CAPTION, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="caption">
+/*!  <description>Get full caption of the Winamp's window. This is something like: 'Number. Song title - Winamp'.
+/*!   Obviously, Winamp's option 'Scroll song title in the Windows taskbar' influences the output from this service.
+/*!  </description>
+/*!  <return-value type="string">Winamp's window caption.</return-value>
+/*! </service> */
+WINAMPC_SERVICE( caption )
+{
+	STARTUP( 0 );
+
+	GetWindowText( winamp_wnd, retval, MAX_VAR_LENGTH + 1 );
+}
 
 
 /*! <service name="get_plist_entry_path">
@@ -1733,7 +1690,7 @@ WINAMPC_SERVICE( shuffle_off )
 
 
 /*! <service name="shuffle_on">
-/*!  <description>Turn shuffle n.</description>
+/*!  <description>Turn shuffle on.</description>
 /*!  <requirements>Winamp 2.4+</requirements>
 /*! </service> */
 WINAMPC_SERVICE( shuffle_on )
@@ -1744,16 +1701,67 @@ WINAMPC_SERVICE( shuffle_on )
 }
 
 
-//_declspec(dllexport) void song_and_number(LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (GET_SONG_NAME_AND_NUMBER, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void song_name(LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (GET_SONG_NAME, nargs, szargs, pFlags, ppsv);
-//}
-//
+/** Trim the ending " - Winamp"
+**/
+static void trim_caption_end( char *caption )
+{
+	static const char winamp[] = " - Winamp";
+	char *p;
+
+	p = strstr( caption, winamp );
+	/* trim only if it is really the last */
+	if( p != NULL && strlen( p ) == strlen( winamp ) )
+	{
+		*p = '\0';
+	}
+}
+
+
+/*! <service name="song_and_number">
+/*!  <description>Get song title with preceding playlist entry number. The information is retrieved from Winamp's window caption.
+/*!   In order for this to work properly, Winamp's option 'Scroll song title in the Windows taskbar'
+/*!   must be disabled. Otherwise the result is undefined.
+/*!  </description>
+/*! </service> */
+WINAMPC_SERVICE( song_and_number )
+{
+	STARTUP( 0 );
+
+	GetWindowText( winamp_wnd, retval, MAX_VAR_LENGTH + 1 );
+}
+
+
+/*! <service name="song_name">
+/*!  <description>Get the title of the current track. The information is retrieved from Winamp's window caption.
+/*!   In order for this to work properly, Winamp's option 'Scroll song title in the Windows taskbar'
+/*!   must be disabled. Otherwise the result is undefined.
+/*!  </description>
+/*! </service> */
+WINAMPC_SERVICE( song_name )
+{	
+	char caption[MAX_VAR_LENGTH + 1];	
+	char *p;
+
+	STARTUP( 0 );
+
+	GetWindowText( winamp_wnd, caption, sizeof( caption ) );
+
+	trim_caption_end( caption );
+
+	/* trim the beginning number "XX. " */
+	p = caption;
+	while( *p != '\0' && *p != ' '  )
+	{
+		p++;
+	}
+	
+	if( *p != '\0' )
+	{
+		strcpys( retval, MAX_VAR_LENGTH + 1, p + 1 );
+	}
+}
+
+
 //_declspec(dllexport) void start_of_plist (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_BUTTON1_CTRL, nargs, szargs, pFlags, ppsv);
