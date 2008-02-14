@@ -7,7 +7,6 @@
 
 
 #include <windows.h>
-#include <string.h>
 #include <stdio.h>
 
 /* Winamp SDK */
@@ -16,7 +15,7 @@
 
 
 /* Maximum length of PowerPro variable in single byte characters */
-#define MAX_VAR_LENGTH                      531
+#define MAX_VAR_LENGTH 531
 
 //WM_COMMAND
 #define WINAMP_10_TRACKS_BACK           40197 // Moves back 10 tracks in playlist 40197
@@ -833,7 +832,7 @@ WINAMPC_SERVICE( get_bitrate )
 /*!    11 - enabled status, <br />
 /*!    12 - autoload status.
 /*!  </argument>
-/*!  <return-value>The value depends on the specified argument. <br />
+/*!  <return-value type="mixed">The value depends on the specified argument. <br />
 /*!    For 0&#8211;10 - return value is a float from -20.0 to 20.0 (db). <br />
 /*!    For 11&#8211;12 - return value is 0 (disabled) or nonzero (enabled). <br />
 /*!  </return-value>
@@ -867,7 +866,7 @@ WINAMPC_SERVICE( get_eq_data )
 /*!    11 - enabled status, <br />
 /*!    12 - autoload status.
 /*!  </argument>
-/*!  <return-value>The value depends on the specified argument. <br />
+/*!  <return-value type="mixed">The value depends on the specified argument. <br />
 /*!    For 0&#8211;10 - return value is an integer from 63 to 0 (which corresponds to -20.0&#8211;20.0 db).<br />
 /*!    For 11&#8211;12 - return value is 0 (disabled) or nonzero (enabled).<br />
 /*!  </return-value>
@@ -1537,7 +1536,7 @@ WINAMPC_SERVICE( restore )
 /*!    11 - enabled status, <br />
 /*!    12 - autoload status.
 /*!  </argument>
-/*!  <argument name="value">For position 0&#8211;10 a number from -20.0 to +20.0 (db). <br />
+/*!  <argument name="value" type="mixed">For position 0&#8211;10 a number from -20.0 to +20.0 (db). <br />
 /*!   For 11&#8211;12 specify 0 to disable, nonzero to enable.
 /*!  </argument>
 /*!  <requirements>Winamp 2.92+</requirements>
@@ -1573,7 +1572,7 @@ WINAMPC_SERVICE( set_eq_data )
 /*!    11 - enabled status, <br />
 /*!    12 - autoload status.
 /*!  </argument>
-/*!  <argument name="value">For position 0&#8211;10 a number from 63 to 0 (which corresponds to -20.0&#8211;20.0 db). <br />
+/*!  <argument name="value" type="mixed">For position 0&#8211;10 a number from 63 to 0 (which corresponds to -20.0&#8211;20.0 db). <br />
 /*!   For 11&#8211;12 specify 0 to disable, nonzero to enable.
 /*!  </argument>
 /*!  <requirements>Winamp 2.92+</requirements>
@@ -1740,7 +1739,7 @@ static void trim_caption_end( char *caption )
 
 
 /*! <service name="song_and_number">
-/*!  <description>Get song title with preceding playlist entry number. The information is retrieved from Winamp's window caption.
+/*!  <description>Get the track title with preceding playlist entry number. The information is retrieved from Winamp's window caption.
 /*!   In order for this to work properly, Winamp's option 'Scroll song title in the Windows taskbar'
 /*!   must be disabled. Otherwise the result is undefined.
 /*!  </description>
@@ -1750,6 +1749,7 @@ WINAMPC_SERVICE( song_and_number )
 	STARTUP( 0 );
 
 	GetWindowText( winamp_wnd, retval, MAX_VAR_LENGTH + 1 );
+	trim_caption_end( retval );
 }
 
 
@@ -1771,13 +1771,9 @@ WINAMPC_SERVICE( song_name )
 	trim_caption_end( caption );
 
 	/* trim the beginning number "XX. " */
-	p = caption;
-	while( *p != '\0' && *p != ' '  )
-	{
-		p++;
-	}
+	p = strchr( caption, ' ' );
 	
-	if( *p != '\0' )
+	if( p != NULL )
 	{
 		strcpys( retval, MAX_VAR_LENGTH + 1, p + 1 );
 	}

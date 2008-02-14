@@ -107,7 +107,7 @@
 					</xsl:for-each>
 					<xsl:text> )</xsl:text>
 				</div>
-				
+
 				<div class="serviceDescriptionText">
 					<xsl:apply-templates select="description"/>
 				</div>
@@ -124,20 +124,12 @@
 					<dl class="serviceArgumentsList">
 						<xsl:for-each select="argument">
 							<dt>
-								<xsl:choose>
-									<xsl:when test="normalize-space(@optional)='true'">
-										<xsl:text>[optional] </xsl:text>
-									</xsl:when>
-									<xsl:otherwise>
-										<xsl:text>[required] </xsl:text>
-									</xsl:otherwise>
-								</xsl:choose>
 								<xsl:text>[</xsl:text>
 								<xsl:value-of select="normalize-space(@type)"/>
 								<xsl:text>] </xsl:text>
 								<xsl:value-of select="normalize-space(@name)"/>
 							</dt>
-							<dd>								
+							<dd>
 								<xsl:apply-templates select="self::node()"/>
 							</dd>
 						</xsl:for-each>
