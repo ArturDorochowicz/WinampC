@@ -93,6 +93,9 @@
 		<xsl:for-each select="$services/service">
 			<xsl:sort select="@name" order="ascending"/>
 			<div class="serviceDescription" id="{generate-id()}">
+				<div class="jumpToListLink">
+					<a href="#listOfServices">list</a>
+				</div>
 				<div class="serviceDefinition">
 					<xsl:value-of select="normalize-space(@name)"/>
 					<xsl:text>( </xsl:text>
@@ -104,6 +107,7 @@
 					</xsl:for-each>
 					<xsl:text> )</xsl:text>
 				</div>
+				
 				<div class="serviceDescriptionText">
 					<xsl:apply-templates select="description"/>
 				</div>

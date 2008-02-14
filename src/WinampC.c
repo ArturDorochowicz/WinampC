@@ -18,12 +18,6 @@
 /* Maximum length of PowerPro variable in single byte characters */
 #define MAX_VAR_LENGTH                      531
 
-//---WINAMP API DEFINITIONS-----------------------------------------------------------------------------------------------------------------
-#define MINIMIZE                        30125 // Minimizes Winamp
-#define MINIMIZE_RESTORE                30127 // Minimizes Winamp when not minimized, restores when minimized
-#define RESTORE                         30145 // Restores Winamp window
-#define PLAY_ANY_AUDIO_CD               30210 // Play specified audio cd
-
 //WM_COMMAND
 #define WINAMP_10_TRACKS_BACK           40197 // Moves back 10 tracks in playlist 40197
 #define WINAMP_ADD_CUR_TRACK_BOOKMARK   40321 // Adds current track as a bookmark 40321
@@ -56,7 +50,6 @@
 #define WINAMP_OPTIONS_EQ               40036 // toggles the EQ window
 #define WINAMP_OPTIONS_PLEDIT           40040 // toggles the playlist window
 #define WINAMP_OPTIONS_PREFS            40012 // pops up the preferences
-#define WINAMP_PLAY_AUDIO_CD            40323 // Play audio CD 40323
 #define WINAMP_RELOAD_CURRENT_SKIN      40291 // Reload the current skin 40291
 #define WINAMP_REW5S                    40061 // rewinds 5 seconds
 #define WINAMP_SHOW_EDIT_BOOKMARKS      40320 // Show the edit bookmarks 40320
@@ -331,29 +324,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
      {
       switch (sw)
         {            
-         case MINIMIZE:
-            PostMessage(hwndWinamp, WM_SYSCOMMAND, SC_MINIMIZE, 0);
-            break;
-         case MINIMIZE_RESTORE:
-            if (IsZoomed(hwndWinamp) || IsIconic(hwndWinamp))
-              {
-               ShowWindow(hwndWinamp, SW_RESTORE);
-               (ppsv->Show)(hwndWinamp);
-               SetForegroundWindow(hwndWinamp);
-              }
-            else
-              {
-               PostMessage(hwndWinamp, WM_SYSCOMMAND, SC_MINIMIZE, 0);
-              }
-            break;
-         case RESTORE:
-            if (IsZoomed(hwndWinamp) || IsIconic(hwndWinamp))
-              {
-               ShowWindow(hwndWinamp, SW_RESTORE);
-              }
-            (ppsv->Show)(hwndWinamp);
-            SetForegroundWindow(hwndWinamp);
-            break;
          case WINAMP_10_TRACKS_BACK:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_10_TRACKS_BACK, 0);
             break;
@@ -456,20 +426,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
          case WINAMP_OPTIONS_PREFS:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_OPTIONS_PREFS, 0);
             break;
-         case WINAMP_PLAY_AUDIO_CD:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_PLAY_AUDIO_CD, 0);
-            break;
-         case PLAY_ANY_AUDIO_CD:
-           {
-            int i = atoi(*(szargs + 1));
-            
-            // prevent using other commands accidentally
-            if (i < 0 || i > 26) // 26 - number of letters in English alphabet (I think so)
-            	i = 0;
-            	
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_PLAY_AUDIO_CD + i, 0);
-            break;
-           }
          case WINAMP_RELOAD_CURRENT_SKIN:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_RELOAD_CURRENT_SKIN, 0);
             break;
@@ -1352,17 +1308,49 @@ WINAMPC_SERVICE( jump_to_time )
 //{
 //   MakeAction (WINAMP_LOAD_PRESET_FROM_EQ, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void minimize (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (MINIMIZE, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void min_restore (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (MINIMIZE_RESTORE, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+
+static void MinimizeWindow( HWND wnd )
+{
+	SendMessage( wnd, WM_SYSCOMMAND, SC_MINIMIZE, 0 );
+}
+
+static void RestoreWindow( HWND wnd, PPROSERVICES *ppro_svcs )
+{
+	ppro_svcs->Show( wnd );
+	SetForegroundWindow( wnd);
+}
+
+
+/*! <service name="minimize">
+/*!  <description>Minimize the Winamp's window.</description>
+/*! </service> */
+WINAMPC_SERVICE( minimize )
+{
+	STARTUP( 0 );
+
+	MinimizeWindow( winamp_wnd );
+}
+
+
+/*! <service name="min_restore">
+/*!  <description>Minimize the Winamp's window if it is not minimized, restore if minimized.</description>
+/*! </service> */
+WINAMPC_SERVICE( min_restore )
+{
+	STARTUP( 0 );
+
+	if( IsIconic( winamp_wnd ) )
+	{		
+		RestoreWindow( winamp_wnd, ppro_svcs );
+	}
+	else
+	{
+		MinimizeWindow( winamp_wnd );
+	}
+}
+
+
 //_declspec(dllexport) void move_10_tracks_back (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_10_TRACKS_BACK, nargs, szargs, pFlags, ppsv);
@@ -1412,17 +1400,45 @@ WINAMPC_SERVICE( jump_to_time )
 //{
 //   MakeAction (WINAMP_BUTTON3, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void play_audio_cd (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_PLAY_AUDIO_CD, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void play_any_audio_cd (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (PLAY_ANY_AUDIO_CD, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+
+/*! <service name="play_audio_cd">
+/*!  <description>Begin playing Audio CD.</description>
+/*! </service> */
+WINAMPC_SERVICE( play_audio_cd )
+{
+	STARTUP( 0 );
+
+	PostMessage( winamp_wnd, WM_COMMAND, ID_MAIN_PLAY_AUDIOCD, 0 );
+}
+
+
+/*! <service name="play_any_audio_cd">
+/*!  <description>Begin playing Audio CD in specified drive.</description>
+/*!  <argument name="drive" type="int">The drive number. First CD drive in the system is at 0. Supports up to 4 drives (thus accepted values are: 0, 1, 2, 3.)</argument>
+/*! </service> */
+WINAMPC_SERVICE( play_any_audio_cd )
+{
+	unsigned int drive;
+	UINT msg;
+
+	STARTUP( 1 );
+
+	drive = (unsigned int) ppro_svcs->DecodeFloat( args[0] );
+
+	switch( drive )
+	{
+	case 0:  msg = ID_MAIN_PLAY_AUDIOCD;   break;
+	case 1:  msg = ID_MAIN_PLAY_AUDIOCD2;  break;
+	case 2:  msg = ID_MAIN_PLAY_AUDIOCD3;  break;
+	case 3:  msg = ID_MAIN_PLAY_AUDIOCD4;  break;
+	default: return;
+	}
+
+	PostMessage( winamp_wnd, WM_COMMAND, msg, 0 );
+}
+
+
 //_declspec(dllexport) void play_button (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_BUTTON2, nargs, szargs, pFlags, ppsv);
@@ -1486,11 +1502,17 @@ WINAMPC_SERVICE( restart_winamp )
 }
 
 
-//_declspec(dllexport) void restore (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (RESTORE, nargs, szargs, pFlags, ppsv);
-//}
-//
+/*! <service name="restore">
+/*!  <description>Restore the Winamp's window and make it foreground.</description>
+/*! </service> */
+WINAMPC_SERVICE( restore )
+{
+	STARTUP( 0 );
+	
+	RestoreWindow( winamp_wnd, ppro_svcs );
+}
+
+
 //_declspec(dllexport) void rewind_5sec (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_REW5S, nargs, szargs, pFlags, ppsv);

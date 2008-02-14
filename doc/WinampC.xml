@@ -5,18 +5,18 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<title>WinampC Plugin for PowerPro</title>
 		<style type="text/css">
-			body, h1, h2, h3, h4, h5, h6 {
-				padding: 0;
-				margin: 0;
+			body, hr, h1 ,h2, h3, h4, h5, h6 {
+				margin:0;
+				padding:0;
 			}
 
 			body {
 				font-size: 14px;
-				line-height: 135%;
 				font-family: Verdana, Arial, Helvetica, sans-serif;
-				width: 80%;
-				margin: 10px auto;
+				line-height: 135%;
+				margin: 15px auto;
 				text-align:justify;
+				width: 80%;
 			}
 
 			hr {
@@ -24,10 +24,10 @@
 			}
 
 			h1 {
-				margin-top: 20px;
-				margin-bottom: 2px;
 				font-size: 130%;
 				font-weight: bold;
+				margin-top: 20px;
+				margin-bottom: 2px;
 			}
 
 			p {
@@ -45,11 +45,10 @@
 			#listOfServices {
 			}
 
-			h1.section {
-				font-size: 18px;
-				font-weight: bold;
-				margin-top: 20px;
-				margin-bottom: 2px;
+			.jumpToListLink {
+				float: right;
+				text-align: right;
+				width: 4ex;
 			}
 
 			.serviceDescription {
@@ -59,28 +58,30 @@
 			.serviceDefinition {
 				background-color: #eee;
 				color: inherit;
-				padding: 2px 5px;
 				font-weight: bold;
 				font-family: "Courier New", Courier, monospace;
 				font-size: 110%;
 				margin-bottom: 3px;
+				margin-right: 4ex;
+				padding: 2px 5px;
 			}
 
 			.serviceDescription h4 {
-				margin-top: 5px;
-				margin-left: 5px;
 				font-size: 85%;
 				font-weight: bold;
+				margin-left: 5px;
+				margin-top: 5px;
 			}
 
 			.serviceDescriptionText {
-				margin-left: 20px;				
+				clear: both;
+				margin-left: 20px;
 			}
 
-			.serviceArgumentsList {  
+			.serviceArgumentsList {
 				list-style-type: none;
-				margin-top: 0;
 				margin-left: 20px;
+				margin-top: 0;
 			}
 
 			.serviceArgumentsList dt {
@@ -96,7 +97,7 @@
 				list-style-type: square;
 				margin-left: 35px;
 			}
-			
+
 			.versionsList > li {
 				margin-bottom: 10px;
 			}
@@ -122,11 +123,11 @@
 		
 		<hr/>
 
-		<h1 class="section">Overview</h1>
+		<h1>Overview</h1>
 
 		<p>Xutils plugin for PowerPro is a set of miscellaneous services. <br/>It has been tested on Windows XP only. Some of the services require Windows XP or newer operating system.</p>
 
-		<h1 class="section">List of services</h1>
+		<h1>List of services</h1>
 
 		<ul id="listOfServices">
 			<li>
@@ -134,15 +135,15 @@
 			</li>
 		</ul>
 
-		<h1 class="section">Installation</h1>
+		<h1>Installation</h1>
 
 		<p>The plugin must be placed in PowerPro's 'plugins' directory. After that its services can be used just like services of any other plugin. Read PowerPro's help for general information on using plugins.</p>
 
-		<h1 class="section">Description of services</h1>
+		<h1>Description of services</h1>
 
 		<div id="descriptionsOfServices">descriptions go here</div>
 		
-		<h1 class="section">History</h1>
+		<h1>History</h1>
 
 		<ul class="versionsList">
 
@@ -160,7 +161,7 @@
 			</li>
 		</ul>
 
-		<h1 class="section">Contacting the author</h1>
+		<h1>Contacting the author</h1>
 
 		<p>All comments, feature requests, bug reports are welcome and greatly appreciated.<br/>
 			Please use Yahoo PowerPro group for any of the above.
