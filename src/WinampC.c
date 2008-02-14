@@ -18,8 +18,6 @@
 #define MAX_VAR_LENGTH 531
 
 //WM_COMMAND
-#define WINAMP_10_TRACKS_BACK           40197 // Moves back 10 tracks in playlist 40197
-#define WINAMP_ADD_CUR_TRACK_BOOKMARK   40321 // Adds current track as a bookmark 40321
 #define WINAMP_BUTTON1                  40044 // Previous track button 40044
 #define WINAMP_BUTTON1_CTRL             40154 // Start of playlist 40154
 #define WINAMP_BUTTON1_SHIFT            40144 // Fast-rewind 5 seconds 40144
@@ -37,8 +35,6 @@
 #define WINAMP_BUTTON5_SHIFT            40148 // Fast-forward 5 seconds 40148
 #define WINAMP_CONFIG_VISUAL_PLUGIN     40221 // Configure current visualization plug-in 40221
 #define WINAMP_EXECUTE_VISUAL_PLUGIN    40192 // Execute current visualization plug-in 40192
-#define WINAMP_FFWD5S                   40060 // fast forwards 5 seconds
-#define WINAMP_FILE_INFO                40188 // Open file info box 40188
 #define WINAMP_FILE_PLAY                40029 // pops up the load file(s) box
 #define WINAMP_HELP_ABOUT               40041 // pops up the about box
 #define WINAMP_O_JUMP_TO_FILE           40194 // Open jump to file dialog 40194
@@ -50,7 +46,6 @@
 #define WINAMP_OPTIONS_PLEDIT           40040 // toggles the playlist window
 #define WINAMP_OPTIONS_PREFS            40012 // pops up the preferences
 #define WINAMP_RELOAD_CURRENT_SKIN      40291 // Reload the current skin 40291
-#define WINAMP_REW5S                    40061 // rewinds 5 seconds
 #define WINAMP_SHOW_EDIT_BOOKMARKS      40320 // Show the edit bookmarks 40320
 #define WINAMP_T_ALWAYS_ON_TOP          40019 // Toggle always on top 40019
 #define WINAMP_T_DOUBLESIZE             40165 // Toggle doublesize mode 40165
@@ -323,12 +318,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
      {
       switch (sw)
         {            
-         case WINAMP_10_TRACKS_BACK:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_10_TRACKS_BACK, 0);
-            break;
-         case WINAMP_ADD_CUR_TRACK_BOOKMARK:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_ADD_CUR_TRACK_BOOKMARK, 0);
-            break;
          case WINAMP_BUTTON1:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_BUTTON1, 0);
             break;
@@ -364,12 +353,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             break;
          case WINAMP_EXECUTE_VISUAL_PLUGIN:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_EXECUTE_VISUAL_PLUGIN, 0);
-            break;
-         case WINAMP_FFWD5S:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_FFWD5S, 0);
-            break;
-         case WINAMP_FILE_INFO:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_FILE_INFO, 0);
             break;
          case WINAMP_FILE_PLAY:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_FILE_PLAY, 0);
@@ -427,9 +410,6 @@ static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPR
             break;
          case WINAMP_RELOAD_CURRENT_SKIN:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_RELOAD_CURRENT_SKIN, 0);
-            break;
-         case WINAMP_REW5S:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_REW5S, 0);
             break;
          case WINAMP_SAVE_PRESET_TO_EQF:
             PostMessage (hwndWinamp, WM_COMMAND, WINAMP_SAVE_PRESET_TO_EQF, 0);
@@ -544,8 +524,16 @@ WINAMPC_SERVICE( add_bookmark_w )
 }
 
 
-//WINAMPC_SERVICE( add_track_as_bookmark, WINAMP_ADD_CUR_TRACK_BOOKMARK )
-//
+/*! <service name="add_track_as_bookmark">
+/*!  <description>Add current track as bookmark.</description>
+/*! </service> */
+WINAMPC_SERVICE( add_track_as_bookmark )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_MAKECURBOOKMARK, 0 );
+}
+
+
 //_declspec(dllexport) void autoload_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_O_LOAD_AUTOPRESET, nargs, szargs, pFlags, ppsv);
@@ -803,10 +791,14 @@ WINAMPC_SERVICE( flush_plist_cache_buffer )
 }
 
 
-//_declspec(dllexport) void forward_5sec (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_FFWD5S, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="forward_5sec">
+/*!  <description>Fast forward 5 seconds.</description>
+/*! </service> */
+WINAMPC_SERVICE( forward_5sec )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_FFWD5S, 0 );
+}
 
 
 /*! <service name="get_bitrate">
@@ -1351,11 +1343,26 @@ WINAMPC_SERVICE( min_restore )
 }
 
 
-//_declspec(dllexport) void move_10_tracks_back (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_10_TRACKS_BACK, nargs, szargs, pFlags, ppsv);
-//}
-//
+/*! <service name="move_10_tracks_back">
+/*!  <description>Move 10 tracks back and start playing.</description>
+/*! </service> */
+WINAMPC_SERVICE( move_10_tracks_back )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_JUMP10BACK, 0 );
+}
+
+
+/*! <service name="move_10_tracks_forward">
+/*!  <description>Move 10 tracks forward and start playing.</description>
+/*! </service> */
+WINAMPC_SERVICE( move_10_tracks_forward )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_JUMP10FWD, 0 );
+}
+
+
 //_declspec(dllexport) void next_track (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_BUTTON5, nargs, szargs, pFlags, ppsv);
@@ -1365,12 +1372,18 @@ WINAMPC_SERVICE( min_restore )
 //{
 //   MakeAction (WINAMP_HELP_ABOUT, nargs, szargs, pFlags, ppsv);
 //}
-//
-//_declspec(dllexport) void open_file_info_box (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_FILE_INFO, nargs, szargs, pFlags, ppsv);
-//}
-//
+
+
+/*! <service name="open_file_info_box">
+/*!  <description>Open file info window.</description>
+/*! </service> */
+WINAMPC_SERVICE( open_file_info_box )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_EDIT_ID3, 0 );
+}
+
+
 //_declspec(dllexport) void open_preferences (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_OPTIONS_PREFS, nargs, szargs, pFlags, ppsv);
@@ -1508,16 +1521,20 @@ WINAMPC_SERVICE( restart_winamp )
 WINAMPC_SERVICE( restore )
 {
 	STARTUP( 0 );
-	
 	RestoreWindow( winamp_wnd, ppro_svcs );
 }
 
 
-//_declspec(dllexport) void rewind_5sec (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_REW5S, nargs, szargs, pFlags, ppsv);
-//}
-//
+/*! <service name="rewind_5sec">
+/*!  <description>Rewind 5 seconds.</description>
+/*! </service> */
+WINAMPC_SERVICE( rewind_5sec )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_REW5S, 0 );
+}
+
+
 //_declspec(dllexport) void save_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
 //{
 //   MakeAction (WINAMP_O_SAVE_PRESET, nargs, szargs, pFlags, ppsv);
