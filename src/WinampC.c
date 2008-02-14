@@ -288,7 +288,7 @@ static void PerformResponse( ResponseType response_type, const char *response_ms
  *  @param dst The destination buffer.
  *  @param dst_size The size of the destination buffer.
 **/
-void ReadStringFromProcessMemory( HWND wnd, void *src_start, char *dst, size_t dst_size )
+void ReadStringFromProcessMemory( HWND wnd, const void *src_start, char *dst, size_t dst_size )
 {
 	if( dst_size > 0 )
 	{
@@ -497,9 +497,10 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
 
 
 #define STARTUP( num_args_required ) \
+	size_t retval_size = MAX_VAR_LENGTH + 1; \
 	char *retval = svc_args[0]; \
 	char **args = &svc_args[1]; \
-	HWND winamp_wnd = Startup( ppro_svcs, ppro_flags, args, num_args, (num_args_required) + 2, retval, MAX_VAR_LENGTH + 1 ); \
+	HWND winamp_wnd = Startup( ppro_svcs, ppro_flags, args, num_args, (num_args_required) + 2, retval, retval_size ); \
 	if( NULL == winamp_wnd ) return;
 
 
@@ -577,7 +578,7 @@ WINAMPC_SERVICE( caption )
 {
 	STARTUP( 0 );
 
-	GetWindowText( winamp_wnd, retval, MAX_VAR_LENGTH + 1 );
+	GetWindowText( winamp_wnd, retval, retval_size );
 }
 
 
@@ -599,7 +600,7 @@ WINAMPC_SERVICE( get_plist_entry_path )
 	file_path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
 	if( file_path != NULL )
 	{
-		ReadStringFromProcessMemory( winamp_wnd, file_path, retval, MAX_VAR_LENGTH + 1 );
+		ReadStringFromProcessMemory( winamp_wnd, file_path, retval, retval_size );
 	}
 }
 
@@ -613,16 +614,16 @@ WINAMPC_SERVICE( get_plist_entry_path )
 WINAMPC_SERVICE( get_plist_entry_title )
 {
 	WPARAM index;
-	char *title;
+	const char *title;
 
 	STARTUP( 1 );
 
 	/* change 1-based input into Winamp's 0-based index */
 	index = (WPARAM) ppro_svcs->DecodeFloat( args[0] ) - 1;
-	title = (char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTTITLE );
+	title = (const char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTTITLE );
 	if( title != NULL )
 	{
-		ReadStringFromProcessMemory( winamp_wnd, title, retval, MAX_VAR_LENGTH + 1 );
+		ReadStringFromProcessMemory( winamp_wnd, title, retval, retval_size );
 	}
 }
 
@@ -643,7 +644,7 @@ WINAMPC_SERVICE( get_plist_selected_path )
 	file_path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
 	if( file_path != NULL )
 	{
-		ReadStringFromProcessMemory( winamp_wnd, file_path, retval, MAX_VAR_LENGTH + 1 );
+		ReadStringFromProcessMemory( winamp_wnd, file_path, retval, retval_size );
 	}
 }
 
@@ -664,7 +665,7 @@ WINAMPC_SERVICE( get_plist_selected_title )
 	title = (char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTTITLE );
 	if( title != NULL )
 	{
-		ReadStringFromProcessMemory( winamp_wnd, title, retval, MAX_VAR_LENGTH + 1 );
+		ReadStringFromProcessMemory( winamp_wnd, title, retval, retval_size );
 	}
 }
 
@@ -832,9 +833,9 @@ WINAMPC_SERVICE( get_bitrate )
 /*!    11 - enabled status, <br />
 /*!    12 - autoload status.
 /*!  </argument>
-/*!  <return-value type="mixed">The value depends on the specified argument. <br />
-/*!    For 0&#8211;10 - return value is a float from -20.0 to 20.0 (db). <br />
-/*!    For 11&#8211;12 - return value is 0 (disabled) or nonzero (enabled). <br />
+/*!  <return-value type="mixed">The value and its type depend on the specified argument. <br />
+/*!    For 0&#8211;10 - return value is a float from -20 to +20 (db). <br />
+/*!    For 11&#8211;12 - return value is an integer: 0 (disabled) or nonzero (enabled). <br />
 /*!  </return-value>
 /*!  <requirements>Winamp 2.05+</requirements>
 /*! </service> */
@@ -849,7 +850,7 @@ WINAMPC_SERVICE( get_eq_data )
 	data = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_GETEQDATA );
 	if( position >= 0 && position <= 10 )
 	{
-		sprintf( retval, "%.1f", -data * (20 + 20 ) / 63.0 + 20 );
+		ppro_svcs->EncodeFloat( - (double) data * (20 + 20 ) / 63 + 20, retval );
 	}
 	else
 	{
@@ -859,15 +860,15 @@ WINAMPC_SERVICE( get_eq_data )
 
 
 /*! <service name="get_eq_data63">
-/*!  <description>Query the status of equaliser.Data is returned exactly as received from Winamp.</description>
+/*!  <description>Query the status of equaliser. Data is returned exactly as received from Winamp.</description>
 /*!  <argument name="position" type="int">Specifies the information to query. <br />
 /*!    0&#8211;9 - The 10 bands of EQ data, <br />
 /*!    10 - the preamp value, <br />
 /*!    11 - enabled status, <br />
 /*!    12 - autoload status.
 /*!  </argument>
-/*!  <return-value type="mixed">The value depends on the specified argument. <br />
-/*!    For 0&#8211;10 - return value is an integer from 63 to 0 (which corresponds to -20.0&#8211;20.0 db).<br />
+/*!  <return-value type="int">The value depends on the specified argument. <br />
+/*!    For 0&#8211;10 - return value is an integer from 63 to 0 (which corresponds to -20&#8211;+20 db).<br />
 /*!    For 11&#8211;12 - return value is 0 (disabled) or nonzero (enabled).<br />
 /*!  </return-value>
 /*!  <requirements>Winamp 2.05+</requirements>
@@ -1536,8 +1537,9 @@ WINAMPC_SERVICE( restore )
 /*!    11 - enabled status, <br />
 /*!    12 - autoload status.
 /*!  </argument>
-/*!  <argument name="value" type="mixed">For position 0&#8211;10 a number from -20.0 to +20.0 (db). <br />
-/*!   For 11&#8211;12 specify 0 to disable, nonzero to enable.
+/*!  <argument name="value" type="mixed">The accepted value and its type depend on the 'position' argument. <br />
+/*!   For 0&#8211;10 specify a float from -20 to +20 (db). <br />
+/*!   For 11&#8211;12 specify 0 to disable or 1 to enable.
 /*!  </argument>
 /*!  <requirements>Winamp 2.92+</requirements>
 /*! </service> */
@@ -1553,7 +1555,7 @@ WINAMPC_SERVICE( set_eq_data )
 	if( pos >= 0 && pos <= 10 )
 	{
 		double value = ppro_svcs->DecodeFloat( args[1] );
-		value63 = (WORD) ( ( -value + 20 ) * 63 / ( 20.0 + 20.0 ) );
+		value63 = (WORD) ( ( -value + 20 ) * 63 / ( 20 + 20 ) );
 	}
 	else
 	{
@@ -1572,8 +1574,9 @@ WINAMPC_SERVICE( set_eq_data )
 /*!    11 - enabled status, <br />
 /*!    12 - autoload status.
 /*!  </argument>
-/*!  <argument name="value" type="mixed">For position 0&#8211;10 a number from 63 to 0 (which corresponds to -20.0&#8211;20.0 db). <br />
-/*!   For 11&#8211;12 specify 0 to disable, nonzero to enable.
+/*!  <argument name="value" type="int">The accepted value depends on the 'position' argument. <br />
+/*!   For 0&#8211;10 specify a number from 63 to 0 (which corresponds to -20&#8211;+20 db). <br />
+/*!   For 11&#8211;12 specify 0 to disable or 1 to enable.
 /*!  </argument>
 /*!  <requirements>Winamp 2.92+</requirements>
 /*! </service> */
@@ -1746,10 +1749,12 @@ static void trim_caption_end( char *caption )
 /*! </service> */
 WINAMPC_SERVICE( song_and_number )
 {
+	char caption[600];
 	STARTUP( 0 );
 
-	GetWindowText( winamp_wnd, retval, MAX_VAR_LENGTH + 1 );
-	trim_caption_end( retval );
+	GetWindowText( winamp_wnd, caption, sizeof( caption ) );
+	trim_caption_end( caption );
+	strcpys( retval, retval_size, caption );
 }
 
 
@@ -1761,7 +1766,7 @@ WINAMPC_SERVICE( song_and_number )
 /*! </service> */
 WINAMPC_SERVICE( song_name )
 {	
-	char caption[MAX_VAR_LENGTH + 1];	
+	char caption[600];
 	char *p;
 
 	STARTUP( 0 );
@@ -1775,7 +1780,7 @@ WINAMPC_SERVICE( song_name )
 	
 	if( p != NULL )
 	{
-		strcpys( retval, MAX_VAR_LENGTH + 1, p + 1 );
+		strcpys( retval, retval_size , p + 1 );
 	}
 }
 
