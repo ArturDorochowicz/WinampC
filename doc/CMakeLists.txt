@@ -1,9 +1,4 @@
 
-# Get current date (output is formatted as YYYY-MM-DD)
-exec_program( "cmd.exe" ARGS "/c date /t" OUTPUT_VARIABLE CURRENT_YEAR )
-# leave year only
-string( REGEX MATCH "[0-9]+" CURRENT_YEAR "${CURRENT_YEAR}" )
-
 # pcregrep.exe and pcre3.dll are in package PCRE for Windows
 # http://gnuwin32.sourceforge.net/packages/pcre.htm
 # Normal grep won't handle lookarounds in the regex used here
@@ -41,6 +36,7 @@ add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml"
 			"--output \"${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml\""
 			"--novalid"
 			"--stringparam \"servicesPath\" \"${CMAKE_CURRENT_BINARY_DIR}/services.xml\""
+			"--stringparam \"pluginVersion\" \"${WINAMPC_VERSION_MAJOR}.${WINAMPC_VERSION_MINOR}.${WINAMPC_VERSION_BUILD}\""
 			"--stringparam \"lastCopyrightYear\" \"${CURRENT_YEAR}\""
 			"${CMAKE_CURRENT_SOURCE_DIR}/WinampC.xsl"
 			"${CMAKE_CURRENT_SOURCE_DIR}/WinampC.xml"

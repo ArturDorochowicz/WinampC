@@ -16,6 +16,7 @@
 		doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"/>
 
 	<!-- declare parameters and their default values -->
+	<xsl:param name="pluginVersion" select="'x.x.x'"/>
 	<xsl:param name="lastCopyrightYear" select="'9999'"/>
 	<xsl:param name="servicesPath" select="'services.xml'"/>
 
@@ -31,7 +32,7 @@
 	</xsl:template>
 
 	<xsl:template match="node()[@id='pluginVersion']">
-		<xsl:value-of select="$services/@version"/>
+		<xsl:value-of select="$pluginVersion"/>
 	</xsl:template>
 
 	<xsl:template match="node()[@id='lastCopyrightYear']">

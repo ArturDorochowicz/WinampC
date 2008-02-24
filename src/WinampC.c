@@ -237,7 +237,7 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
    float - float value, possible PowerPro arguments: integer, string (containing a float), float
 */
 
-/*! <services version="1.3.0"> */
+/*! <services> */
 
 /*! <service name="add_bookmark">
 /*!  <description>Add specified file/URL to Winamp's bookmark list.</description>
@@ -755,7 +755,7 @@ BEGIN_PPRO_SVC( get_panning )
 
 	STARTUP( 0 );
 
-	panning = SendMessage( winamp_wnd, WM_WA_IPC, -666, IPC_SETPANNING );
+	panning = SendMessage( winamp_wnd, WM_WA_IPC, (WPARAM) -666, IPC_SETPANNING );
 	sprintf( retval, "%d", panning * 100 / 127 );
 }
 END_PPRO_SVC
@@ -772,7 +772,7 @@ BEGIN_PPRO_SVC( get_panning127 )
 
 	STARTUP( 0 );
 
-	panning = SendMessage( winamp_wnd, WM_WA_IPC, -666, IPC_SETPANNING );
+	panning = SendMessage( winamp_wnd, WM_WA_IPC, (WPARAM) -666, IPC_SETPANNING );
 	sprintf( retval, "%d", panning );
 }
 END_PPRO_SVC
@@ -1071,7 +1071,7 @@ BEGIN_PPRO_SVC( get_volume )
 
 	STARTUP( 0 );
 
-	volume = SendMessage( winamp_wnd, WM_WA_IPC, -666, IPC_SETVOLUME );
+	volume = SendMessage( winamp_wnd, WM_WA_IPC, (WPARAM) -666, IPC_SETVOLUME );
 	sprintf( retval, "%d", volume * 100 / 255 );
 }
 END_PPRO_SVC
@@ -1087,7 +1087,7 @@ BEGIN_PPRO_SVC( get_volume255 )
 
 	STARTUP( 0 );
 
-	volume = SendMessage( winamp_wnd, WM_WA_IPC, -666, IPC_SETVOLUME );
+	volume = SendMessage( winamp_wnd, WM_WA_IPC, (WPARAM) -666, IPC_SETVOLUME );
 	sprintf( retval, "%d", volume );
 }
 END_PPRO_SVC
