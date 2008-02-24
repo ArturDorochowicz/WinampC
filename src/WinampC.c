@@ -17,54 +17,6 @@
 /* Maximum length of PowerPro variable in single byte characters */
 #define MAX_VAR_LENGTH 531
 
-//WM_COMMAND
-#define WINAMP_BUTTON1                  40044 // Previous track button 40044
-#define WINAMP_BUTTON1_CTRL             40154 // Start of playlist 40154
-#define WINAMP_BUTTON1_SHIFT            40144 // Fast-rewind 5 seconds 40144
-#define WINAMP_BUTTON2                  40045 // Play button 40045
-#define WINAMP_BUTTON2_CTRL             40155 // Open URL dialog 40155
-#define WINAMP_BUTTON2_SHIFT            40145 // Open 'Open file' dialog, not used
-#define WINAMP_BUTTON3                  40046 // Pause/Unpause button 40046
-#define WINAMP_BUTTON3_CTRL             40156 // Does nothing
-#define WINAMP_BUTTON3_SHIFT            40146 // Does nothing
-#define WINAMP_BUTTON4                  40047 // Stop button 40047
-#define WINAMP_BUTTON4_CTRL             40157 // Stop after current track 40157
-#define WINAMP_BUTTON4_SHIFT            40147 // Fadeout and stop 40147
-#define WINAMP_BUTTON5                  40048 // Next track button 40048
-#define WINAMP_BUTTON5_CTRL             40158 // Go to end of playlist  40158
-#define WINAMP_BUTTON5_SHIFT            40148 // Fast-forward 5 seconds 40148
-#define WINAMP_CONFIG_VISUAL_PLUGIN     40221 // Configure current visualization plug-in 40221
-#define WINAMP_EXECUTE_VISUAL_PLUGIN    40192 // Execute current visualization plug-in 40192
-#define WINAMP_FILE_PLAY                40029 // pops up the load file(s) box
-#define WINAMP_HELP_ABOUT               40041 // pops up the about box
-#define WINAMP_O_JUMP_TO_FILE           40194 // Open jump to file dialog 40194
-#define WINAMP_O_JUMP_TO_TIME           40193 // Open jump to time dialog 40193
-#define WINAMP_O_SKIN_SELECTOR          40219 // Open skin selector 40219
-#define WINAMP_O_VISUAL_OPTIONS         40190 // Open visualization options 40190
-#define WINAMP_O_VISUAL_PLUGIN_OPTIONS  40191 // Open visualization plug-in options 40191
-#define WINAMP_OPTIONS_EQ               40036 // toggles the EQ window
-#define WINAMP_OPTIONS_PLEDIT           40040 // toggles the playlist window
-#define WINAMP_OPTIONS_PREFS            40012 // pops up the preferences
-#define WINAMP_RELOAD_CURRENT_SKIN      40291 // Reload the current skin 40291
-#define WINAMP_SHOW_EDIT_BOOKMARKS      40320 // Show the edit bookmarks 40320
-#define WINAMP_T_ALWAYS_ON_TOP          40019 // Toggle always on top 40019
-#define WINAMP_T_DOUBLESIZE             40165 // Toggle doublesize mode 40165
-#define WINAMP_T_EASYMOVE               40186 // Toggle easymove 40186
-#define WINAMP_T_MAIN_WINDOW            40258 // Toggle main window visible 40258
-#define WINAMP_T_MINIBROWSER            40298 // Toggle minibrowser 40298
-#define WINAMP_T_PLIST_WINDOWSHADE      40266 // Toggle Playlist Windowshade 40266
-#define WINAMP_T_TITLE_SCROLLING        40189 // Toggle title Autoscrolling 40189
-#define WINAMP_T_WINDOWSHADE            40064 // toggle Windowshade 40064
-
-#define WINAMP_LOAD_DEFAULT_PRESET      40174 // Load default preset 40174
-#define WINAMP_LOAD_PRESET_FROM_EQ      40243 // Load a preset from EQ 40253
-#define WINAMP_O_AUTOLOAD_SAVE_PRESET   40176 // Opens auto-load save preset 40176
-#define WINAMP_O_DELETE_AUTOPRESET      40180 // Opens delete an auto load preset dialog 40180
-#define WINAMP_O_DELETE_PRESET          40178 // Opens delete preset dialog 40178
-#define WINAMP_O_LOAD_AUTOPRESET        40173 // Opens auto-load presets dialog 40173
-#define WINAMP_O_LOAD_PRESET            40172 // Opens load presets dialog 40172
-#define WINAMP_O_SAVE_PRESET            40175 // Opens save preset dialog 40175
-#define WINAMP_SAVE_PRESET_TO_EQF       40254 // Save a preset to EQF 40254
 
 typedef struct PPROSERVICES
 {
@@ -310,142 +262,6 @@ void ReadStringFromProcessMemory( HWND wnd, const void *src_start, char *dst, si
 }
 
 
-static void MakeAction (UINT sw, UINT nargs, LPSTR * szargs, DWORD * pFlags, PPROSERVICES * ppsv)
-  {
-   HWND hwndWinamp = NULL;
-
-   if (hwndWinamp)
-     {
-      switch (sw)
-        {            
-         case WINAMP_BUTTON1:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_BUTTON1, 0);
-            break;
-         case WINAMP_BUTTON1_CTRL:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_BUTTON1_CTRL, 0);
-            break;
-         case WINAMP_BUTTON2:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_BUTTON2, 0);
-            break;
-         case WINAMP_BUTTON2_CTRL:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_BUTTON2_CTRL, 0);
-            break;
-         case WINAMP_BUTTON3:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_BUTTON3, 0);
-            break;
-         case WINAMP_BUTTON4:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_BUTTON4, 0);
-            break;
-         case WINAMP_BUTTON4_CTRL:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_BUTTON4_CTRL, 0);
-            break;
-         case WINAMP_BUTTON4_SHIFT:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_BUTTON4_SHIFT, 0);
-            break;
-         case WINAMP_BUTTON5:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_BUTTON5, 0);
-            break;
-         case WINAMP_BUTTON5_CTRL:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_BUTTON5_CTRL, 0);
-            break;
-         case WINAMP_CONFIG_VISUAL_PLUGIN:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_CONFIG_VISUAL_PLUGIN, 0);
-            break;
-         case WINAMP_EXECUTE_VISUAL_PLUGIN:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_EXECUTE_VISUAL_PLUGIN, 0);
-            break;
-         case WINAMP_FILE_PLAY:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_FILE_PLAY, 0);
-            break;
-         case WINAMP_HELP_ABOUT:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_HELP_ABOUT, 0);
-            break;
-         case WINAMP_LOAD_DEFAULT_PRESET:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_LOAD_DEFAULT_PRESET, 0);
-            break;
-         case WINAMP_LOAD_PRESET_FROM_EQ:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_LOAD_PRESET_FROM_EQ, 0);
-            break;
-         case WINAMP_O_AUTOLOAD_SAVE_PRESET:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_O_AUTOLOAD_SAVE_PRESET, 0);
-            break;
-         case WINAMP_O_DELETE_AUTOPRESET:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_O_DELETE_AUTOPRESET, 0);
-            break;
-         case WINAMP_O_DELETE_PRESET:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_O_DELETE_PRESET, 0);
-            break;
-         case WINAMP_O_JUMP_TO_FILE:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_O_JUMP_TO_FILE, 0);
-            break;
-         case WINAMP_O_JUMP_TO_TIME:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_O_JUMP_TO_TIME, 0);
-            break;
-         case WINAMP_O_LOAD_AUTOPRESET:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_O_LOAD_AUTOPRESET, 0);
-            break;
-         case WINAMP_O_LOAD_PRESET:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_O_LOAD_PRESET, 0);
-            break;
-         case WINAMP_O_SAVE_PRESET:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_O_SAVE_PRESET, 0);
-            break;
-         case WINAMP_O_SKIN_SELECTOR:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_O_SKIN_SELECTOR, 0);
-            break;
-         case WINAMP_O_VISUAL_OPTIONS:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_O_VISUAL_OPTIONS, 0);
-            break;
-         case WINAMP_O_VISUAL_PLUGIN_OPTIONS:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_O_VISUAL_PLUGIN_OPTIONS, 0);
-            break;
-         case WINAMP_OPTIONS_EQ:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_OPTIONS_EQ, 0);
-            break;
-         case WINAMP_OPTIONS_PLEDIT:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_OPTIONS_PLEDIT, 0);
-            break;
-         case WINAMP_OPTIONS_PREFS:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_OPTIONS_PREFS, 0);
-            break;
-         case WINAMP_RELOAD_CURRENT_SKIN:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_RELOAD_CURRENT_SKIN, 0);
-            break;
-         case WINAMP_SAVE_PRESET_TO_EQF:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_SAVE_PRESET_TO_EQF, 0);
-            break;
-         case WINAMP_SHOW_EDIT_BOOKMARKS:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_SHOW_EDIT_BOOKMARKS, 0);
-            break;
-         case WINAMP_T_ALWAYS_ON_TOP:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_T_ALWAYS_ON_TOP, 0);
-            break;
-         case WINAMP_T_DOUBLESIZE:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_T_DOUBLESIZE, 0);
-            break;
-         case WINAMP_T_EASYMOVE:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_T_EASYMOVE, 0);
-            break;
-         case WINAMP_T_MAIN_WINDOW:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_T_MAIN_WINDOW, 0);
-            break;
-         case WINAMP_T_MINIBROWSER:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_T_MINIBROWSER, 0);
-            break;
-         case WINAMP_T_PLIST_WINDOWSHADE:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_T_PLIST_WINDOWSHADE, 0);
-            break;
-         case WINAMP_T_TITLE_SCROLLING:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_T_TITLE_SCROLLING, 0);
-            break;
-         case WINAMP_T_WINDOWSHADE:
-            PostMessage (hwndWinamp, WM_COMMAND, WINAMP_T_WINDOWSHADE, 0);
-            break;
-        }
-     }
-  }
-
-
 static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
 	unsigned int num_args, unsigned int num_args_required, char *retval,
 	size_t retval_size )
@@ -534,15 +350,24 @@ WINAMPC_SERVICE( add_track_as_bookmark )
 }
 
 
-//_declspec(dllexport) void autoload_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_O_LOAD_AUTOPRESET, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void autoload_save_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_O_AUTOLOAD_SAVE_PRESET, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="autoload_preset_dialog">
+/*!  <description>Open autoload presets dialog. Doesn't seem to work on Winamp 2.80.</description>
+/*! </service> */
+WINAMPC_SERVICE( autoload_preset_dialog )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_LOADMP3, 0 );
+}
+
+
+/*! <service name="autoload_save_preset_dialog">
+/*!  <description>Open autoload preset save dialog. Doesn't seem to work on Winamp 2.80.</description>
+/*! </service> */
+WINAMPC_SERVICE( autoload_save_preset_dialog )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_SAVEMP3, 0 );
+}
 
 
 /*! <service name="block_minibrowser">
@@ -695,21 +520,34 @@ WINAMPC_SERVICE( close_winamp )
 }
 
 
-//_declspec(dllexport) void configure_visual_plugin (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_CONFIG_VISUAL_PLUGIN, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void delete_autoload_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_O_DELETE_AUTOPRESET, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="configure_visual_plugin">
+/*!  <description>Open configuration window of the current visualization plugin.</description>
+/*! </service> */
+WINAMPC_SERVICE( configure_visual_plugin )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_VISCONF, 0 );
+}
 
 
-//_declspec(dllexport) void delete_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_O_DELETE_PRESET, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="delete_autoload_preset_dialog">
+/*!  <description>Open delete an auto load preset dialog. Doesn't seem to work on Winamp 2.80.</description>
+/*! </service> */
+WINAMPC_SERVICE( delete_autoload_preset_dialog )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_DELMP3, 0 );
+}
+
+
+/*! <service name="delete_preset_dialog">
+/*!  <description>Open delete preset dialog. Doesn't seem to work on Winamp 2.80.</description>
+/*! </service> */
+WINAMPC_SERVICE( delete_preset_dialog )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_DELPRE, 0 );
+}
 
 
 /*! <service name="display_elapsed_time">
@@ -732,10 +570,16 @@ WINAMPC_SERVICE( display_remaining_time )
 }
 
 
-//_declspec(dllexport) void end_of_plist (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_BUTTON5_CTRL, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="end_of_plist">
+/*!  <description>Play the last file on the playlist. 
+/*!   When shuffle is on, it is the last played file.
+/*!  </description>
+/*! </service> */
+WINAMPC_SERVICE( end_of_plist )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON5_CTRL, 0 );
+}
 
 
 /*! <service name="enqueue_file">
@@ -769,15 +613,24 @@ WINAMPC_SERVICE( enqueue_file_w )
 }
 
 
-//_declspec(dllexport) void execute_visual_plugin (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_EXECUTE_VISUAL_PLUGIN, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void file_open_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_FILE_PLAY, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="execute_visual_plugin">
+/*!  <description>Execute current visualization plugin.</description>
+/*! </service> */
+WINAMPC_SERVICE( execute_visual_plugin )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_VISPLUGIN, 0 );
+}
+
+
+/*! <service name="file_open_dialog">
+/*!  <description>Open 'Open file(s)' dialog.</description>
+/*! </service> */
+WINAMPC_SERVICE( file_open_dialog )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_FILE_PLAY, 0 );
+}
 
 
 /*! <service name="flush_plist_cache_buffer">
@@ -1256,11 +1109,14 @@ WINAMPC_SERVICE( get_volume255 )
 }
 
 
-
-//_declspec(dllexport) void jump_to_file_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_O_JUMP_TO_FILE, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="jump_to_file_dialog">
+/*!  <description>Open 'Jump to file' dialog.</description>
+/*! </service> */
+WINAMPC_SERVICE( jump_to_file_dialog )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_JUMPFILE, 0 );
+}
 
 
 /*! <service name="jump_to_time">
@@ -1281,25 +1137,45 @@ WINAMPC_SERVICE( jump_to_time )
 	sprintf( retval, "%d", result );
 }
 
-//_declspec(dllexport) void jump_to_time_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_O_JUMP_TO_TIME, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void load_default_preset (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_LOAD_DEFAULT_PRESET, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void load_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_O_LOAD_PRESET, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void load_preset_from_eq (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_LOAD_PRESET_FROM_EQ, nargs, szargs, pFlags, ppsv);
-//}
+
+/*! <service name="jump_to_time_dialog">
+/*!  <description>Open 'Jump to time' dialog.</description>
+/*! </service> */
+WINAMPC_SERVICE( jump_to_time_dialog )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_JUMP, 0 );
+}
+
+
+/*! <service name="load_default_preset">
+/*!  <description>Load default equaliser preset. Doesn't seem to work on Winamp 2.80.</description>
+/*! </service> */
+WINAMPC_SERVICE( load_default_preset )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_LOADDEFAULT, 0 );
+}
+
+
+/*! <service name="load_preset_dialog">
+/*!  <description>Open load preset dialog. Doesn't seem to work on Winamp 2.80.</description>
+/*! </service> */
+WINAMPC_SERVICE( load_preset_dialog )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_LOADPRE, 0 );
+}
+
+
+/*! <service name="load_preset_from_eqf">
+/*!  <description>Load equaliser preset from EQF. Doesn't seem to work on Winamp 2.80.</description>
+/*! </service> */
+WINAMPC_SERVICE( load_preset_from_eqf )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, ID_LOAD_EQF, 0 );
+}
 
 
 static void MinimizeWindow( HWND wnd )
@@ -1363,15 +1239,24 @@ WINAMPC_SERVICE( move_10_tracks_forward )
 }
 
 
-//_declspec(dllexport) void next_track (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_BUTTON5, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void open_about_box (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_HELP_ABOUT, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="next_track">
+/*!  <description>Start the next track.</description>
+/*! </service> */
+WINAMPC_SERVICE( next_track )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON5, 0 );
+}
+
+
+/*! <service name="open_about_box">
+/*!  <description>Open 'About Winamp' window.</description>
+/*! </service> */
+WINAMPC_SERVICE( open_about_box )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_HELP_ABOUT, 0 );
+}
 
 
 /*! <service name="open_file_info_box">
@@ -1384,35 +1269,64 @@ WINAMPC_SERVICE( open_file_info_box )
 }
 
 
-//_declspec(dllexport) void open_preferences (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_OPTIONS_PREFS, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void open_skin_selector (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_O_SKIN_SELECTOR, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void open_url_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_BUTTON2_CTRL, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void open_visual_options (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_O_VISUAL_OPTIONS, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void open_visual_plugin_options (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_O_VISUAL_PLUGIN_OPTIONS, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void pause_unpause (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_BUTTON3, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="open_preferences">
+/*!  <description>Open preferences window.</description>
+/*! </service> */
+WINAMPC_SERVICE( open_preferences )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_PREFS, 0 );
+}
+
+
+/*! <service name="open_skin_selector">
+/*!  <description>Open skin selector window.</description>
+/*! </service> */
+WINAMPC_SERVICE( open_skin_selector )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_SELSKIN, 0 );
+}
+
+
+/*! <service name="open_url_dialog">
+/*!  <description>Open 'Open location' dialog.</description>
+/*! </service> */
+WINAMPC_SERVICE( open_url_dialog )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON2_CTRL, 0 );
+}
+
+
+/*! <service name="open_visual_options">
+/*!  <description>Open visualization options. Doesn't seem to work on Winamp 2.80.</description>
+/*! </service> */
+WINAMPC_SERVICE( open_visual_options )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_VISSETUP, 0 );
+}
+
+
+/*! <service name="open_visual_plugin_options">
+/*!  <description>Open visualization plug-in options.</description>
+/*! </service> */
+WINAMPC_SERVICE( open_visual_plugin_options )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_PLGSETUP, 0 );
+}
+
+
+/*! <service name="pause_unpause">
+/*!  <description>Pause when playing, start playing when paused.</description>
+/*! </service> */
+WINAMPC_SERVICE( pause_unpause )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON3, 0 );
+}
 
 
 /*! <service name="play_audio_cd">
@@ -1452,10 +1366,17 @@ WINAMPC_SERVICE( play_any_audio_cd )
 }
 
 
-//_declspec(dllexport) void play_button (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_BUTTON2, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="play_button">
+/*!  <description>Same as hitting play button.
+/*!   There's also play_selected service (see below).
+/*!   According to Nullsoft there are some differences between them.
+/*!  </description>
+/*! </service> */
+WINAMPC_SERVICE( play_button )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON2, 0 );
+}
 
 
 /*! <service name="play_selected">
@@ -1468,15 +1389,24 @@ WINAMPC_SERVICE( play_selected )
 }
 
 
-//_declspec(dllexport) void previous_track (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_BUTTON1, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void reload_current_skin (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_RELOAD_CURRENT_SKIN, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="previous_track">
+/*!  <description>Start previous track.</description>
+/*! </service> */
+WINAMPC_SERVICE( previous_track )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON1, 0 );
+}
+
+
+/*! <service name="reload_current_skin">
+/*!  <description>Reload current skin.</description>
+/*! </service> */
+WINAMPC_SERVICE( reload_current_skin )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_REFRESHSKIN, 0 );
+}
 
 
 /*! <service name="repeat_off">
@@ -1535,15 +1465,24 @@ WINAMPC_SERVICE( rewind_5sec )
 }
 
 
-//_declspec(dllexport) void save_preset_dialog (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_O_SAVE_PRESET, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void save_preset_to_eqf (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_SAVE_PRESET_TO_EQF, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="save_preset_dialog">
+/*!  <description>Open save preset dialog. Doesn't seem to work on Winamp 2.80.</description>
+/*! </service> */
+WINAMPC_SERVICE( save_preset_dialog )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_SAVEPRE, 0 );
+}
+
+
+/*! <service name="save_preset_to_eqf">
+/*!  <description>Save equaliser preset to EQF. Doesn't seem to work on Winamp 2.80.</description>
+/*! </service> */
+WINAMPC_SERVICE( save_preset_to_eqf )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, ID_SAVE_EQF, 0 );
+}
 
 
 /*! <service name="set_eq_data">
@@ -1712,10 +1651,15 @@ WINAMPC_SERVICE( set_volume255 )
 	PostMessage( winamp_wnd, WM_WA_IPC, volume, IPC_SETVOLUME );
 }
 
-//_declspec(dllexport) void show_edit_bookmarks (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_SHOW_EDIT_BOOKMARKS, nargs, szargs, pFlags, ppsv);
-//}
+
+/*! <service name="show_edit_bookmarks">
+/*!  <description>Show edit bookmarks window.</description>
+/*! </service> */
+WINAMPC_SERVICE( show_edit_bookmarks )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_EDIT_BOOKMARKS, 0 );
+}
 
 
 /*! <service name="shuffle_off">
@@ -1802,65 +1746,124 @@ WINAMPC_SERVICE( song_name )
 }
 
 
-//_declspec(dllexport) void start_of_plist (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_BUTTON1_CTRL, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void stop (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_BUTTON4, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void stop_after_current (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_BUTTON4_CTRL, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void stop_with_fadeout (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_BUTTON4_SHIFT, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void toggle_doublesize (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_T_DOUBLESIZE, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void toggle_easymove (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_T_EASYMOVE, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void toggle_eq_window (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_OPTIONS_EQ, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void toggle_main_window (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_T_MAIN_WINDOW, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void toggle_minibrowser (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_T_MINIBROWSER, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void toggle_on_top (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_T_ALWAYS_ON_TOP, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void toggle_plist_window (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_OPTIONS_PLEDIT, nargs, szargs, pFlags, ppsv);
-//}
-//
-//_declspec(dllexport) void toggle_plist_windowshade (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_T_PLIST_WINDOWSHADE, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="start_of_plist">
+/*!  <description>Play the first file on the playlist. When shuffle is on it is the first played file.
+/*!  </description>
+/*! </service> */
+WINAMPC_SERVICE( start_of_plist )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON1_CTRL, 0 );
+}
+
+
+/*! <service name="stop">
+/*!  <description>Stop playback.</description>
+/*! </service> */
+WINAMPC_SERVICE( stop )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON4, 0 );
+}
+
+
+/*! <service name="stop_after_current">
+/*!  <description>Stop playback after current track.</description>
+/*! </service> */
+WINAMPC_SERVICE( stop_after_current )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON4_CTRL, 0 );
+}
+
+
+/*! <service name="stop_with_fadeout">
+/*!  <description>Stop playback with fadeout.</description>
+/*! </service> */
+WINAMPC_SERVICE( stop_with_fadeout )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON4_SHIFT, 0 );
+}
+
+
+/*! <service name="toggle_doublesize">
+/*!  <description>Toggle double size option.</description>
+/*! </service> */
+WINAMPC_SERVICE( toggle_doublesize )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_DSIZE, 0 );
+}
+
+/*! <service name="toggle_easymove">
+/*!  <description>Toggle easy move option.</description>
+/*! </service> */
+WINAMPC_SERVICE( toggle_easymove )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_EASYMOVE, 0 );
+}
+
+
+/*! <service name="toggle_eq_window">
+/*!  <description>Toggle equalizer window.</description>
+/*! </service> */
+WINAMPC_SERVICE( toggle_eq_window )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_EQ, 0 );
+}
+
+
+/*! <service name="toggle_main_window">
+/*!  <description>Toggle visibility of the Winamp's main window.</description>
+/*! </service> */
+WINAMPC_SERVICE( toggle_main_window )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_MAIN_WINDOW, 0 );
+}
+
+
+/*! <service name="toggle_minibrowser">
+/*!  <description>Toggle visibility of the minibrowser window.</description>
+/*! </service> */
+WINAMPC_SERVICE( toggle_minibrowser )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_MINIBROWSER, 0 );
+}
+
+
+/*! <service name="toggle_on_top">
+/*!  <description>Toggle always on top option.</description>
+/*! </service> */
+WINAMPC_SERVICE( toggle_on_top )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_AOT, 0 );
+}
+
+
+/*! <service name="toggle_plist_window">
+/*!  <description>Toggle playlist window.</description>
+/*! </service> */
+WINAMPC_SERVICE( toggle_plist_window )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_PLEDIT, 0 );
+}
+
+
+/*! <service name="toggle_plist_windowshade">
+/*!  <description>Toggle window shade of the playlist window.</description>
+/*! </service> */
+WINAMPC_SERVICE( toggle_plist_windowshade )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_WINDOWSHADE_PL, 0 );
+}
 
 
 /*! <service name="toggle_repeat">
@@ -1883,14 +1886,24 @@ WINAMPC_SERVICE( toggle_shuffle )
 }
 
 
-//_declspec(dllexport) void toggle_title_scrolling (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_T_TITLE_SCROLLING, nargs, szargs, pFlags, ppsv);
-//}
-//_declspec(dllexport) void toggle_windowshade (LPSTR szv, LPSTR szx, BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * pFlags, UINT nargs, LPSTR * szargs, PPROSERVICES * ppsv)
-//{
-//   MakeAction (WINAMP_T_WINDOWSHADE, nargs, szargs, pFlags, ppsv);
-//}
+/*! <service name="toggle_title_scrolling">
+/*!  <description>Toggle title scrolling option.</description>
+/*! </service> */
+WINAMPC_SERVICE( toggle_title_scrolling )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_TOGGLE_AUTOSCROLL, 0 );
+}
+
+
+/*! <service name="toggle_windowshade">
+/*!  <description>Toggle window shade option of the Winamp's main window.</description>
+/*! </service> */
+WINAMPC_SERVICE( toggle_windowshade )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_WINDOWSHADE, 0 );
+}
 
 
 /*! <service name="unblock_minibrowser">
