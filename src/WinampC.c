@@ -6,71 +6,13 @@
 /**/
 
 
-#include <windows.h>
 #include <stdio.h>
+
+#include <powerpro.h>
 
 /* Winamp SDK */
 #include <Winamp/wa_ipc.h>
 #include <lang_b/resource.h>
-
-
-/* Maximum length of PowerPro variable in single byte characters */
-#define MAX_VAR_LENGTH 531
-
-
-typedef struct PPROSERVICES
-{
-	void (*ErrMessage)(LPSTR, LPSTR);
-	BOOL (*MatchCaption)(HWND, LPSTR);
-	HWND (*FindMatchingWindow)(LPSTR,BOOL);
-	BOOL (*IsRolled)(HWND hw);
-	BOOL (*IsTrayMinned)(HWND hw);
-	void (*GetExeFullPath)(HWND hw, LPSTR szt);
-	void (*RollUp)(HWND hw);
-	void (*TrayMin)(HWND hw);
-	void (*SendKeys)(LPSTR sz);
-	BOOL (*EvalExpr)(LPSTR sz, LPSTR szo);
-	void (*Debug)(LPSTR sz1, LPSTR sz2,LPSTR sz3, LPSTR sz4, LPSTR sz5, LPSTR sz6);
-	LPSTR (*AllocTemp)(UINT leng);
-	void (*ReturnString)(LPSTR sz, LPSTR* szargs);
-	LPSTR (*GetVarAddr)(LPSTR var);
-	LPSTR (*SetVar)(LPSTR var, LPSTR val);
-	void (*IgnoreNextClip)();
-	void (*Show)(HWND h);
-	void (*RunCmd)(LPSTR szCmd, LPSTR szParam, LPSTR szWork);
-	BOOL (*InsertStringForBar)(LPSTR szStr, LPSTR szCmd);
-	void (*ResetFocus)();
-	HWND (*NoteOpen)(LPSTR szFile, LPSTR szKeyWords, BOOL bActivate);
-	BOOL (*PumpMessages)();
-	BOOL (*RegForConfig)(void ( *callback )(LPSTR szList), BOOL bReg );
-	void (*SetPreviousFocus)(HWND h );
-	UINT (*SetDebug)(LPSTR sz,LPSTR sz2 );
-	UINT (*ScriptCancel)(LPSTR sz );
-	void (*GetCurrentDir)(HWND h,LPSTR szt);
-	void (*RegisterNonModal)(HWND h,BOOL b);
-	UINT (*GetVarSize)(LPSTR p);
-	BOOL (*RegisterSigOld)(BOOL b, LPSTR sig, LPSTR sig2, LPSTR szPlugName,
-		void (*callback)(LPSTR sz), LPSTR szGet, LPSTR szSet,LPSTR szDo );
-	void (*FreeIfHandle)(LPSTR sz);
-	int (*LastMouse)(UINT u);
-	BOOL (*RegisterSig)(BOOL b, LPSTR sig, LPSTR sig2, LPSTR szPlugName,
-		void (*callback)(LPSTR sz), LPSTR szGet, LPSTR szSet,LPSTR szDo,LPSTR szSetDo );
-	void (*ReturningNewHandle)();
-	LPSTR (*GetStaticVarAddr)(LPSTR sz, LPSTR szScript);
-	BOOL (*SetStaticVar)(LPSTR szName, LPSTR szScript, LPSTR szv,BOOL bCreate);
-	HWND (*ActiveMenu)(LPSTR szCap, LPSTR szSwit);
-	void (*SaveClip)(LPSTR szFileName, BOOL bTextOnly, BOOL bVerbose);
-	void (*LoadClip)(LPSTR szFileName, BOOL bTextOnly, BOOL bVerbose);
-	LPSTR (*EncodeFloat)(double x, LPSTR szBuff);
-	double (*DecodeFloat)(LPSTR szBuff);
-	void (*GetCaretPosScreen)(HWND h, POINT*pt);
-	void (*SetAddRefCallback)(LPSTR sig1,void (*refcallback)(LPSTR sz, BOOL addref));
-	void (*ChangeIfHandle)(LPSTR sz, BOOL b);
-	BOOL (*CallScriptFile)(LPSTR szPath, int narg, LPSTR* pargs);
-	LPSTR (*LoadScriptFile)(LPSTR szPath);
-	BOOL (*RegisterForMouseUpDown)(BOOL b, void (*callback)(UINT msg, UINT msg2));
-	LPSTR (*GetOutputAddr)(LPSTR szPath);
-} PPROSERVICES;
 
 
 typedef enum ResponseType
@@ -268,11 +210,8 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
 {
 	char wnd_class[MAX_WND_CLASS_NAME_LENGTH + 1] = { 0 };
 	ResponseType response_type = ResponseTypeNone;
-	char response_msg[MAX_VAR_LENGTH + 1] = { 0 };
+	char response_msg[PPRO_MAX_VAR_LENGTH + 1] = { 0 };
 	HWND winamp_wnd = NULL;
-
-	/* Initially return nothing */
-	strcpys( retval, retval_size, "" );
 
 	if( TRUE == CheckArgCount( args, num_args, num_args_required, ppro_svcs, wnd_class,
 		sizeof( wnd_class ), &response_type, response_msg, sizeof( response_msg ) ) )
@@ -286,17 +225,9 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
 }
 
 
-#define WINAMPC_SERVICE( service ) \
-	_declspec(dllexport) void service ( LPVOID unused1, LPVOID unused2, \
-		BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD * ppro_flags, \
-		UINT num_args, LPSTR * svc_args, PPROSERVICES * ppro_svcs )
-
-
 #define STARTUP( num_args_required ) \
-	size_t retval_size = MAX_VAR_LENGTH + 1; \
-	char *retval = svc_args[0]; \
-	char **args = &svc_args[1]; \
-	HWND winamp_wnd = Startup( ppro_svcs, ppro_flags, args, num_args, (num_args_required) + 2, retval, retval_size ); \
+	HWND winamp_wnd = Startup( ppro_svcs, ppro_flags, argv, argc, \
+		(num_args_required) + 2, retval, retval_size ); \
 	if( NULL == winamp_wnd ) return;
 
 
@@ -313,72 +244,80 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
 /*!  <requirements>Winamp 2.4+</requirements>
 /*!  <argument name="file" type="string">File path or URL.</argument>
 /*! </service> */
-WINAMPC_SERVICE( add_bookmark )
+BEGIN_PPRO_SVC( add_bookmark )
 {
 	COPYDATASTRUCT cds;
 
 	STARTUP( 1 );
 
 	cds.dwData = IPC_ADDBOOKMARK;
-	cds.lpData = args[0];
-	cds.cbData = strlen( args[0] ) + 1;
+	cds.lpData = argv[0];
+	cds.cbData = strlen( argv[0] ) + 1;
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
+END_PPRO_SVC
 
 
 /* Works but requires Unicode input */
-WINAMPC_SERVICE( add_bookmark_w )
+BEGIN_PPRO_SVC( add_bookmark_w )
 {
 	COPYDATASTRUCT cds;
 
 	STARTUP( 1 );
 
 	cds.dwData = IPC_ADDBOOKMARKW;
-	cds.lpData = args[0];
-	cds.cbData = ( wcslen( (wchar_t*) args[0] ) + 1 ) * sizeof( wchar_t);
+	cds.lpData = argv[0];
+	cds.cbData = ( wcslen( (wchar_t*) argv[0] ) + 1 ) * sizeof( wchar_t);
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
+END_PPRO_SVC
 
 
 /*! <service name="add_track_as_bookmark">
 /*!  <description>Add current track as bookmark.</description>
 /*! </service> */
-WINAMPC_SERVICE( add_track_as_bookmark )
+BEGIN_PPRO_SVC( add_track_as_bookmark )
 {
-	STARTUP( 0 );
+	HWND winamp_wnd = Startup( ppro_svcs, ppro_flags, argv, argc, 2, retval, retval_size );
+	if( NULL == winamp_wnd )
+		return;
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_MAKECURBOOKMARK, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="autoload_preset_dialog">
 /*!  <description>Open autoload presets dialog. Doesn't seem to work on Winamp 2.80.</description>
 /*! </service> */
-WINAMPC_SERVICE( autoload_preset_dialog )
+BEGIN_PPRO_SVC( autoload_preset_dialog )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_LOADMP3, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="autoload_save_preset_dialog">
 /*!  <description>Open autoload preset save dialog. Doesn't seem to work on Winamp 2.80.</description>
 /*! </service> */
-WINAMPC_SERVICE( autoload_save_preset_dialog )
+BEGIN_PPRO_SVC( autoload_save_preset_dialog )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_SAVEMP3, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="block_minibrowser">
 /*!  <description>Block the Minibrowser from updates.</description>
 /*!  <requirements>Winamp 2.4+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( block_minibrowser )
+BEGIN_PPRO_SVC( block_minibrowser )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_WA_IPC, 1, IPC_MBBLOCK );
 }
+END_PPRO_SVC
 
 
 /*! <service name="caption">
@@ -387,12 +326,12 @@ WINAMPC_SERVICE( block_minibrowser )
 /*!  </description>
 /*!  <return-value type="string">Winamp's window caption.</return-value>
 /*! </service> */
-WINAMPC_SERVICE( caption )
+BEGIN_PPRO_SVC( caption )
 {
 	STARTUP( 0 );
-
 	GetWindowText( winamp_wnd, retval, retval_size );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_plist_entry_path">
@@ -401,7 +340,7 @@ WINAMPC_SERVICE( caption )
 /*!  <argument name="index" type="int">The position. First entry is at 1.</argument>
 /*!  <return-value type="string">The path.</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_plist_entry_path )
+BEGIN_PPRO_SVC( get_plist_entry_path )
 {
 	WPARAM index;
 	char *file_path;
@@ -409,13 +348,14 @@ WINAMPC_SERVICE( get_plist_entry_path )
 	STARTUP( 1 );
 
 	/* change 1-based input into Winamp's 0-based index */
-	index = (WPARAM) ppro_svcs->DecodeFloat( args[0] ) - 1;
+	index = (WPARAM) ppro_svcs->DecodeFloat( argv[0] ) - 1;
 	file_path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
 	if( file_path != NULL )
 	{
 		ReadStringFromProcessMemory( winamp_wnd, file_path, retval, retval_size );
 	}
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_plist_entry_title">
@@ -424,7 +364,7 @@ WINAMPC_SERVICE( get_plist_entry_path )
 /*!  <argument name="index" type="int">The position. First entry is at 1.</argument>
 /*!  <return-value type="string">The title.</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_plist_entry_title )
+BEGIN_PPRO_SVC( get_plist_entry_title )
 {
 	WPARAM index;
 	const char *title;
@@ -432,13 +372,14 @@ WINAMPC_SERVICE( get_plist_entry_title )
 	STARTUP( 1 );
 
 	/* change 1-based input into Winamp's 0-based index */
-	index = (WPARAM) ppro_svcs->DecodeFloat( args[0] ) - 1;
+	index = (WPARAM) ppro_svcs->DecodeFloat( argv[0] ) - 1;
 	title = (const char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTTITLE );
 	if( title != NULL )
 	{
 		ReadStringFromProcessMemory( winamp_wnd, title, retval, retval_size );
 	}
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_plist_selected_path">
@@ -446,7 +387,7 @@ WINAMPC_SERVICE( get_plist_entry_title )
 /*!  <requirements>Winamp 2.04+</requirements>
 /*!  <return-value type="string">The path.</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_plist_selected_path )
+BEGIN_PPRO_SVC( get_plist_selected_path )
 {
 	LRESULT index;
 	char *file_path;
@@ -460,6 +401,7 @@ WINAMPC_SERVICE( get_plist_selected_path )
 		ReadStringFromProcessMemory( winamp_wnd, file_path, retval, retval_size );
 	}
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_plist_selected_title">
@@ -467,7 +409,7 @@ WINAMPC_SERVICE( get_plist_selected_path )
 /*!  <requirements>Winamp 2.04+</requirements>
 /*!  <return-value type="string">The title.</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_plist_selected_title )
+BEGIN_PPRO_SVC( get_plist_selected_title )
 {
 	LRESULT index;
 	char *title;
@@ -481,93 +423,102 @@ WINAMPC_SERVICE( get_plist_selected_title )
 		ReadStringFromProcessMemory( winamp_wnd, title, retval, retval_size );
 	}
 }
+END_PPRO_SVC
 
 
 /*! <service name="change_directory">
 /*!  <description>Change Winamp's current working directory.</description>
 /*!  <argument name="directory" type="string">The new working directory.</argument>
 /*! </service> */
-WINAMPC_SERVICE( change_directory )
+BEGIN_PPRO_SVC( change_directory )
 {
 	COPYDATASTRUCT cds;
 	
 	STARTUP( 1 );
 	
 	cds.dwData = IPC_CHDIR;
-	cds.lpData = args[0];
-	cds.cbData = strlen( args[0] ) + 1;
+	cds.lpData = argv[0];
+	cds.cbData = strlen( argv[0] ) + 1;
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
+END_PPRO_SVC
 
 
 /*! <service name="clear_plist">
 /*!  <description>Clear Winamp's internal playlist.</description>
 /*! </service> */
-WINAMPC_SERVICE( clear_plist )
+BEGIN_PPRO_SVC( clear_plist )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_DELETE );
 }
+END_PPRO_SVC
 
 
 /*! <service name="close_winamp">
 /*!  <description>Close Winamp.</description>
 /*! </service> */
-WINAMPC_SERVICE( close_winamp )
+BEGIN_PPRO_SVC( close_winamp )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_FILE_QUIT, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="configure_visual_plugin">
 /*!  <description>Open configuration window of the current visualization plugin.</description>
 /*! </service> */
-WINAMPC_SERVICE( configure_visual_plugin )
+BEGIN_PPRO_SVC( configure_visual_plugin )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_VISCONF, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="delete_autoload_preset_dialog">
 /*!  <description>Open delete an auto load preset dialog. Doesn't seem to work on Winamp 2.80.</description>
 /*! </service> */
-WINAMPC_SERVICE( delete_autoload_preset_dialog )
+BEGIN_PPRO_SVC( delete_autoload_preset_dialog )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_DELMP3, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="delete_preset_dialog">
 /*!  <description>Open delete preset dialog. Doesn't seem to work on Winamp 2.80.</description>
 /*! </service> */
-WINAMPC_SERVICE( delete_preset_dialog )
+BEGIN_PPRO_SVC( delete_preset_dialog )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_DELPRE, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="display_elapsed_time">
 /*!  <description>Set time display mode to elapsed time.</description>
 /*! </service> */
-WINAMPC_SERVICE( display_elapsed_time )
+BEGIN_PPRO_SVC( display_elapsed_time )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_ELAPSED, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="display_remaining_time">
 /*!  <description>Set time display mode to remaining time.</description>
 /*! </service> */
-WINAMPC_SERVICE( display_remaining_time )
+BEGIN_PPRO_SVC( display_remaining_time )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_REMAINING, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="end_of_plist">
@@ -575,83 +526,89 @@ WINAMPC_SERVICE( display_remaining_time )
 /*!   When shuffle is on, it is the last played file.
 /*!  </description>
 /*! </service> */
-WINAMPC_SERVICE( end_of_plist )
+BEGIN_PPRO_SVC( end_of_plist )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON5_CTRL, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="enqueue_file">
 /*!  <description>Enqueue file.</description>
 /*!  <argument name="file" type="string">The file to enqueue.</argument>
 /*! </service> */
-WINAMPC_SERVICE( enqueue_file )
+BEGIN_PPRO_SVC( enqueue_file )
 {
 	COPYDATASTRUCT cds;
 
 	STARTUP( 1 );
 
 	cds.dwData = IPC_ENQUEUEFILE;
-	cds.lpData = args[0];
-	cds.cbData = strlen( args[0] ) + 1;
+	cds.lpData = argv[0];
+	cds.cbData = strlen( argv[0] ) + 1;
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
+END_PPRO_SVC
 
 
 /* Works but requires Unicode input */
-WINAMPC_SERVICE( enqueue_file_w )
+BEGIN_PPRO_SVC( enqueue_file_w )
 {
 	COPYDATASTRUCT cds;
 
 	STARTUP( 1 );
 
 	cds.dwData = IPC_PLAYFILEW;
-	cds.lpData = args[0];
-	cds.cbData = ( wcslen( (wchar_t*) args[0] ) + 1 ) * sizeof( wchar_t);
+	cds.lpData = argv[0];
+	cds.cbData = ( wcslen( (wchar_t*) argv[0] ) + 1 ) * sizeof( wchar_t);
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
+END_PPRO_SVC
 
 
 /*! <service name="execute_visual_plugin">
 /*!  <description>Execute current visualization plugin.</description>
 /*! </service> */
-WINAMPC_SERVICE( execute_visual_plugin )
+BEGIN_PPRO_SVC( execute_visual_plugin )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_VISPLUGIN, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="file_open_dialog">
 /*!  <description>Open 'Open file(s)' dialog.</description>
 /*! </service> */
-WINAMPC_SERVICE( file_open_dialog )
+BEGIN_PPRO_SVC( file_open_dialog )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_FILE_PLAY, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="flush_plist_cache_buffer">
 /*!  <description>Flushes the playlist cache buffer.</description>
 /*! </service> */
-WINAMPC_SERVICE( flush_plist_cache_buffer )
+BEGIN_PPRO_SVC( flush_plist_cache_buffer )
 {
 	STARTUP( 0 );
-	
 	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_REFRESHPLCACHE );
 }
+END_PPRO_SVC
 
 
 /*! <service name="forward_5sec">
 /*!  <description>Fast forward 5 seconds.</description>
 /*! </service> */
-WINAMPC_SERVICE( forward_5sec )
+BEGIN_PPRO_SVC( forward_5sec )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_FFWD5S, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_bitrate">
@@ -659,7 +616,7 @@ WINAMPC_SERVICE( forward_5sec )
 /*!  <requirements>Winamp 2.05+</requirements>
 /*!  <return-value type="int">The bitrate in kbs.</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_bitrate )
+BEGIN_PPRO_SVC( get_bitrate )
 {
 	LRESULT bitrate;
 
@@ -668,6 +625,7 @@ WINAMPC_SERVICE( get_bitrate )
 	bitrate = SendMessage( winamp_wnd, WM_WA_IPC, 1, IPC_GETINFO );
 	sprintf( retval, "%d", bitrate );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_eq_data">
@@ -684,14 +642,14 @@ WINAMPC_SERVICE( get_bitrate )
 /*!  </return-value>
 /*!  <requirements>Winamp 2.05+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( get_eq_data )
+BEGIN_PPRO_SVC( get_eq_data )
 {
 	WPARAM position;
 	LRESULT data;
 
 	STARTUP( 1 );
 
-	position = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
+	position = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
 	data = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_GETEQDATA );
 	if( position >= 0 && position <= 10 )
 	{
@@ -702,6 +660,7 @@ WINAMPC_SERVICE( get_eq_data )
 		sprintf( retval, "%d", data );
 	}
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_eq_data63">
@@ -718,24 +677,25 @@ WINAMPC_SERVICE( get_eq_data )
 /*!  </return-value>
 /*!  <requirements>Winamp 2.05+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( get_eq_data63 )
+BEGIN_PPRO_SVC( get_eq_data63 )
 {
 	WPARAM position;
 	LRESULT data;
 
 	STARTUP( 1 );
 
-	position = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
+	position = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
 	data = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_GETEQDATA );
 	sprintf( retval, "%d", data );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_length">
 /*!  <description>Get length of the current song.</description>
 /*!  <return-value type="int">The length in seconds.</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_length )
+BEGIN_PPRO_SVC( get_length )
 {
 	LRESULT length;
 
@@ -744,6 +704,7 @@ WINAMPC_SERVICE( get_length )
 	length = SendMessage( winamp_wnd, WM_WA_IPC, 1, IPC_GETOUTPUTTIME );
 	sprintf( retval, "%d", length );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_net_status">
@@ -754,7 +715,7 @@ WINAMPC_SERVICE( get_length )
 /*!  <requirements>Winamp 2.05+</requirements>
 /*!  <return-value type="int">Returns 1 when connection is available, 0 otherwise.</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_net_status )
+BEGIN_PPRO_SVC( get_net_status )
 {
 	LRESULT status;
 
@@ -763,6 +724,7 @@ WINAMPC_SERVICE( get_net_status )
 	status = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_INETAVAILABLE );
 	sprintf( retval, "%d", status );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_number_of_channels">
@@ -770,7 +732,7 @@ WINAMPC_SERVICE( get_net_status )
 /*!  <requirements>Winamp 2.05+</requirements>
 /*!  <return-value type="int">Number of channels.</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_number_of_channels )
+BEGIN_PPRO_SVC( get_number_of_channels )
 {
 	LRESULT channels;
 	
@@ -779,6 +741,7 @@ WINAMPC_SERVICE( get_number_of_channels )
 	channels = SendMessage( winamp_wnd, WM_WA_IPC, 2, IPC_GETINFO );
 	sprintf( retval, "%d", channels );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_panning">
@@ -786,7 +749,7 @@ WINAMPC_SERVICE( get_number_of_channels )
 /*!  <requirements>Winamp 2.0+</requirements>
 /*!  <return-value type="int">The panning value from -100 (all left) to +100 (all right).</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_panning )
+BEGIN_PPRO_SVC( get_panning )
 {
 	LRESULT panning;
 
@@ -795,6 +758,7 @@ WINAMPC_SERVICE( get_panning )
 	panning = SendMessage( winamp_wnd, WM_WA_IPC, -666, IPC_SETPANNING );
 	sprintf( retval, "%d", panning * 100 / 127 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_panning127">
@@ -802,7 +766,7 @@ WINAMPC_SERVICE( get_panning )
 /*!  <requirements>Winamp 2.0+</requirements>
 /*!  <return-value type="int">The panning value from -127 (all left) to +127 (all right).</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_panning127 )
+BEGIN_PPRO_SVC( get_panning127 )
 {
 	LRESULT panning;
 
@@ -811,13 +775,14 @@ WINAMPC_SERVICE( get_panning127 )
 	panning = SendMessage( winamp_wnd, WM_WA_IPC, -666, IPC_SETPANNING );
 	sprintf( retval, "%d", panning );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_playback_status">
 /*!  <description>Get status of the playback.</description>
 /*!  <return-value type="int">Returns 1 when Winamp is playing, 3 when paused, 0 when it is not playing.</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_playback_status )
+BEGIN_PPRO_SVC( get_playback_status )
 {
 	LRESULT status;
 
@@ -826,6 +791,7 @@ WINAMPC_SERVICE( get_playback_status )
 	status = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_ISPLAYING );
 	sprintf( retval, "%d", status );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_plist_length">
@@ -833,7 +799,7 @@ WINAMPC_SERVICE( get_playback_status )
 /*!  <return-value type="int">Number of tracks in the playlist.</return-value>
 /*!  <requirements>Winamp 2.0+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( get_plist_length )
+BEGIN_PPRO_SVC( get_plist_length )
 {
 	LRESULT length;
 
@@ -842,6 +808,7 @@ WINAMPC_SERVICE( get_plist_length )
 	length = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETLISTLENGTH );
 	sprintf( retval, "%d", length );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_plist_position">
@@ -849,7 +816,7 @@ WINAMPC_SERVICE( get_plist_length )
 /*!  <return-value type="int">The position of the current track in the playlist. First track is at 1.</return-value>
 /*!  <requirements>Winamp 2.05+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( get_plist_position )
+BEGIN_PPRO_SVC( get_plist_position )
 {
 	LRESULT position;
 	
@@ -859,6 +826,7 @@ WINAMPC_SERVICE( get_plist_position )
 	position = 1 + SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETLISTPOS );
 	sprintf( retval, "%d", position );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_plist_position1">
@@ -866,7 +834,7 @@ WINAMPC_SERVICE( get_plist_position )
 /*!  <return-value type="int">The position of the current track in the playlist. First track is at 1.</return-value>
 /*!  <requirements>Winamp 1.666+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( get_plist_position1 )
+BEGIN_PPRO_SVC( get_plist_position1 )
 {
 	LRESULT position;
 
@@ -876,13 +844,14 @@ WINAMPC_SERVICE( get_plist_position1 )
 	position = 1 + SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_WRITEPLAYLIST );
 	sprintf( retval, "%d", position );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_position">
 /*!  <description>Get position in the current track.</description>
 /*!  <return-value type="int">The position in miliseconds.</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_position )
+BEGIN_PPRO_SVC( get_position )
 {
 	LRESULT position;
 	
@@ -891,12 +860,14 @@ WINAMPC_SERVICE( get_position )
 	position = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETOUTPUTTIME );
 	sprintf( retval, "%d", position );
 }
+END_PPRO_SVC
+
 
 /*! <service name="get_position">
 /*!  <description>Get position in the current track.</description>
 /*!  <return-value type="int">The position in seconds.</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_position_in_sec )
+BEGIN_PPRO_SVC( get_position_in_sec )
 {
 	LRESULT position;
 	
@@ -905,6 +876,7 @@ WINAMPC_SERVICE( get_position_in_sec )
 	position = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETOUTPUTTIME );
 	sprintf( retval, "%d", ( position != -1 ? ( position / 1000 ) : position ) );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_rating">
@@ -912,7 +884,7 @@ WINAMPC_SERVICE( get_position_in_sec )
 /*!  <return-value type="int">Rating value from 0 (no rating) to 5.</return-value>
 /*!  <requirements>Winamp 5.04+ with Media Library</requirements>
 /*! </service> */
-WINAMPC_SERVICE( get_rating )
+BEGIN_PPRO_SVC( get_rating )
 {
 	LRESULT rating;
 
@@ -921,6 +893,7 @@ WINAMPC_SERVICE( get_rating )
 	rating = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETRATING );
 	sprintf( retval, "%d", rating );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_repeat">
@@ -928,7 +901,7 @@ WINAMPC_SERVICE( get_rating )
 /*!  <return-value type="int">1 - enabled or 0 - disabled.</return-value>
 /*!  <requirements>Winamp 2.4+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( get_repeat )
+BEGIN_PPRO_SVC( get_repeat )
 {
 	LRESULT repeat;
 
@@ -937,6 +910,7 @@ WINAMPC_SERVICE( get_repeat )
 	repeat = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GET_REPEAT );
 	sprintf( retval, "%d", repeat );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_samplerate">
@@ -944,7 +918,7 @@ WINAMPC_SERVICE( get_repeat )
 /*!  <return-value type="int">Sample rate in kHz.</return-value>
 /*!  <requirements>Winamp 2.05+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( get_samplerate )
+BEGIN_PPRO_SVC( get_samplerate )
 {
 	LRESULT samplerate;
 
@@ -953,6 +927,7 @@ WINAMPC_SERVICE( get_samplerate )
 	samplerate = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETINFO );
 	sprintf( retval, "%d", samplerate );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_samplerate_hz">
@@ -960,7 +935,7 @@ WINAMPC_SERVICE( get_samplerate )
 /*!  <return-value type="int">Sample rate in Hz.</return-value>
 /*!  <requirements>Winamp 5.25+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( get_samplerate_hz )
+BEGIN_PPRO_SVC( get_samplerate_hz )
 {
 	LRESULT samplerate;
 
@@ -969,6 +944,7 @@ WINAMPC_SERVICE( get_samplerate_hz )
 	samplerate = SendMessage( winamp_wnd, WM_WA_IPC, 5, IPC_GETINFO );
 	sprintf( retval, "%d", samplerate );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_shuffle">
@@ -976,7 +952,7 @@ WINAMPC_SERVICE( get_samplerate_hz )
 /*!  <return-value type="int">1 - enabled or 0 - disabled.</return-value>
 /*!  <requirements>Winamp 2.4+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( get_shuffle )
+BEGIN_PPRO_SVC( get_shuffle )
 {
 	LRESULT shuffle;
 
@@ -985,6 +961,7 @@ WINAMPC_SERVICE( get_shuffle )
 	shuffle = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GET_SHUFFLE );
 	sprintf( retval, "%d", shuffle );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_time_display_mode">
@@ -992,7 +969,7 @@ WINAMPC_SERVICE( get_shuffle )
 /*!  <return-value type="int">1 - displaying elapsed time, 0 - displaying remaining time.</return-value>
 /*!  <requirements>Winamp 2.05+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( get_time_display_mode )
+BEGIN_PPRO_SVC( get_time_display_mode )
 {
 	LRESULT mode;
 
@@ -1001,6 +978,7 @@ WINAMPC_SERVICE( get_time_display_mode )
 	mode = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETTIMEDISPLAYMODE );
 	sprintf( retval, "%d", mode );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_version">
@@ -1011,7 +989,7 @@ WINAMPC_SERVICE( get_time_display_mode )
 /*!   digit in hexadecimal version number (which should be 0) with a dot.
 /*!  </return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_version )
+BEGIN_PPRO_SVC( get_version )
 {
 	LRESULT version;
 
@@ -1020,6 +998,7 @@ WINAMPC_SERVICE( get_version )
 	version = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETVERSION );
 	sprintf( retval, "%X.%X", WINAMP_VERSION_MAJOR( version ), WINAMP_VERSION_MINOR( version ) );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_version_hex">
@@ -1036,7 +1015,7 @@ WINAMPC_SERVICE( get_version )
 /*!   For 5.07 this api will return the same value as for a 5.06 build."
 /*!  </return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_version_hex )
+BEGIN_PPRO_SVC( get_version_hex )
 {
 	LRESULT version;
 
@@ -1045,6 +1024,7 @@ WINAMPC_SERVICE( get_version_hex )
 	version = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETVERSION );
 	sprintf( retval, "%X", version );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_video_height">
@@ -1052,7 +1032,7 @@ WINAMPC_SERVICE( get_version_hex )
 /*!  <return-value type="int">The height.</return-value>
 /*!  <requirements>Winamp 5+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( get_video_height )
+BEGIN_PPRO_SVC( get_video_height )
 {
 	LRESULT size;
 
@@ -1061,6 +1041,7 @@ WINAMPC_SERVICE( get_video_height )
 	size = SendMessage( winamp_wnd, WM_WA_IPC, 3, IPC_GETINFO );
 	sprintf( retval, "%d", HIWORD( size ) );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_video_width">
@@ -1068,7 +1049,7 @@ WINAMPC_SERVICE( get_video_height )
 /*!  <return-value type="int">The width.</return-value>
 /*!  <requirements>Winamp 5+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( get_video_width )
+BEGIN_PPRO_SVC( get_video_width )
 {
 	LRESULT size;
 
@@ -1077,13 +1058,14 @@ WINAMPC_SERVICE( get_video_width )
 	size = SendMessage( winamp_wnd, WM_WA_IPC, 3, IPC_GETINFO );
 	sprintf( retval, "%d", LOWORD( size ) );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_volume">
 /*!  <description>Get value of the volume setting.</description>
 /*!  <return-value type="int">The volume as a value from 0 (mute) to 100.</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_volume )
+BEGIN_PPRO_SVC( get_volume )
 {
 	LRESULT volume;
 
@@ -1092,13 +1074,14 @@ WINAMPC_SERVICE( get_volume )
 	volume = SendMessage( winamp_wnd, WM_WA_IPC, -666, IPC_SETVOLUME );
 	sprintf( retval, "%d", volume * 100 / 255 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="get_volume255">
 /*!  <description>Get value of the volume setting. Data is returned exactly as received from Winamp.</description>
 /*!  <return-value type="int">The volume as a value from 0 (mute) to 255.</return-value>
 /*! </service> */
-WINAMPC_SERVICE( get_volume255 )
+BEGIN_PPRO_SVC( get_volume255 )
 {
 	LRESULT volume;
 
@@ -1107,16 +1090,18 @@ WINAMPC_SERVICE( get_volume255 )
 	volume = SendMessage( winamp_wnd, WM_WA_IPC, -666, IPC_SETVOLUME );
 	sprintf( retval, "%d", volume );
 }
+END_PPRO_SVC
 
 
 /*! <service name="jump_to_file_dialog">
 /*!  <description>Open 'Jump to file' dialog.</description>
 /*! </service> */
-WINAMPC_SERVICE( jump_to_file_dialog )
+BEGIN_PPRO_SVC( jump_to_file_dialog )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_JUMPFILE, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="jump_to_time">
@@ -1125,63 +1110,69 @@ WINAMPC_SERVICE( jump_to_file_dialog )
 /*!  <return-value type="int">Returns -1 if Winamp is not playing, 1 on end of file, or 0 if call was successful.</return-value>
 /*!  <requirements>Winamp 1.60+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( jump_to_time )
+BEGIN_PPRO_SVC( jump_to_time )
 {
 	WPARAM position;
 	LRESULT result;
 
 	STARTUP( 1 );
 
-	position = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
+	position = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
 	result = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_JUMPTOTIME );
 	sprintf( retval, "%d", result );
 }
+END_PPRO_SVC
 
 
 /*! <service name="jump_to_time_dialog">
 /*!  <description>Open 'Jump to time' dialog.</description>
 /*! </service> */
-WINAMPC_SERVICE( jump_to_time_dialog )
+BEGIN_PPRO_SVC( jump_to_time_dialog )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_JUMP, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="load_default_preset">
 /*!  <description>Load default equaliser preset. Doesn't seem to work on Winamp 2.80.</description>
 /*! </service> */
-WINAMPC_SERVICE( load_default_preset )
+BEGIN_PPRO_SVC( load_default_preset )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_LOADDEFAULT, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="load_preset_dialog">
 /*!  <description>Open load preset dialog. Doesn't seem to work on Winamp 2.80.</description>
 /*! </service> */
-WINAMPC_SERVICE( load_preset_dialog )
+BEGIN_PPRO_SVC( load_preset_dialog )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_LOADPRE, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="load_preset_from_eqf">
 /*!  <description>Load equaliser preset from EQF. Doesn't seem to work on Winamp 2.80.</description>
 /*! </service> */
-WINAMPC_SERVICE( load_preset_from_eqf )
+BEGIN_PPRO_SVC( load_preset_from_eqf )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, ID_LOAD_EQF, 0 );
 }
+END_PPRO_SVC
 
 
 static void MinimizeWindow( HWND wnd )
 {
 	SendMessage( wnd, WM_SYSCOMMAND, SC_MINIMIZE, 0 );
 }
+
 
 static void RestoreWindow( HWND wnd, PPROSERVICES *ppro_svcs )
 {
@@ -1193,18 +1184,19 @@ static void RestoreWindow( HWND wnd, PPROSERVICES *ppro_svcs )
 /*! <service name="minimize">
 /*!  <description>Minimize the Winamp's window.</description>
 /*! </service> */
-WINAMPC_SERVICE( minimize )
+BEGIN_PPRO_SVC( minimize )
 {
 	STARTUP( 0 );
 
 	MinimizeWindow( winamp_wnd );
 }
+END_PPRO_SVC
 
 
 /*! <service name="min_restore">
 /*!  <description>Minimize the Winamp's window if it is not minimized, restore if minimized.</description>
 /*! </service> */
-WINAMPC_SERVICE( min_restore )
+BEGIN_PPRO_SVC( min_restore )
 {
 	STARTUP( 0 );
 
@@ -1217,141 +1209,154 @@ WINAMPC_SERVICE( min_restore )
 		MinimizeWindow( winamp_wnd );
 	}
 }
+END_PPRO_SVC
 
 
 /*! <service name="move_10_tracks_back">
 /*!  <description>Move 10 tracks back and start playing.</description>
 /*! </service> */
-WINAMPC_SERVICE( move_10_tracks_back )
+BEGIN_PPRO_SVC( move_10_tracks_back )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_JUMP10BACK, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="move_10_tracks_forward">
 /*!  <description>Move 10 tracks forward and start playing.</description>
 /*! </service> */
-WINAMPC_SERVICE( move_10_tracks_forward )
+BEGIN_PPRO_SVC( move_10_tracks_forward )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_JUMP10FWD, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="next_track">
 /*!  <description>Start the next track.</description>
 /*! </service> */
-WINAMPC_SERVICE( next_track )
+BEGIN_PPRO_SVC( next_track )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON5, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="open_about_box">
 /*!  <description>Open 'About Winamp' window.</description>
 /*! </service> */
-WINAMPC_SERVICE( open_about_box )
+BEGIN_PPRO_SVC( open_about_box )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_HELP_ABOUT, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="open_file_info_box">
 /*!  <description>Open file info window.</description>
 /*! </service> */
-WINAMPC_SERVICE( open_file_info_box )
+BEGIN_PPRO_SVC( open_file_info_box )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_EDIT_ID3, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="open_preferences">
 /*!  <description>Open preferences window.</description>
 /*! </service> */
-WINAMPC_SERVICE( open_preferences )
+BEGIN_PPRO_SVC( open_preferences )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_PREFS, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="open_skin_selector">
 /*!  <description>Open skin selector window.</description>
 /*! </service> */
-WINAMPC_SERVICE( open_skin_selector )
+BEGIN_PPRO_SVC( open_skin_selector )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_SELSKIN, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="open_url_dialog">
 /*!  <description>Open 'Open location' dialog.</description>
 /*! </service> */
-WINAMPC_SERVICE( open_url_dialog )
+BEGIN_PPRO_SVC( open_url_dialog )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON2_CTRL, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="open_visual_options">
 /*!  <description>Open visualization options. Doesn't seem to work on Winamp 2.80.</description>
 /*! </service> */
-WINAMPC_SERVICE( open_visual_options )
+BEGIN_PPRO_SVC( open_visual_options )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_VISSETUP, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="open_visual_plugin_options">
 /*!  <description>Open visualization plug-in options.</description>
 /*! </service> */
-WINAMPC_SERVICE( open_visual_plugin_options )
+BEGIN_PPRO_SVC( open_visual_plugin_options )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_PLGSETUP, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="pause_unpause">
 /*!  <description>Pause when playing, start playing when paused.</description>
 /*! </service> */
-WINAMPC_SERVICE( pause_unpause )
+BEGIN_PPRO_SVC( pause_unpause )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON3, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="play_audio_cd">
 /*!  <description>Begin playing Audio CD.</description>
 /*! </service> */
-WINAMPC_SERVICE( play_audio_cd )
+BEGIN_PPRO_SVC( play_audio_cd )
 {
 	STARTUP( 0 );
 
 	PostMessage( winamp_wnd, WM_COMMAND, ID_MAIN_PLAY_AUDIOCD, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="play_any_audio_cd">
 /*!  <description>Begin playing Audio CD in specified drive.</description>
 /*!  <argument name="drive" type="int">The drive number. First CD drive in the system is at 0. Supports up to 4 drives (thus accepted values are: 0, 1, 2, 3.)</argument>
 /*! </service> */
-WINAMPC_SERVICE( play_any_audio_cd )
+BEGIN_PPRO_SVC( play_any_audio_cd )
 {
 	unsigned int drive;
 	UINT msg;
 
 	STARTUP( 1 );
 
-	drive = (unsigned int) ppro_svcs->DecodeFloat( args[0] );
+	drive = (unsigned int) ppro_svcs->DecodeFloat( argv[0] );
 
 	switch( drive )
 	{
@@ -1364,6 +1369,7 @@ WINAMPC_SERVICE( play_any_audio_cd )
 
 	PostMessage( winamp_wnd, WM_COMMAND, msg, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="play_button">
@@ -1372,117 +1378,128 @@ WINAMPC_SERVICE( play_any_audio_cd )
 /*!   According to Nullsoft there are some differences between them.
 /*!  </description>
 /*! </service> */
-WINAMPC_SERVICE( play_button )
+BEGIN_PPRO_SVC( play_button )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON2, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="play_selected">
 /*!  <description>Begin playing selected track.</description>
 /*! </service> */
-WINAMPC_SERVICE( play_selected )
+BEGIN_PPRO_SVC( play_selected )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_STARTPLAY );
 }
+END_PPRO_SVC
 
 
 /*! <service name="previous_track">
 /*!  <description>Start previous track.</description>
 /*! </service> */
-WINAMPC_SERVICE( previous_track )
+BEGIN_PPRO_SVC( previous_track )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON1, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="reload_current_skin">
 /*!  <description>Reload current skin.</description>
 /*! </service> */
-WINAMPC_SERVICE( reload_current_skin )
+BEGIN_PPRO_SVC( reload_current_skin )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_REFRESHSKIN, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="repeat_off">
 /*!  <description>Turn repeat off.</description>
 /*!  <requirements>Winamp 2.4+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( repeat_off )
+BEGIN_PPRO_SVC( repeat_off )
 {
 	STARTUP( 0 );
 
 	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_SET_REPEAT );
 }
+END_PPRO_SVC
 
 
 /*! <service name="repeat_on">
 /*!  <description>Turn repeat on.</description>
 /*!  <requirements>Winamp 2.4+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( repeat_on )
+BEGIN_PPRO_SVC( repeat_on )
 {
 	STARTUP( 0 );
 
 	PostMessage( winamp_wnd, WM_WA_IPC, 1, IPC_SET_REPEAT );
 }
+END_PPRO_SVC
 
 
 /*! <service name="restart_winamp">
 /*!  <description>Restart Winamp.</description>
 /*!  <requirements>Winamp 2.2+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( restart_winamp )
+BEGIN_PPRO_SVC( restart_winamp )
 {
 	STARTUP( 0 );
 
 	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_RESTARTWINAMP );
 }
+END_PPRO_SVC
 
 
 /*! <service name="restore">
 /*!  <description>Restore the Winamp's window and make it foreground.</description>
 /*! </service> */
-WINAMPC_SERVICE( restore )
+BEGIN_PPRO_SVC( restore )
 {
 	STARTUP( 0 );
 	RestoreWindow( winamp_wnd, ppro_svcs );
 }
+END_PPRO_SVC
 
 
 /*! <service name="rewind_5sec">
 /*!  <description>Rewind 5 seconds.</description>
 /*! </service> */
-WINAMPC_SERVICE( rewind_5sec )
+BEGIN_PPRO_SVC( rewind_5sec )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_REW5S, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="save_preset_dialog">
 /*!  <description>Open save preset dialog. Doesn't seem to work on Winamp 2.80.</description>
 /*! </service> */
-WINAMPC_SERVICE( save_preset_dialog )
+BEGIN_PPRO_SVC( save_preset_dialog )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_SAVEPRE, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="save_preset_to_eqf">
 /*!  <description>Save equaliser preset to EQF. Doesn't seem to work on Winamp 2.80.</description>
 /*! </service> */
-WINAMPC_SERVICE( save_preset_to_eqf )
+BEGIN_PPRO_SVC( save_preset_to_eqf )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, ID_SAVE_EQF, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="set_eq_data">
@@ -1499,7 +1516,7 @@ WINAMPC_SERVICE( save_preset_to_eqf )
 /*!  </argument>
 /*!  <requirements>Winamp 2.92+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( set_eq_data )
+BEGIN_PPRO_SVC( set_eq_data )
 {
 	BYTE pos;
 	WORD value63;
@@ -1507,19 +1524,20 @@ WINAMPC_SERVICE( set_eq_data )
 
 	STARTUP( 2 );
 
-	pos = (BYTE) ppro_svcs->DecodeFloat( args[0] );
+	pos = (BYTE) ppro_svcs->DecodeFloat( argv[0] );
 	if( pos >= 0 && pos <= 10 )
 	{
-		double value = ppro_svcs->DecodeFloat( args[1] );
+		double value = ppro_svcs->DecodeFloat( argv[1] );
 		value63 = (WORD) ( ( -value + 20 ) * 63 / ( 20 + 20 ) );
 	}
 	else
 	{
-		value63 = (WORD) ppro_svcs->DecodeFloat( args[1] );
+		value63 = (WORD) ppro_svcs->DecodeFloat( argv[1] );
 	}
 	position = MAKEWPARAM( value63, MAKEWORD( pos, 0xDB ) );
 	PostMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETEQDATA );
 }
+END_PPRO_SVC
 
 
 /*! <service name="set_eq_data63">
@@ -1536,7 +1554,7 @@ WINAMPC_SERVICE( set_eq_data )
 /*!  </argument>
 /*!  <requirements>Winamp 2.92+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( set_eq_data63 )
+BEGIN_PPRO_SVC( set_eq_data63 )
 {
 	BYTE pos;
 	WORD value;
@@ -1544,11 +1562,12 @@ WINAMPC_SERVICE( set_eq_data63 )
 
 	STARTUP( 2 );
 
-	pos = (BYTE) ppro_svcs->DecodeFloat( args[0] );
-	value = (WORD) ppro_svcs->DecodeFloat( args[1] );
+	pos = (BYTE) ppro_svcs->DecodeFloat( argv[0] );
+	value = (WORD) ppro_svcs->DecodeFloat( argv[1] );
 	position = MAKEWPARAM( value, MAKEWORD( pos, 0xDB ) );
 	PostMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETEQDATA );
 }
+END_PPRO_SVC
 
 
 /*! <service name="set_panning">
@@ -1556,15 +1575,16 @@ WINAMPC_SERVICE( set_eq_data63 )
 /*!  <argument name="panning" type="int">The panning value from -100 (all left) to +100 (all right).</argument>
 /*!  <requirements>Winamp 2.0+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( set_panning )
+BEGIN_PPRO_SVC( set_panning )
 {
 	WPARAM panning;
 
 	STARTUP( 1 );
 
-	panning = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
+	panning = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
 	PostMessage( winamp_wnd, WM_WA_IPC, panning * 100 / 127, IPC_SETPANNING );
 }
+END_PPRO_SVC
 
 
 /*! <service name="set_panning127">
@@ -1572,15 +1592,16 @@ WINAMPC_SERVICE( set_panning )
 /*!  <argument name="panning" type="int">The panning value from -127 (all left) to +127 (all right).</argument>
 /*!  <requirements>Winamp 2.0+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( set_panning127 )
+BEGIN_PPRO_SVC( set_panning127 )
 {
 	WPARAM panning;
 
 	STARTUP( 1 );
 
-	panning = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
+	panning = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
 	PostMessage( winamp_wnd, WM_WA_IPC, panning, IPC_SETPANNING );
 }
+END_PPRO_SVC
 
 
 /*! <service name="set_plist_position">
@@ -1588,16 +1609,17 @@ WINAMPC_SERVICE( set_panning127 )
 /*!  <argument name="position" type="int">The position to set. First playlist entry is at 1.</argument>
 /*!  <requirements>Winamp 2.0+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( set_plist_position )
+BEGIN_PPRO_SVC( set_plist_position )
 {
 	WPARAM position;
 
 	STARTUP( 1 );
 
 	/* change 1-based input into Winamp's 0-based index */
-	position = (WPARAM) ( ppro_svcs->DecodeFloat( args[0] ) - 1 );
+	position = (WPARAM) ( ppro_svcs->DecodeFloat( argv[0] ) - 1 );
 	PostMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETPLAYLISTPOS );
 }
+END_PPRO_SVC
 
 
 /*! <service name="set_rating">
@@ -1605,15 +1627,16 @@ WINAMPC_SERVICE( set_plist_position )
 /*!  <argument name="rating" type="int">The rating value from 0 (no rating) to 5.</argument>
 /*!  <requirements>Winamp 5.04+ with Media Library</requirements>
 /*! </service> */
-WINAMPC_SERVICE( set_rating )
+BEGIN_PPRO_SVC( set_rating )
 {
 	WPARAM rating;
 
 	STARTUP( 1 );
 	
-	rating = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
+	rating = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
 	PostMessage( winamp_wnd, WM_WA_IPC, rating, IPC_SETRATING );
 }
+END_PPRO_SVC
 
 
 /*! <service name="set_volume">
@@ -1621,19 +1644,20 @@ WINAMPC_SERVICE( set_rating )
 /*!  <argument name="volume" type="int">The volume value from 0 (mute) to 100.</argument>
 /*!  <requirements>Winamp 2.0+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( set_volume )
+BEGIN_PPRO_SVC( set_volume )
 {
 	WPARAM volume;
 	WPARAM volume255;
 
 	STARTUP( 1 );
 	
-	volume = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
+	volume = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
 	volume255 = (WPARAM) ( volume * 2.55 );
 	if( volume255 / 2.55 < volume )
 		++volume255;
 	PostMessage( winamp_wnd, WM_WA_IPC, volume255, IPC_SETVOLUME );
 }
+END_PPRO_SVC
 
 
 /*! <service name="set_volume255">
@@ -1641,49 +1665,53 @@ WINAMPC_SERVICE( set_volume )
 /*!  <argument name="volume" type="int">The volume value from 0 (mute) to 255.</argument>
 /*!  <requirements>Winamp 2.0+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( set_volume255 )
+BEGIN_PPRO_SVC( set_volume255 )
 {
 	WPARAM volume;
 
 	STARTUP( 1 );
 
-	volume = (WPARAM) ppro_svcs->DecodeFloat( args[0] );
+	volume = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
 	PostMessage( winamp_wnd, WM_WA_IPC, volume, IPC_SETVOLUME );
 }
+END_PPRO_SVC
 
 
 /*! <service name="show_edit_bookmarks">
 /*!  <description>Show edit bookmarks window.</description>
 /*! </service> */
-WINAMPC_SERVICE( show_edit_bookmarks )
+BEGIN_PPRO_SVC( show_edit_bookmarks )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_EDIT_BOOKMARKS, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="shuffle_off">
 /*!  <description>Turn shuffle off.</description>
 /*!  <requirements>Winamp 2.4+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( shuffle_off )
+BEGIN_PPRO_SVC( shuffle_off )
 {
 	STARTUP( 0 );
 
 	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_SET_SHUFFLE );
 }
+END_PPRO_SVC
 
 
 /*! <service name="shuffle_on">
 /*!  <description>Turn shuffle on.</description>
 /*!  <requirements>Winamp 2.4+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( shuffle_on )
+BEGIN_PPRO_SVC( shuffle_on )
 {
 	STARTUP( 0 );
 
 	PostMessage( winamp_wnd, WM_WA_IPC, 1, IPC_SET_SHUFFLE );
 }
+END_PPRO_SVC
 
 
 /** Trim the ending " - Winamp"
@@ -1708,7 +1736,7 @@ static void trim_caption_end( char *caption )
 /*!   must be disabled. Otherwise the result is undefined.
 /*!  </description>
 /*! </service> */
-WINAMPC_SERVICE( song_and_number )
+BEGIN_PPRO_SVC( song_and_number )
 {
 	char caption[600];
 	STARTUP( 0 );
@@ -1717,6 +1745,7 @@ WINAMPC_SERVICE( song_and_number )
 	trim_caption_end( caption );
 	strcpys( retval, retval_size, caption );
 }
+END_PPRO_SVC
 
 
 /*! <service name="song_name">
@@ -1725,7 +1754,7 @@ WINAMPC_SERVICE( song_and_number )
 /*!   must be disabled. Otherwise the result is undefined.
 /*!  </description>
 /*! </service> */
-WINAMPC_SERVICE( song_name )
+BEGIN_PPRO_SVC( song_name )
 {	
 	char caption[600];
 	char *p;
@@ -1744,235 +1773,258 @@ WINAMPC_SERVICE( song_name )
 		strcpys( retval, retval_size , p + 1 );
 	}
 }
+END_PPRO_SVC
 
 
 /*! <service name="start_of_plist">
 /*!  <description>Play the first file on the playlist. When shuffle is on it is the first played file.
 /*!  </description>
 /*! </service> */
-WINAMPC_SERVICE( start_of_plist )
+BEGIN_PPRO_SVC( start_of_plist )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON1_CTRL, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="stop">
 /*!  <description>Stop playback.</description>
 /*! </service> */
-WINAMPC_SERVICE( stop )
+BEGIN_PPRO_SVC( stop )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON4, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="stop_after_current">
 /*!  <description>Stop playback after current track.</description>
 /*! </service> */
-WINAMPC_SERVICE( stop_after_current )
+BEGIN_PPRO_SVC( stop_after_current )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON4_CTRL, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="stop_with_fadeout">
 /*!  <description>Stop playback with fadeout.</description>
 /*! </service> */
-WINAMPC_SERVICE( stop_with_fadeout )
+BEGIN_PPRO_SVC( stop_with_fadeout )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON4_SHIFT, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="toggle_doublesize">
 /*!  <description>Toggle double size option.</description>
 /*! </service> */
-WINAMPC_SERVICE( toggle_doublesize )
+BEGIN_PPRO_SVC( toggle_doublesize )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_DSIZE, 0 );
 }
+END_PPRO_SVC
 
 /*! <service name="toggle_easymove">
 /*!  <description>Toggle easy move option.</description>
 /*! </service> */
-WINAMPC_SERVICE( toggle_easymove )
+BEGIN_PPRO_SVC( toggle_easymove )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_EASYMOVE, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="toggle_eq_window">
 /*!  <description>Toggle equalizer window.</description>
 /*! </service> */
-WINAMPC_SERVICE( toggle_eq_window )
+BEGIN_PPRO_SVC( toggle_eq_window )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_EQ, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="toggle_main_window">
 /*!  <description>Toggle visibility of the Winamp's main window.</description>
 /*! </service> */
-WINAMPC_SERVICE( toggle_main_window )
+BEGIN_PPRO_SVC( toggle_main_window )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_MAIN_WINDOW, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="toggle_minibrowser">
 /*!  <description>Toggle visibility of the minibrowser window.</description>
 /*! </service> */
-WINAMPC_SERVICE( toggle_minibrowser )
+BEGIN_PPRO_SVC( toggle_minibrowser )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_MINIBROWSER, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="toggle_on_top">
 /*!  <description>Toggle always on top option.</description>
 /*! </service> */
-WINAMPC_SERVICE( toggle_on_top )
+BEGIN_PPRO_SVC( toggle_on_top )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_AOT, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="toggle_plist_window">
 /*!  <description>Toggle playlist window.</description>
 /*! </service> */
-WINAMPC_SERVICE( toggle_plist_window )
+BEGIN_PPRO_SVC( toggle_plist_window )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_PLEDIT, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="toggle_plist_windowshade">
 /*!  <description>Toggle window shade of the playlist window.</description>
 /*! </service> */
-WINAMPC_SERVICE( toggle_plist_windowshade )
+BEGIN_PPRO_SVC( toggle_plist_windowshade )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_WINDOWSHADE_PL, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="toggle_repeat">
 /*!  <description>Toggle repeat setting.</description>
 /*! </service> */
-WINAMPC_SERVICE( toggle_repeat )
+BEGIN_PPRO_SVC( toggle_repeat )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_FILE_REPEAT, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="toggle_shuffle">
 /*!  <description>Toggle shuffle setting.</description>
 /*! </service> */
-WINAMPC_SERVICE( toggle_shuffle )
+BEGIN_PPRO_SVC( toggle_shuffle )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_FILE_SHUFFLE, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="toggle_title_scrolling">
 /*!  <description>Toggle title scrolling option.</description>
 /*! </service> */
-WINAMPC_SERVICE( toggle_title_scrolling )
+BEGIN_PPRO_SVC( toggle_title_scrolling )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_TOGGLE_AUTOSCROLL, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="toggle_windowshade">
 /*!  <description>Toggle window shade option of the Winamp's main window.</description>
 /*! </service> */
-WINAMPC_SERVICE( toggle_windowshade )
+BEGIN_PPRO_SVC( toggle_windowshade )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_WINDOWSHADE, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="unblock_minibrowser">
 /*!  <description>Unblock the Minibrowser from updates.</description>
 /*!  <requirements>Winamp 2.4+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( unblock_minibrowser )
+BEGIN_PPRO_SVC( unblock_minibrowser )
 {
 	STARTUP( 0 );
 
 	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_MBBLOCK );
 }
+END_PPRO_SVC
 
 
 /*! <service name="update_info">
 /*!  <description>Make Winamp update the information about the current track.</description>
 /*!  <requirements>Winamp 2.2+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( update_info )
+BEGIN_PPRO_SVC( update_info )
 {
 	STARTUP( 0 );
 
 	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_UPDTITLE );
 }
+END_PPRO_SVC
 
 
 /*! <service name="volume_down">
 /*!  <description>Decrease the volume a bit.</description>
 /*! </service> */
-WINAMPC_SERVICE( volume_down )
+BEGIN_PPRO_SVC( volume_down )
 {
 	STARTUP( 0 );
 
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_VOLUMEDOWN, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="volume_up">
 /*!  <description>Increase the volume a bit.</description>
 /*! </service> */
-WINAMPC_SERVICE( volume_up )
+BEGIN_PPRO_SVC( volume_up )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_VOLUMEUP, 0 );
 }
+END_PPRO_SVC
 
 
 /*! <service name="windows_disable">
 /*!  <description>Disable all main Winamp windows. Works with simple skin only.</description>
 /*!  <requirements>Winamp 2.9+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( windows_disable )
+BEGIN_PPRO_SVC( windows_disable )
 {
 	STARTUP( 0 );
 
 	PostMessage( winamp_wnd, WM_WA_IPC, 0xdeadbeef, IPC_ENABLEDISABLE_ALL_WINDOWS );
 }
+END_PPRO_SVC
 
 
 /*! <service name="windows_enable">
 /*!  <description>Enable back Winamp windows.</description>
 /*!  <requirements>Winamp 2.9+</requirements>
 /*! </service> */
-WINAMPC_SERVICE( windows_enable )
+BEGIN_PPRO_SVC( windows_enable )
 {
 	STARTUP( 0 );
 
 	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_ENABLEDISABLE_ALL_WINDOWS );
 }
+END_PPRO_SVC
 
 
 /*! </services> */

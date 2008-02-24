@@ -16,7 +16,9 @@ endif( )
 configure_file( "version.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/version.h" )
 include_directories( BEFORE "${CMAKE_CURRENT_BINARY_DIR}" )
 
-include_directories( "${CMAKE_CURRENT_SOURCE_DIR}/include/Winamp SDK" )
+include_directories(
+	"${CMAKE_CURRENT_SOURCE_DIR}/include"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/Winamp SDK" )
 
 set( WinampSdkFiles
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/Winamp SDK/Winamp/wa_ipc.h"
@@ -30,6 +32,7 @@ set( SOURCES
 	"Resources.rc"
 	"version.h.cmake"
 	"${CMAKE_CURRENT_BINARY_DIR}/version.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/include/powerpro.h"
 	${WinampSdkFiles} )
 
 
