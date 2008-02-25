@@ -1,0 +1,69 @@
+The Licence Agreement
+
+1. Preamble
+
+This Licence applies to the computer program with which this licence is 
+distributed (the "Program"). The Program is intellectual property of
+   Artur Dorochowicz
+(the "Author") and is placed under the protection of copyright laws.
+
+BY USING OR DISTRIBUTING THE PROGRAM (OR ANY WORK BASED ON THE PROGRAM),
+YOU INDICATE YOUR ACCEPTANCE OF THIS LICENCE.
+
+2. Rights
+
+The Author hereby grants you the following rights, provided that you comply with
+all of the restrictions set forth in this Licence and provided, further, that
+you distribute an unmodified copy of this Licence with the Program:
+
+   1. Permission is granted to use the Program.
+   2. You may copy and distribute literal (i.e. verbatim) copies of the Program
+      as you receive it.
+   3. You may modify the Program for your own use only. Such modified copies may
+      not be distributed.
+   3. You may create works based on the Program and distribute copies of such.
+
+3. Restrictions
+
+This licence is subject to the following restrictions:
+
+   1. Every distribution of the Program must retain a copy of this Licence.
+   2. The Program may not be sold or incorporated into any product which is sold
+      without prior permission from the Author. Distribution of the Program or
+      any work based on the Program to any third party without permission is
+      prohibited if any payment is made in connection with such distribution,
+      whether directly (as in payment for a copy of the Program) or indirectly
+      (as in payment for some service related to the Program, or payment for
+      some product or service that includes a copy of the Program "without
+      charge").
+   3. You must meet all of the following conditions with respect to any work
+      that you distribute or publish that in whole or in part contains or is
+      derived from the Program (the "Work"):
+
+         1. The Work must include an acknowledgement that it in whole or in part
+            contains or is derived (as applicable) from the Program.
+         2. The Work must reproduce the copyright notice of the Program.
+         4. You may not impose any further restrictions on the recipient's
+            exercise of the rights granted herein.
+
+4. Reservation of Rights
+
+No rights are granted to the Program except as expressly set forth herein. You
+may not copy, modify, sublicense, or distribute the Program except as expressly
+provided under this Licence. Any attempt otherwise to copy, modify, sublicense
+or distribute the Program is void, and will automatically terminate your rights
+under this Licence. However, parties who have received copies, or rights, from
+you under this Licence will not have their licences terminated so long as such
+parties remain in full compliance with this Licence.
+
+5. Limitations
+
+THIS PROGRAM IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+THE USE OF THIS PROGRAM, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
