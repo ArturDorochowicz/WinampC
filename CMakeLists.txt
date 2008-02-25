@@ -7,7 +7,7 @@ message( STATUS "Generator: ${CMAKE_GENERATOR}" )
 
 
 # Get current date (output is formatted as YYYY-MM-DD)
-exec_program( "cmd.exe" ARGS "/c date /t" OUTPUT_VARIABLE CURRENT_YEAR )
+exec_program( "$ENV{SystemRoot}/system32/cmd.exe" ARGS "/c date /t" OUTPUT_VARIABLE CURRENT_YEAR )
 # leave year only
 string( REGEX MATCH "[0-9]+" CURRENT_YEAR "${CURRENT_YEAR}" )
 

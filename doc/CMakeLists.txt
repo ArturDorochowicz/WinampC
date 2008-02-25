@@ -21,11 +21,19 @@ endif( )
 # Command that creates services.xml by grepping the source code file.
 add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/services.xml" 
 	COMMAND
+		"${CMAKE_COMMAND}"
+			"-E echo \"<services>\""
+			" > \"${CMAKE_CURRENT_BINARY_DIR}/services.xml\""
+	COMMAND
 		"${GREP}"
 			"--file=\"${CMAKE_CURRENT_SOURCE_DIR}/pattern.txt\""
 			"--only-matching"
 			"${CMAKE_CURRENT_SOURCE_DIR}/../src/WinampC.c"
-			" > \"${CMAKE_CURRENT_BINARY_DIR}/services.xml\""
+			" >> \"${CMAKE_CURRENT_BINARY_DIR}/services.xml\""
+	COMMAND
+		"${CMAKE_COMMAND}"
+			"-E echo \"</services>\""
+			" >> \"${CMAKE_CURRENT_BINARY_DIR}/services.xml\""
 	DEPENDS
 		"${CMAKE_CURRENT_SOURCE_DIR}/../src/WinampC.c"
 		"${CMAKE_CURRENT_SOURCE_DIR}/pattern.txt" )

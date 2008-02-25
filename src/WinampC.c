@@ -237,7 +237,6 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
    float - float value, possible PowerPro arguments: integer, string (containing a float), float
 */
 
-/*! <services> */
 
 /*! <service name="add_bookmark">
 /*!  <description>Add specified file/URL to Winamp's bookmark list.</description>
@@ -2025,6 +2024,3 @@ BEGIN_PPRO_SVC( windows_enable )
 	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_ENABLEDISABLE_ALL_WINDOWS );
 }
 END_PPRO_SVC
-
-
-/*! </services> */
