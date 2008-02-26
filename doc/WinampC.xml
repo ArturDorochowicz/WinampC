@@ -88,6 +88,10 @@
 				font-size: 95%;
 				font-style: italic;
 			}
+			
+			.code {
+				font-family: "Courier New", Courier, monospace;
+			}
 
 			.serviceArgumentsList dd {
 				margin-left: 30px;
@@ -160,41 +164,52 @@
 		<h1>Using the plugin</h1>
 
 		<p>
-			The plugin must be placed in PowerPro's 'plugins' directory. 
+			The plugin must be placed in PowerPro's <span class="code">plugins</span> directory. 
 		   After that, its services can be used just like services of any other plugin.
 			Read PowerPro's help for general information on using plugins.
 		</p>
 		<p>
-			All services can take two additional, optional arguments: response_type
-			and class_name (in this order only).
+			All services can take two additional, optional arguments: <span class="code">response_type</span>
+			and <span class="code">class_name</span> (in this order only).
 			For clarity, these arguments are not listed in the descriptions.
 		</p>
 		<p>
-			Specify class_name argument if given command should be issued against
+			Specify <span class="code">class_name</span> argument if given command should be issued against
 			specific Winamp instance (identified by Winamp's window class name).
-			If you omit this argument or specify an empty string (""), default class
-			name (which is "Winamp v1.x") will be used. The class_name argument enables
+			If you omit this argument or specify an empty string (<span class="code">""</span>), default class
+			name (which is <span class="code">"Winamp v1.x"</span>) will be used. The <span class="code">class_name</span> argument enables
 			you to control many Winamp instances at the same time as long as they use
 			different class names. Winamp can be started with special command line
-			argument (/class="class name here"), which makes it use a class name of
+			argument (<span class="code">/class="class name here"</span>), which makes it use a class name of
 			your choice.
 		</p>
 		<p>
-			The response_type argument allows you to choose how the plugin should react if specified
+			The <span class="code">response_type</span> argument allows you to choose how the plugin should react if specified
 			Winamp window does not exist i.e. Winamp is not running at all or there is no
-			Winamp window of specified class. <br />
-			Giving 1 as an argument shows a window with error explanation in case of an error. <br />
-			Giving 2 sets F0 (flag 0) when Winamp window was found or clears F0 if there was an error. <br />
-			Giving 3abcde... returns abcde... in case of error. <br />
+			Winamp window of specified class.
+			<ul>
+				<li>Giving <span class="code">1</span> as an argument shows a window with error explanation in case of an error.</li>
+				<li>Giving <span class="code">2</span> sets F0 (flag 0) when Winamp window was found or clears F0 if there was an error.</li>
+				<li>Giving <span class="code">3abcde...</span> returns <span class="code">abcde...</span> in case of error.</li>
+			</ul>
 			Any other value or when you omit this argument will make the plugin not
 			react in any way if specified Winamp window wasn't found.
 		</p>
 		<p>
-			If you want to specify class_name argument, you must provide response_type argument as well.
-			Example service usage might be: <br />
-			WinampC.service_name( arg1, arg2, ..., response_type, class_name ) <br />
-			or   WinampC.service_name( arg1, arg2, ..., response_type ) <br />
-			or   WinampC.service_name(arg1, arg2, ... ) <br />
+			If you want to specify <span class="code">class_name</span>
+			argument, you must provide <span class="code">response_type</span> argument as well.
+			Example service usage might be:
+			<ul>
+				<li>
+					<span class="code">WinampC.service_name( arg1, arg2, ..., response_type, class_name )</span>
+				</li>
+				<li>
+					or <span class="code">WinampC.service_name( arg1, arg2, ..., response_type )</span>
+				</li>
+				<li>
+					or <span class="code">WinampC.service_name(arg1, arg2, ... )</span>
+				</li>
+			</ul>
 		</p>
 
 		<h1>Description of services</h1>
