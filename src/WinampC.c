@@ -8,6 +8,8 @@
 
 #include <stdio.h>
 
+/* First version to support EncodeFloat/DecodeFloat */
+#define PPRO_VERSION 4512
 #include <powerpro.h>
 
 /* Winamp SDK */
