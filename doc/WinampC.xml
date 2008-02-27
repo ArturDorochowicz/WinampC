@@ -98,8 +98,7 @@
 			}
 
 			.versionsList {
-				list-style-type: square;
-				margin-left: 35px;
+				list-style-type: none;
 			}
 
 			.versionsList > li {
@@ -219,17 +218,57 @@
 		<h1>History</h1>
 
 		<ul class="versionsList">
-
-			<li>v 1.0.1  2007-01-01
+			<li>
+				1.2.0 - 2008-03-XX
 				<ul class="changesList">
-					<li>Fixed: Resource leak in RunAs functionality.</li>
+					<li>Developed against Winamp 5 API</li>
+					<li>Numerous breaking changes</li>
+					<li>Requires PowerPro version 4.5.12 or newer to run</li>
 				</ul>
 			</li>
-			<li>v 1.0  2005-11-22
+			<li>
+				1.1.2 - 2007-11-13
 				<ul class="changesList">
-					<li>Initial release.</li>
-					<li>Hardly any error reporting.</li>
-
+					<li>Added <span class="code">get_plist_selected_path</span></li>
+				</ul>
+			</li>
+			<li>
+				1.1.1
+				<ul class="changesList">
+					<li>Added <span class="code">play_any_audio_cd</span></li>
+				</ul>
+			</li>
+			<li>
+				1.1.0
+				<ul class="changesList">
+					<li>
+						<span class="code">response_type</span> and <span class="code">class_name</span> became the last and optional arguments</li>
+					<li>New <span class="code">response_type</span> defined: <span class="code">3text...</span> - see description</li>
+					<li>Plugin is much smaller now</li>
+				</ul>
+			</li>
+			<li>
+				1.0.2
+				<ul class="changesList">
+					<li>Renamed <span class="code">get_version</span> to <span class="code">get_version_hex</span></li>
+					<li>Added new <span class="code">get_version</span> service - see description</li>
+					<li>Added <span class="code">minimize</span>, <span class="code">restore</span>, <span class="code">min_restore</span>
+				</li>
+					<li>Minor changes in plugin and info file</li>
+				</ul>
+			</li>
+			<li>
+				1.0.1
+				<ul class="changesList">
+					<li>Renamed <span class="code">set_panning</span> service to <span class="code">set_panning127</span></li>
+					<li>Added new <span class="code">set_panning</span> service - see description</li>
+					<li>Minor fixes in plugin and info file</li>
+				</ul>
+			</li>
+			<li>
+				1.0.0
+				<ul class="changesList">
+					<li>First public release</li>
 				</ul>
 			</li>
 		</ul>
