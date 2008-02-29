@@ -172,4 +172,8 @@ typedef struct PPROSERVICES
 #define END_PPRO_SVC  }
 
 
+#define PPRO_SVC_RETURN_INT( integer )   sprintf( retval, "%d", (int) (integer) );
+#define PPRO_SVC_RETURN_UINT( uinteger )   sprintf( retval, "%u", (unsigned int) (uinteger) );
+#define PPRO_SVC_RETURN_FLOAT( double_num )   ppro_svcs->EncodeFloat( (double) (double_num), retval );
+
 #endif   /* #ifndef _POWERPRO_H_ */
