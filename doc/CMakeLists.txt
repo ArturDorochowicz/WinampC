@@ -53,15 +53,12 @@ add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml"
 		"${CMAKE_CURRENT_SOURCE_DIR}/WinampC.xml"
 		"${CMAKE_CURRENT_BINARY_DIR}/services.xml" )
 
-if( XSLT AND GREP )
 
-	add_custom_target( "documentation"
+if( XSLT AND GREP )
+	add_custom_target( "Documentation"
 		DEPENDS
 			"${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml" )
-
 else( )
-
 	message( "The tools necessary to build documentation are not present." )
 	message( "Documentation target will not be created." )
-
 endif( )
