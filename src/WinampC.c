@@ -6,8 +6,6 @@
 /**/
 
 
-#include <stdio.h>
-
 /* PowerPro 4.5.12 is the first version to support EncodeFloat/DecodeFloat */
 #define PPRO_VERSION 4512
 #include <powerpro.h>
@@ -15,6 +13,8 @@
 /* Winamp SDK */
 #include <Winamp/wa_ipc.h>
 #include <lang_b/resource.h>
+
+#include <stdio.h>
 
 
 typedef enum ResponseType
@@ -1765,7 +1765,7 @@ BEGIN_PPRO_SVC( song_name )
 	trim_caption_end( caption );
 
 	/* trim the beginning number "XX. " */
-	p = strstr( caption, '. ' );
+	p = strstr( caption, ". " );
 	
 	if( p != NULL )
 	{

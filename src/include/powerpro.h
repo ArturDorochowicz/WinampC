@@ -27,6 +27,9 @@
 #endif
 #include <windows.h>
 
+/* For sprintf in PPRO_SVC_RETURN_* macros */
+#include <stdio.h>
+
 
 /* Maximum length of PowerPro variable in single byte characters.
  * The total buffer size is one byte greater.
@@ -155,6 +158,25 @@ typedef struct PPROSERVICES
 #endif
 
 
+/* Use these macros like this:
+ * BEGIN_PPRO_SVC( my_service_name )
+ * {
+ *    ...
+ *    service code goes here
+ *    ...
+ * }
+ * END_PPRO_SVC
+ *
+ * The following meaningful variables are defined inside the block:
+ * BOOL (*GetVar)(LPSTR, LPSTR) - the usual GetVar function
+ * void (*SetVar)(LPSTR, LPSTR) - the usual SetVar function
+ * DWORD *ppro_flags - pointer to PowerPro flags
+ * PPROSERVICES *ppro_svcs - PowerPro services
+ * UINT argc - number of arguments
+ * char **argv - array of service arguments
+ * char *retval - place for string with return value
+ * size_t retval_size - size of retval buffer in bytes (532 bytes in recent versions)
+ */
 #define BEGIN_PPRO_SVC( service_name ) \
 	_declspec(dllexport) void service_name( LPVOID ppro_unused1, LPVOID ppro_unused2, \
 		BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD *ppro_flags, \
@@ -172,8 +194,15 @@ typedef struct PPROSERVICES
 #define END_PPRO_SVC  }
 
 
-#define PPRO_SVC_RETURN_INT( integer )   sprintf( retval, "%d", (int) (integer) );
-#define PPRO_SVC_RETURN_UINT( uinteger )   sprintf( retval, "%u", (unsigned int) (uinteger) );
-#define PPRO_SVC_RETURN_FLOAT( double_num )   ppro_svcs->EncodeFloat( (double) (double_num), retval );
+#define PPRO_SVC_RETURN_INT( integer )  sprintf( retval, "%d", (int) (integer) );
+#define PPRO_SVC_RETURN_UINT( uinteger )  sprintf( retval, "%u", (unsigned int) (uinteger) );
+
+#if PPRO_VERSION < 4512
+#pragma message( "PPRO_SVC_RETURN_FLOAT returns string instead of PowerPro float" )
+#define PPRO_SVC_RETURN_FLOAT( double_num )  sprintf( retval, "%.3f", (double) (double_num) );
+#else
+#define PPRO_SVC_RETURN_FLOAT( double_num )  ppro_svcs->EncodeFloat( (double) (double_num), retval );
+#endif
+
 
 #endif   /* #ifndef _POWERPRO_H_ */
