@@ -186,11 +186,13 @@
 			The <span class="code">response_type</span> argument allows you to choose how the plugin should react if specified
 			Winamp window does not exist i.e. Winamp is not running at all or there is no
 			Winamp window of specified class.
-			<ul>
-				<li>Giving <span class="code">1</span> as an argument shows a window with error explanation in case of an error.</li>
-				<li>Giving <span class="code">2</span> sets F0 (flag 0) when Winamp window was found or clears F0 if there was an error.</li>
-				<li>Giving <span class="code">3abcde...</span> returns <span class="code">abcde...</span> in case of error.</li>
-			</ul>
+		</p>
+		<ul>
+			<li>Giving <span class="code">1</span> as an argument shows a window with error explanation in case of an error.</li>
+			<li>Giving <span class="code">2</span> sets F0 (flag 0) when Winamp window was found or clears F0 if there was an error.</li>
+			<li>Giving <span class="code">3abcde...</span> returns <span class="code">abcde...</span> in case of error.</li>
+		</ul>
+		<p>
 			Any other value or when you omit this argument will make the plugin not
 			react in any way if specified Winamp window wasn't found.
 		</p>
@@ -198,20 +200,34 @@
 			If you want to specify <span class="code">class_name</span>
 			argument, you must provide <span class="code">response_type</span> argument as well.
 			Example service usage might be:
-			<ul>
-				<li>
-					<span class="code">WinampC.service_name( arg1, arg2, ..., response_type, class_name )</span>
-				</li>
-				<li>
-					or <span class="code">WinampC.service_name( arg1, arg2, ..., response_type )</span>
-				</li>
-				<li>
-					or <span class="code">WinampC.service_name(arg1, arg2, ... )</span>
-				</li>
-			</ul>
 		</p>
+		<ul>
+			<li>
+				<span class="code">WinampC.service_name( arg1, arg2, ..., response_type, class_name )</span>
+			</li>
+			<li>
+				or <span class="code">WinampC.service_name( arg1, arg2, ..., response_type )</span>
+			</li>
+			<li>
+				or <span class="code">WinampC.service_name(arg1, arg2, ... )</span>
+			</li>
+		</ul>
 
 		<h1>Description of services</h1>
+
+		<p>
+			In the desciptions below the following data types are used:
+		</p>		
+		<dl>
+			<dt>string</dt>
+			<dd>possible PowerPro arguments are: string, integer (is converted to string)</dd>
+			<dt>int</dt>
+			<dd>integer, possible PowerPro arguments are: integer, string (containing an integer), float (is truncated to integer)</dd>
+			<dt>float</dt>
+			<dd>possible PowerPro arguments are: float, integer, string (containing a float)</dd>
+			<dt>mixed</dt>
+			<dd>the actual type depends on the value of one of arguments</dd>
+		</dl>
 
 		<div id="descriptionsOfServices">descriptions go here</div>
 		
