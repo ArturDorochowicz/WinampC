@@ -31,6 +31,9 @@ typedef enum ResponseType
  */
 #define MAX_WND_CLASS_NAME_LENGTH 256 
 
+/* Just makes sure that the value can only be 1 or 0 */
+#define MAKE_BOOL( number )  ( (number) != 0 ? 1 : 0 )
+
 
 static HWND FindWinampWindow( const char *window_class )
 {
@@ -91,29 +94,29 @@ static const char* RequiredArgsCountInfo( int required_count )
 /**
  *  @param required_count Includes two optional arguments.
 **/
-static BOOL CheckArgCount( const char **args, int num_args, int required_count,
+BOOL CheckArgCount( unsigned int argc, const char **argv, unsigned int required_count,
 	PPROSERVICES *ppro_svcs, char *window_class, size_t window_class_size,
 	ResponseType *response_type, char *response_msg, size_t response_msg_size )
 {
 	BOOL rv = TRUE;
 
-	if( num_args > required_count )
+	if( argc > required_count )
 	{
 		const char *error_msg1 = "Too many arguments for the service.\n";
 		const char *error_msg2 = RequiredArgsCountInfo( required_count );
 		ppro_svcs->ErrMessage( (LPSTR) error_msg1, (LPSTR) error_msg2 );
 		rv = FALSE;   /* error */
 	}
-	else if( num_args < required_count - 2 )
+	else if( argc < required_count - 2 )
 	{
 		const char *error_msg1 = "Not enough arguments for the service.\n";
 		const char *error_msg2 = RequiredArgsCountInfo( required_count );
 		ppro_svcs->ErrMessage( (LPSTR) error_msg1, (LPSTR) error_msg2 );
 		rv = FALSE;   /* error */
 	}
-	else if( num_args >= required_count - 1 )   /* at least one optional present */
+	else if( argc >= required_count - 1 )   /* at least one optional present */
 	{
-		const char *response_type_arg = args[required_count - 2];
+		const char *response_type_arg = argv[required_count - 2];
 		
 		if( response_type_arg[0] == '3' )
 		{
@@ -129,9 +132,9 @@ static BOOL CheckArgCount( const char **args, int num_args, int required_count,
 			*response_type = ResponseTypeShowErrorMsg;
 		}
 
-		if( num_args == required_count )   /* both optional present */
+		if( argc == required_count )   /* both optional present */
 		{
-			strcpys( window_class, window_class_size, args[required_count - 1] );
+			strcpys( window_class, window_class_size, argv[required_count - 1] );
 		}
 	}
 	/* else no optional arguments were specified */
@@ -169,7 +172,7 @@ static void PerformResponse( ResponseType response_type, const char *response_ms
 		{
 			strcpys( retval, retval_size, response_msg );
 		}
-	}           
+	}
 }
 
 
@@ -206,8 +209,8 @@ void ReadStringFromProcessMemory( HWND wnd, const void *src_start, char *dst, si
 }
 
 
-static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
-	unsigned int num_args, unsigned int num_args_required, char *retval,
+static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, unsigned int argc,
+	char **argv, unsigned int argc_required, char *retval,
 	size_t retval_size )
 {
 	char wnd_class[MAX_WND_CLASS_NAME_LENGTH + 1] = { 0 };
@@ -215,7 +218,7 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
 	char response_msg[PPRO_MAX_VAR_LENGTH + 1] = { 0 };
 	HWND winamp_wnd = NULL;
 
-	if( TRUE == CheckArgCount( args, num_args, num_args_required, ppro_svcs, wnd_class,
+	if( TRUE == CheckArgCount( argc, argv, argc_required + 2, ppro_svcs, wnd_class,
 		sizeof( wnd_class ), &response_type, response_msg, sizeof( response_msg ) ) )
 	{
 		winamp_wnd = FindWinampWindow( wnd_class );
@@ -227,9 +230,12 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char **args,
 }
 
 
-#define STARTUP( num_args_required ) \
-	HWND winamp_wnd = Startup( ppro_svcs, ppro_flags, argv, argc, \
-		(num_args_required) + 2, retval, retval_size ); \
+#define STARTUP_NO_EXIT( argc_required ) \
+	HWND winamp_wnd = Startup( ppro_svcs, ppro_flags, argc, argv, \
+		(argc_required), retval, retval_size );
+
+#define STARTUP( argc_required ) \
+	STARTUP_NO_EXIT( argc_required ); \
 	if( NULL == winamp_wnd ) return;
 
 
@@ -279,9 +285,7 @@ END_PPRO_SVC
 /*! </service> */
 BEGIN_PPRO_SVC( add_track_as_bookmark )
 {
-	HWND winamp_wnd = Startup( ppro_svcs, ppro_flags, argv, argc, 2, retval, retval_size );
-	if( NULL == winamp_wnd )
-		return;
+	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_MAKECURBOOKMARK, 0 );
 }
 END_PPRO_SVC
@@ -468,7 +472,7 @@ END_PPRO_SVC
 
 
 /*! <service name="configure_visual_plugin">
-/*!  <description>Open configuration window of the current visualization plugin.</description>
+/*!  <description>Open configuration window of the current visualisation plugin.</description>
 /*! </service> */
 BEGIN_PPRO_SVC( configure_visual_plugin )
 {
@@ -569,7 +573,7 @@ END_PPRO_SVC
 
 
 /*! <service name="execute_visual_plugin">
-/*!  <description>Execute current visualization plugin.</description>
+/*!  <description>Execute current visualisation plugin.</description>
 /*! </service> */
 BEGIN_PPRO_SVC( execute_visual_plugin )
 {
@@ -639,7 +643,7 @@ END_PPRO_SVC
 /*!  </argument>
 /*!  <return-value type="mixed">The value and its type depend on the specified argument. <br />
 /*!    For 0&#8211;10 - return value is a float from -20 to +20 (db). <br />
-/*!    For 11&#8211;12 - return value is an integer: 0 (disabled) or nonzero (enabled). <br />
+/*!    For 11&#8211;12 - return value is an integer: 0 (disabled) or 1 (enabled). <br />
 /*!  </return-value>
 /*!  <requirements>Winamp 2.05+</requirements>
 /*! </service> */
@@ -658,7 +662,7 @@ BEGIN_PPRO_SVC( get_eq_data )
 	}
 	else
 	{
-		PPRO_SVC_RETURN_UINT( data );
+		PPRO_SVC_RETURN_UINT( MAKE_BOOL( data ) );
 	}
 }
 END_PPRO_SVC
@@ -674,7 +678,7 @@ END_PPRO_SVC
 /*!  </argument>
 /*!  <return-value type="int">The value depends on the specified argument. <br />
 /*!    For 0&#8211;10 - return value is an integer from 63 to 0 (which corresponds to -20&#8211;+20 db).<br />
-/*!    For 11&#8211;12 - return value is 0 (disabled) or nonzero (enabled).<br />
+/*!    For 11&#8211;12 - return value is 0 (disabled) or 1 (enabled).<br />
 /*!  </return-value>
 /*!  <requirements>Winamp 2.05+</requirements>
 /*! </service> */
@@ -687,7 +691,7 @@ BEGIN_PPRO_SVC( get_eq_data63 )
 
 	position = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
 	data = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_GETEQDATA );
-	PPRO_SVC_RETURN_UINT( data );
+	PPRO_SVC_RETURN_UINT( ( ( position >= 0 && position <= 10 ) ? data : MAKE_BOOL( data ) ) );
 }
 END_PPRO_SVC
 
@@ -1094,6 +1098,123 @@ BEGIN_PPRO_SVC( get_volume255 )
 END_PPRO_SVC
 
 
+/*! <service name="is_running">
+/*!  <description>Check if Winamp is running. Check is done by searching for Winamp's window.</description>
+/*!  <return-value type="int">1 if Winamp is running, 0 if Winamp is not running.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( is_running )
+{
+	STARTUP_NO_EXIT( 0 );
+	PPRO_SVC_RETURN_UINT( winamp_wnd != NULL ? 1 : 0 );
+}
+END_PPRO_SVC
+
+
+/*! <service name="is_fullscreen">
+/*!  <description>Check if video or visualisation is in fullscreen mode.</description>
+/*!  <return-value type="int">1 if in fullscreen mode, 0 if not.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( is_fullscreen )
+{
+	LRESULT status;
+	STARTUP( 0 );
+
+	status = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_IS_FULLSCREEN );
+	PPRO_SVC_RETURN_UINT( MAKE_BOOL( status ) );
+}
+END_PPRO_SVC
+
+
+/*! <service name="is_vis_running">
+/*!  <description>Check if visualisation is running.</description>
+/*!  <return-value type="int">1 if visualisation is running, 0 if not.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( is_vis_running )
+{
+	LRESULT running;
+	STARTUP( 0 );
+
+	running = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_ISVISRUNNING );
+	PPRO_SVC_RETURN_UINT( MAKE_BOOL( running ) );
+}
+END_PPRO_SVC
+
+
+/*! <service name="is_double_size">
+/*!  <description>Check if Double size option is enabled.</description>
+/*!  <return-value type="int">1 if option is enabled, 0 if not.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( is_double_size )
+{
+	LRESULT double_size;
+	STARTUP( 0 );
+
+	double_size = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_ISDOUBLESIZE );
+	PPRO_SVC_RETURN_UINT( MAKE_BOOL( double_size ) );
+}
+END_PPRO_SVC
+
+
+/*! <service name="is_wnd_visible">
+/*!  <description>Check if specified Winamp window is visible.</description>
+/*!  <argument name="window" type="int">The window to check. Possible values are: -1 - main window, 0 - equaliser, 1 - playlist, 2 - minibrowser, 3 - video.</argument>
+/*!  <return-value type="int">1 if window is visible, 0 if window is hidden.</return-value>
+/*!  <requirements>Winamp 2.9+</requirements>
+/*! </service> */
+BEGIN_PPRO_SVC( is_wnd_visible )
+{
+	LRESULT visible = 0;
+	WPARAM wnd;
+
+	STARTUP( 1 );
+
+	wnd = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
+
+	switch( wnd )
+	{
+	case (WPARAM) -1:
+	case IPC_GETWND_EQ:
+	case IPC_GETWND_MB:
+	case IPC_GETWND_PE:
+	case IPC_GETWND_VIDEO:
+		visible = SendMessage( winamp_wnd, WM_WA_IPC, wnd, IPC_ISWNDVISIBLE );
+	}
+
+	PPRO_SVC_RETURN_UINT( MAKE_BOOL( visible ) );
+}
+END_PPRO_SVC
+
+
+/*! <service name="is_wnd_in_wndshade">
+/*!  <description>Check if specified Winamp window is set to Windowshade mode.</description>
+/*!  <argument name="window" type="int">The window to check. Possible values are: -1 - main window, 0 - equaliser, 1 - playlist, 2 - minibrowser, 3 - video.</argument>
+/*!  <return-value type="int">1 if window is set to Windowshade mode, 0 if not.</return-value>
+/*!  <requirements>Winamp 5.04+</requirements>
+/*! </service> */
+BEGIN_PPRO_SVC( is_wnd_in_wndshade )
+{
+	LRESULT wndshade = 0;
+	WPARAM wnd;
+
+	STARTUP( 1 );
+
+	wnd = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
+
+	switch( wnd )
+	{
+	case (WPARAM) -1:
+	case IPC_GETWND_EQ:
+	case IPC_GETWND_MB:
+	case IPC_GETWND_PE:
+	case IPC_GETWND_VIDEO:
+		wndshade = SendMessage( winamp_wnd, WM_WA_IPC, wnd, IPC_IS_WNDSHADE );
+	}
+
+	PPRO_SVC_RETURN_UINT( MAKE_BOOL( wndshade ) );
+}
+END_PPRO_SVC
+
+
 /*! <service name="jump_to_file_dialog">
 /*!  <description>Open 'Jump to file' dialog.</description>
 /*! </service> */
@@ -1302,7 +1423,7 @@ END_PPRO_SVC
 
 
 /*! <service name="open_visual_options">
-/*!  <description>Open visualization options. Doesn't seem to work on Winamp 2.80.</description>
+/*!  <description>Open visualisation options. Doesn't seem to work on Winamp 2.80.</description>
 /*! </service> */
 BEGIN_PPRO_SVC( open_visual_options )
 {
@@ -1313,7 +1434,7 @@ END_PPRO_SVC
 
 
 /*! <service name="open_visual_plugin_options">
-/*!  <description>Open visualization plug-in options.</description>
+/*!  <description>Open visualisation plug-in options.</description>
 /*! </service> */
 BEGIN_PPRO_SVC( open_visual_plugin_options )
 {
@@ -1619,6 +1740,40 @@ BEGIN_PPRO_SVC( set_plist_position )
 	/* change 1-based input into Winamp's 0-based index */
 	position = (WPARAM) ( ppro_svcs->DecodeFloat( argv[0] ) - 1 );
 	PostMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETPLAYLISTPOS );
+}
+END_PPRO_SVC
+
+
+/*! <service name="set_plist_manual_advance">
+/*!  <description>Set the status of the Manual Playlist Advance option.</description>
+/*!  <argument name="status" type="int">Specify 1 to enable the option, 0 to disable.</argument>
+/*!  <requirements>Winamp 5.03+</requirements>
+/*! </service> */
+BEGIN_PPRO_SVC( set_plist_manual_advance )
+{
+	WPARAM status;
+
+	STARTUP( 1 );
+
+	status = MAKE_BOOL( (WPARAM) ppro_svcs->DecodeFloat( argv[0] ) );
+	PostMessage( winamp_wnd, WM_WA_IPC, status, IPC_SET_MANUALPLADVANCE );
+}
+END_PPRO_SVC
+
+
+/*! <service name="get_plist_manual_advance">
+/*!  <description>Get the status of the Manual Playlist Advance option.</description>
+/*!  <return-value type="int">1 if option is enabled, 0 if disabled.</return-value>
+/*!  <requirements>Winamp 5.03+</requirements>
+/*! </service> */
+BEGIN_PPRO_SVC( get_plist_manual_advance )
+{
+	LRESULT status;
+
+	STARTUP( 0 );
+
+	status = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GET_MANUALPLADVANCE );
+	PPRO_SVC_RETURN_UINT( MAKE_BOOL( status ) );
 }
 END_PPRO_SVC
 

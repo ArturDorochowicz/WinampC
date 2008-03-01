@@ -194,14 +194,15 @@ typedef struct PPROSERVICES
 #define END_PPRO_SVC  }
 
 
-#define PPRO_SVC_RETURN_INT( integer )  sprintf( retval, "%d", (int) (integer) );
-#define PPRO_SVC_RETURN_UINT( uinteger )  sprintf( retval, "%u", (unsigned int) (uinteger) );
+#define PPRO_SVC_RETURN_INT( integer )  sprintf( retval, "%d", (int) (integer) )
+#define PPRO_SVC_RETURN_UINT( uinteger )  sprintf( retval, "%u", (unsigned int) (uinteger) )
 
+/* PowerPro 4.5.12 is the first version to support EncodeFloat/DecodeFloat */
 #if PPRO_VERSION < 4512
 #pragma message( "PPRO_SVC_RETURN_FLOAT returns string instead of PowerPro float" )
-#define PPRO_SVC_RETURN_FLOAT( double_num )  sprintf( retval, "%.3f", (double) (double_num) );
+#define PPRO_SVC_RETURN_FLOAT( double_num )  sprintf( retval, "%.3f", (double) (double_num) )
 #else
-#define PPRO_SVC_RETURN_FLOAT( double_num )  ppro_svcs->EncodeFloat( (double) (double_num), retval );
+#define PPRO_SVC_RETURN_FLOAT( double_num )  ppro_svcs->EncodeFloat( (double) (double_num), retval )
 #endif
 
 
