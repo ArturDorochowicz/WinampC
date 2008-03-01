@@ -343,7 +343,7 @@ END_PPRO_SVC
 /*!  <description>Get full path of playlist entry at specified position.</description>
 /*!  <requirements>Winamp 2.04+</requirements>
 /*!  <argument name="index" type="int">The position. First entry is at 1.</argument>
-/*!  <return-value type="string">The path.</return-value>
+/*!  <return-value type="string">The path. The path is limited to 531 characters.</return-value>
 /*! </service> */
 BEGIN_PPRO_SVC( get_plist_entry_path )
 {
@@ -367,7 +367,7 @@ END_PPRO_SVC
 /*!  <description>Get title of playlist entry at specified position.</description>
 /*!  <requirements>Winamp 2.04+</requirements>
 /*!  <argument name="index" type="int">The position. First entry is at 1.</argument>
-/*!  <return-value type="string">The title.</return-value>
+/*!  <return-value type="string">The title. The title is limited to 531 characters.</return-value>
 /*! </service> */
 BEGIN_PPRO_SVC( get_plist_entry_title )
 {
@@ -390,7 +390,7 @@ END_PPRO_SVC
 /*! <service name="get_plist_selected_path">
 /*!  <description> Get full path of currently selected playlist entry.</description>
 /*!  <requirements>Winamp 2.04+</requirements>
-/*!  <return-value type="string">The path.</return-value>
+/*!  <return-value type="string">The path. The path is limited to 531 characters.</return-value>
 /*! </service> */
 BEGIN_PPRO_SVC( get_plist_selected_path )
 {
@@ -412,7 +412,7 @@ END_PPRO_SVC
 /*! <service name="get_plist_selected_title">
 /*!  <description> Get title of currently selected playlist entry.</description>
 /*!  <requirements>Winamp 2.04+</requirements>
-/*!  <return-value type="string">The title.</return-value>
+/*!  <return-value type="string">The title. The title is limited to 531 characters.</return-value>
 /*! </service> */
 BEGIN_PPRO_SVC( get_plist_selected_title )
 {
@@ -426,6 +426,82 @@ BEGIN_PPRO_SVC( get_plist_selected_title )
 	if( title != NULL )
 	{
 		ReadStringFromProcessMemory( winamp_wnd, title, retval, retval_size );
+	}
+}
+END_PPRO_SVC
+
+
+/*! <service name="get_winamp_ini_path">
+/*!  <description> Get path of the winamp.ini configuration file.</description>
+/*!  <return-value type="string">The path. The path is limited to 531 characters.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( get_winamp_ini_path )
+{
+	char *path;
+
+	STARTUP( 0 );
+
+	path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETINIFILE );
+	if( path != NULL )
+	{
+		ReadStringFromProcessMemory( winamp_wnd, path, retval, retval_size );
+	}
+}
+END_PPRO_SVC
+
+
+/*! <service name="get_config_dir">
+/*!  <description> Get directory where Winamp configuration files are stored.</description>
+/*!  <return-value type="string">The directory. The path is limited to 531 characters.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( get_config_dir )
+{
+	char *path;
+
+	STARTUP( 0 );
+
+	path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETINIDIRECTORY );
+	if( path != NULL )
+	{
+		ReadStringFromProcessMemory( winamp_wnd, path, retval, retval_size );
+	}
+}
+END_PPRO_SVC
+
+
+/*! <service name="get_plugin_dir">
+/*!  <description> Get directory where Winamp plugins are stored.</description>
+/*!  <return-value type="string">The directory. The path is limited to 531 characters.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( get_plugin_dir )
+{
+	char *path;
+
+	STARTUP( 0 );
+
+	path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETPLUGINDIRECTORY );
+	if( path != NULL )
+	{
+		ReadStringFromProcessMemory( winamp_wnd, path, retval, retval_size );
+	}
+}
+END_PPRO_SVC
+
+
+/*! <service name="get_winamp_m3u_dir">
+/*!  <description> Get directory where winamp.m3u file is saved.</description>
+/*!  <return-value type="string">The directory. The path is limited to 531 characters.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( get_winamp_m3u_dir )
+{
+	char *path;
+
+	STARTUP( 0 );
+
+	path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETM3UDIRECTORY );
+	if( path != NULL )
+	{
+		ReadStringFromProcessMemory( winamp_wnd, path, retval, retval_size );
 	}
 }
 END_PPRO_SVC
@@ -616,6 +692,74 @@ BEGIN_PPRO_SVC( forward_5sec )
 END_PPRO_SVC
 
 
+/*! <service name="get_num_audio_tracks">
+/*!  <description>Get number of audio tracks for the currently playing item.</description>
+/*!  <requirements>Winamp 5.04+</requirements>
+/*!  <return-value type="int">The number of audio tracks.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( get_num_audio_tracks )
+{
+	LRESULT num;
+
+	STARTUP( 0 );
+
+	num = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETNUMAUDIOTRACKS );
+	PPRO_SVC_RETURN_UINT( num );
+}
+END_PPRO_SVC
+
+
+/*! <service name="get_audio_track_index">
+/*!  <description>Get index of current audio track for the currently playing item.</description>
+/*!  <requirements>Winamp 5.04+</requirements>
+/*!  <return-value type="int">The index.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( get_audio_track_index )
+{
+	LRESULT index;
+
+	STARTUP( 0 );
+
+	index = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETAUDIOTRACK );
+	PPRO_SVC_RETURN_UINT( index );
+}
+END_PPRO_SVC
+
+
+/*! <service name="get_num_video_tracks">
+/*!  <description>Get number of video tracks for the currently playing item.</description>
+/*!  <requirements>Winamp 5.04+</requirements>
+/*!  <return-value type="int">The number of video tracks.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( get_num_video_tracks )
+{
+	LRESULT num;
+
+	STARTUP( 0 );
+
+	num = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETNUMVIDEOTRACKS );
+	PPRO_SVC_RETURN_UINT( num );
+}
+END_PPRO_SVC
+
+
+/*! <service name="get_video_track_index">
+/*!  <description>Get index of current video track for the currently playing item.</description>
+/*!  <requirements>Winamp 5.04+</requirements>
+/*!  <return-value type="int">The index.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( get_video_track_index )
+{
+	LRESULT index;
+
+	STARTUP( 0 );
+
+	index = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETVIDEOTRACK );
+	PPRO_SVC_RETURN_UINT( index );
+}
+END_PPRO_SVC
+
+
 /*! <service name="get_bitrate">
 /*!  <description>Get momentary bitrate of current song.</description>
 /*!  <requirements>Winamp 2.05+</requirements>
@@ -727,7 +871,7 @@ BEGIN_PPRO_SVC( get_net_status )
 	STARTUP( 0 );
 
 	status = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_INETAVAILABLE );
-	PPRO_SVC_RETURN_UINT( status );
+	PPRO_SVC_RETURN_UINT( MAKE_BOOL( status ) );
 }
 END_PPRO_SVC
 
@@ -913,7 +1057,7 @@ BEGIN_PPRO_SVC( get_repeat )
 	STARTUP( 0 );
 
 	repeat = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GET_REPEAT );
-	PPRO_SVC_RETURN_UINT( repeat );
+	PPRO_SVC_RETURN_UINT( MAKE_BOOL( repeat ) );
 }
 END_PPRO_SVC
 
@@ -964,7 +1108,7 @@ BEGIN_PPRO_SVC( get_shuffle )
 	STARTUP( 0 );
 	
 	shuffle = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GET_SHUFFLE );
-	PPRO_SVC_RETURN_UINT( shuffle );
+	PPRO_SVC_RETURN_UINT( MAKE_BOOL( shuffle ) );
 }
 END_PPRO_SVC
 
