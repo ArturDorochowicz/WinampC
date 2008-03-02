@@ -326,10 +326,10 @@ END_PPRO_SVC
 
 
 /*! <service name="caption">
-/*!  <description>Get full caption of the Winamp's window. This is something like: 'Number. Song title - Winamp'.
+/*!  <description>Get full caption of the Winamp window. This is something like: 'Number. Song title - Winamp'.
 /*!   Obviously, Winamp's option 'Scroll song title in the Windows taskbar' influences the output from this service.
 /*!  </description>
-/*!  <return-value type="string">Winamp's window caption.</return-value>
+/*!  <return-value type="string">The caption of the Winamp window.</return-value>
 /*! </service> */
 BEGIN_PPRO_SVC( caption )
 {

@@ -51,14 +51,29 @@
 			#listOfServices {
 			}
 
+			ul#servicesDescriptions {
+				list-style-type: none;
+				margin-left: 0;
+				margin-right: 0;
+				padding-left: 0;
+				padding-right: 0;
+			}
+			
+			ul#servicesDescriptions > li {
+				margin-top: 18px;
+			}
+			
+			ul#servicesDescriptions > li > h4 {
+				font-size: 85%;
+				font-weight: bold;
+				margin-left: 5px;
+				margin-top: 5px;
+			}
+			
 			.jumpToListLink {
 				float: right;
 				text-align: right;
-				width: 4ex;
-			}
-
-			.serviceDescription {
-				margin-top: 18px;
+				width: 3.5em;
 			}
 
 			.serviceDefinition {
@@ -68,15 +83,8 @@
 				font-family: "Courier New", Courier, monospace;
 				font-size: 110%;
 				margin-bottom: 3px;
-				margin-right: 4ex;
+				margin-right: 3.5em;
 				padding: 2px 5px;
-			}
-
-			.serviceDescription h4 {
-				font-size: 85%;
-				font-weight: bold;
-				margin-left: 5px;
-				margin-top: 5px;
 			}
 
 			.serviceDescriptionText {
@@ -84,34 +92,36 @@
 				margin-left: 20px;
 			}
 
-			.serviceArgumentsList {
+			dl.serviceArgumentsList {
 				list-style-type: none;
 				margin-left: 20px;
 				margin-top: 0;
 			}
 
-			.serviceArgumentsList dt {
+			dl.serviceArgumentsList > dt {
 				font-size: 95%;
 				font-style: italic;
+				margin-top: 2px;
 			}
 			
-			.code {
-				font-family: "Courier New", Courier, monospace;
-			}
-
-			.serviceArgumentsList dd {
+			dl.serviceArgumentsList > dd {
 				margin-left: 30px;
 			}
 
-			.versionsList {
+			.code {
+				font-family: "Courier New", Courier, monospace;
+			}
+			
+			ol#versionsList {
 				list-style-type: none;
 			}
 
-			.versionsList > li {
-				margin-bottom: 10px;
+			ol#versionsList > li {
+				margin-top: 15px;
 			}
 
-			.changesList {
+			ul.changesList {
+				list-style-type: disc;
 			}
 		</style>
 	</head>
@@ -162,7 +172,7 @@
 
 		<ul id="listOfServices">
 			<li>
-				<a href="#service">list of services</a>
+				<a href="#example_service">list of services</a>
 			</li>
 		</ul>
 
@@ -215,7 +225,7 @@
 				or <span class="code">WinampC.service_name( arg1, arg2, ..., response_type )</span>
 			</li>
 			<li>
-				or <span class="code">WinampC.service_name(arg1, arg2, ... )</span>
+				or <span class="code">WinampC.service_name( arg1, arg2, ... )</span>
 			</li>
 		</ul>
 
@@ -231,11 +241,57 @@
 			<li>mixed - the actual type depends on the value of one of arguments</li>
 		</ul>
 
-		<div id="descriptionsOfServices">descriptions go here</div>
+		<ul id="servicesDescriptions">
+			<li id="example_service">
+				<div class="jumpToListLink">
+					<a href="#listOfServices">Go up</a>
+				</div>
+				<div class="serviceDefinition">
+					example_service( argument1, argument2, argument3 )
+				</div>
+				<div class="serviceDescriptionText">
+					The description of the example_service. The description of the example_service.
+					The description of the example_service. The description of the example_service.
+					The description of the example_service. The description of the example_service.
+				</div>
+
+				<h4>Requirements</h4>
+				<div class="serviceDescriptionText">
+					The requirements go here.
+				</div>
+
+				<h4>Parameters</h4>
+				<dl class="serviceArgumentsList">
+					<dt>
+						[string] argument1
+					</dt>
+					<dd>
+						The argument1 description.
+					</dd>
+					<dt>
+						[float] argument2
+					</dt>
+					<dd>
+						The argument2 description.
+					</dd>
+					<dt>
+						[int] argument3
+					</dt>
+					<dd>
+						The argument3 description.
+					</dd>
+				</dl>
+
+				<h4>Return value</h4>
+				<div class="serviceDescriptionText">
+					[mixed] The return value description.
+				</div>
+			</li>
+		</ul>
 		
 		<h1>History</h1>
 
-		<ul class="versionsList">
+		<ol id="versionsList">
 			<li>
 				1.2.0 - 2008-03-XX
 				<ul class="changesList">
@@ -289,7 +345,7 @@
 					<li>First public release</li>
 				</ul>
 			</li>
-		</ul>
+		</ol>
 
 		<h1>Contacting the author</h1>
 

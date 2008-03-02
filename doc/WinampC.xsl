@@ -13,7 +13,8 @@
 		omit-xml-declaration="yes"
 		method="xml"
 		doctype-public="-//W3C//DTD XHTML 1.1//EN"
-		doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"/>
+		doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"
+		cdata-section-elements="style"/>
 
 	<!-- declare parameters and their default values -->
 	<xsl:param name="pluginVersion" select="'x.x.x'"/>
@@ -90,67 +91,72 @@
 	</xsl:template>
 
 	<!-- Generate descriptions of services -->
-	<xsl:template match="node()[@id='descriptionsOfServices']">
-		<xsl:for-each select="$services/service">
-			<xsl:sort select="@name" order="ascending"/>
-			<div class="serviceDescription" id="{generate-id()}">
-				<div class="jumpToListLink">
-					<a href="#listOfServices">list</a>
-				</div>
-				<div class="serviceDefinition">
-					<xsl:value-of select="normalize-space(@name)"/>
-					<xsl:text>( </xsl:text>
-					<xsl:for-each select="argument">
-						<xsl:value-of select="normalize-space(@name)"/>
-						<xsl:if test="last() > position()">
-							<xsl:text>, </xsl:text>
-						</xsl:if>
-					</xsl:for-each>
-					<xsl:text> )</xsl:text>
-				</div>
-
-				<div class="serviceDescriptionText">
-					<xsl:apply-templates select="description"/>
-				</div>
-
-				<xsl:if test="count(requirements) > 0">
-					<h4>Requirements</h4>
-					<div class="serviceDescriptionText">
-						<xsl:value-of select="normalize-space(requirements)"/>
+	<xsl:template match="node()[@id='servicesDescriptions']">
+		<xsl:copy>
+			<!-- let attributes be copied -->
+			<xsl:apply-templates select="@*"/>
+			<!-- add descriptions -->
+			<xsl:for-each select="$services/service">
+				<xsl:sort select="@name" order="ascending"/>
+				<li id="{generate-id()}">
+					<div class="jumpToListLink">
+						<a href="#listOfServices">Go up</a>
 					</div>
-				</xsl:if>
-
-				<xsl:if test="count(argument) > 0">
-					<h4>Parameters</h4>
-					<dl class="serviceArgumentsList">
+					<div class="serviceDefinition">
+						<xsl:value-of select="normalize-space(@name)"/>
+						<xsl:text>( </xsl:text>
 						<xsl:for-each select="argument">
-							<dt>
-								<xsl:text>[</xsl:text>
-								<xsl:value-of select="normalize-space(@type)"/>
-								<xsl:text>] </xsl:text>
-								<xsl:value-of select="normalize-space(@name)"/>
-							</dt>
-							<dd>
-								<xsl:apply-templates select="self::node()"/>
-							</dd>
+							<xsl:value-of select="normalize-space(@name)"/>
+							<xsl:if test="last() > position()">
+								<xsl:text>, </xsl:text>
+							</xsl:if>
 						</xsl:for-each>
-					</dl>
-				</xsl:if>
+						<xsl:text> )</xsl:text>
+					</div>
 
-				<h4>Return value</h4>
-				<div class="serviceDescriptionText">
-					<xsl:choose>
-						<xsl:when test="count(return-value) > 0">
-							[<xsl:value-of select="normalize-space(return-value/@type)"/>]
-							<xsl:apply-templates select="return-value"/>
-						</xsl:when>
-						<xsl:otherwise>
-							No return value.
-						</xsl:otherwise>
-					</xsl:choose>
-				</div>
-			</div>
-		</xsl:for-each>
+					<div class="serviceDescriptionText">
+						<xsl:apply-templates select="description"/>
+					</div>
+
+					<xsl:if test="count(requirements) > 0">
+						<h4>Requirements</h4>
+						<div class="serviceDescriptionText">
+							<xsl:value-of select="normalize-space(requirements)"/>
+						</div>
+					</xsl:if>
+
+					<xsl:if test="count(argument) > 0">
+						<h4>Parameters</h4>
+						<dl class="serviceArgumentsList">
+							<xsl:for-each select="argument">
+								<dt>
+									<xsl:text>[</xsl:text>
+									<xsl:value-of select="normalize-space(@type)"/>
+									<xsl:text>] </xsl:text>
+									<xsl:value-of select="normalize-space(@name)"/>
+								</dt>
+								<dd>
+									<xsl:apply-templates select="self::node()"/>
+								</dd>
+							</xsl:for-each>
+						</dl>
+					</xsl:if>
+
+					<h4>Return value</h4>
+					<div class="serviceDescriptionText">
+						<xsl:choose>
+							<xsl:when test="count(return-value) > 0">
+								[<xsl:value-of select="normalize-space(return-value/@type)"/>]
+								<xsl:apply-templates select="return-value"/>
+							</xsl:when>
+							<xsl:otherwise>
+								No return value.
+							</xsl:otherwise>
+						</xsl:choose>
+					</div>
+				</li>
+			</xsl:for-each>
+		</xsl:copy>
 	</xsl:template>
 
 	<!-- Copy description/argument/return-value text contents creating <br/> tags as indicated in the source -->
