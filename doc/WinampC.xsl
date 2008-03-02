@@ -21,9 +21,10 @@
 	<xsl:param name="lastCopyrightYear" select="'9999'"/>
 	<xsl:param name="servicesPath" select="'services.xml'"/>
 
-	<xsl:variable
-		name="services"
+	<xsl:variable name="services"
 		select="document($servicesPath)/services"/>
+	<xsl:variable name="listOfServicesHeaderId"
+		select="generate-id(//htm:h1[normalize-space(.)='List of services'][1])"/>
 
 	<!-- copy input to output -->
 	<xsl:template match="*|@*">
@@ -100,7 +101,7 @@
 				<xsl:sort select="@name" order="ascending"/>
 				<li id="{generate-id()}">
 					<div class="jumpToListLink">
-						<a href="#listOfServices">Go up</a>
+						<a href="#{$listOfServicesHeaderId}">Go up</a>
 					</div>
 					<div class="serviceDefinition">
 						<xsl:value-of select="normalize-space(@name)"/>
