@@ -1,26 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"
+[	<!ENTITY nbsp "&#160;">
+	<!ENTITY copy "&#169;">
+	<!ENTITY ndash "&#8211;">
+	<!ENTITY mdash "&#8212;">
+]>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 		<title>WinampC Plugin for PowerPro</title>
 		<style type="text/css">
-			body, hr, h1, h2, h3, h4, h5, h6 {
-				margin: 0;
-				padding: 0;
+			/* begin reset styles */
+			body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p, blockquote, th, td { 
+				margin:0;
+				padding:0;
 			}
-			
-			ul, ol {
-				margin-top: 0;
-				margin-bottom: 0;
+			table {
+				border-collapse:collapse;
+				border-spacing:0;
 			}
-			
+			fieldset,img { 
+				border:0;
+			}
+			address,caption,cite,code,dfn,em,strong,th,var {
+				font-style:normal;
+				font-weight:normal;
+			}
+			ol,ul {
+				list-style:none;
+			}
+			caption,th {
+				text-align:left;
+			}
+			h1,h2,h3,h4,h5,h6 {
+				font-size:100%;
+				font-weight:normal;
+			}
+			q:before,q:after {
+				content:'';
+			}
+			abbr,acronym {
+				border:0;
+			}
+			/* end reset styles */
+
 			body {
 				font-size: 14px;
 				font-family: Verdana, Arial, Helvetica, sans-serif;
 				line-height: 135%;
-				margin: 15px auto;
-				text-align:justify;
+				margin: 20px auto;
+				text-align: justify;
 				width: 80%;
 			}
 
@@ -31,13 +60,27 @@
 			h1 {
 				font-size: 130%;
 				font-weight: bold;
-				margin-top: 20px;
-				margin-bottom: 2px;
+				margin: 20px 0 10px 0;
 			}
 
 			p {
-				margin-top: 5px;
-				margin-bottom: 5px;
+				margin: 10px 0 0 0;
+			}
+			
+			ul {
+				list-style-type: disc;
+				list-style-position: inside;
+				margin: 0; /* IE 7 seem to not accept the previous zeroing */
+			}
+			
+			ol {
+				list-style-type: decimal;
+				list-style-position: inside;
+				margin: 0; /* IE 7 seem to not accept the previous zeroing */
+			}
+			
+			ul>li, ol>li {
+				padding-left: 20px;
 			}
 
 			.softwareName {
@@ -52,28 +95,31 @@
 			}
 
 			ul#servicesDescriptions {
+				list-style-position: outside;
 				list-style-type: none;
-				margin-left: 0;
-				margin-right: 0;
-				padding-left: 0;
-				padding-right: 0;
 			}
 			
-			ul#servicesDescriptions > li {
-				margin-top: 18px;
+			ul#servicesDescriptions>li {
+				margin-top: 20px;
+				padding-left: 20px;
+				padding-right: 15px;
+				position: relative;
 			}
 			
 			ul#servicesDescriptions > li > h4 {
 				font-size: 85%;
 				font-weight: bold;
-				margin-left: 5px;
-				margin-top: 5px;
+				margin: 5px -15px 2px -20px;
+				padding-left: 5px;
 			}
 			
 			.jumpToListLink {
-				float: right;
+				font-size: 80%;
+				padding: 2px 0px;
+				position: absolute;
+				right: 0;
 				text-align: right;
-				width: 3.5em;
+				top: 0;
 			}
 
 			.serviceDefinition {
@@ -82,20 +128,15 @@
 				font-weight: bold;
 				font-family: "Courier New", Courier, monospace;
 				font-size: 110%;
-				margin-bottom: 3px;
-				margin-right: 3.5em;
-				padding: 2px 5px;
+				margin: 0 -15px 4px -20px;
+				padding: 2px 3.4em 2px 6px;
 			}
 
 			.serviceDescriptionText {
-				clear: both;
-				margin-left: 20px;
 			}
 
 			dl.serviceArgumentsList {
 				list-style-type: none;
-				margin-left: 20px;
-				margin-top: 0;
 			}
 
 			dl.serviceArgumentsList > dt {
@@ -113,15 +154,22 @@
 			}
 			
 			ol#versionsList {
+				list-style-position: outside;
 				list-style-type: none;
 			}
 
 			ol#versionsList > li {
 				margin-top: 15px;
+				padding-left: 20px;
 			}
 
 			ul.changesList {
+				list-style-position: inside;
 				list-style-type: disc;
+			}
+
+			ul.changesList>li {
+				padding-left: 20px;
 			}
 		</style>
 	</head>
@@ -129,13 +177,14 @@
 		<p class="softwareName">WinampC <span id="pluginVersion">version</span></p>
 
 		<p>
-			Copyright &#0169; 2003&#8211;<span id="lastCopyrightYear">year</span> Artur Dorochowicz <br />
+			Copyright &copy; 2003&ndash;<span id="lastCopyrightYear">year</span> Artur Dorochowicz <br />
 			All rights reserved
 		</p>
 		<p>
 			WinampC plugin is freeware software (free as in free beer). <br />
 			Released under the terms of licence agreement specified in <a href="licence.txt">licence.txt</a> file.
 		</p>
+		
 		<hr/>
 
 		<h1>Table of contents</h1>
@@ -190,7 +239,7 @@
 		</p>
 		<p>
 			Specify <span class="code">class_name</span> argument if given command should be issued against
-			specific Winamp instance (identified by Winamp's window class name).
+			specific Winamp instance (identified by Winamp's <a href="http://msdn2.microsoft.com/en-us/library/ms633574(VS.85).aspx">window class name</a>).
 			If you omit this argument or specify an empty string (<span class="code">""</span>), default class
 			name (which is <span class="code">"Winamp v1.x"</span>) will be used. The <span class="code">class_name</span> argument enables
 			you to control many Winamp instances at the same time as long as they use

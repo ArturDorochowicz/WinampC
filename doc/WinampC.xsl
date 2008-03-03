@@ -27,7 +27,7 @@
 		select="generate-id(//htm:h1[normalize-space(.)='List of services'][1])"/>
 
 	<!-- copy input to output -->
-	<xsl:template match="*|@*">
+	<xsl:template match="node()|@*">
 		<xsl:copy xml:space="default">
 			<xsl:apply-templates select="node()|@*"/>
 		</xsl:copy>
@@ -100,9 +100,6 @@
 			<xsl:for-each select="$services/service">
 				<xsl:sort select="@name" order="ascending"/>
 				<li id="{generate-id()}">
-					<div class="jumpToListLink">
-						<a href="#{$listOfServicesHeaderId}">Go up</a>
-					</div>
 					<div class="serviceDefinition">
 						<xsl:value-of select="normalize-space(@name)"/>
 						<xsl:text>( </xsl:text>
@@ -113,6 +110,9 @@
 							</xsl:if>
 						</xsl:for-each>
 						<xsl:text> )</xsl:text>
+					</div>
+					<div class="jumpToListLink">
+						<a href="#{$listOfServicesHeaderId}">Go up</a>
 					</div>
 
 					<div class="serviceDescriptionText">
