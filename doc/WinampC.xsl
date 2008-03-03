@@ -115,20 +115,20 @@
 						<a href="#{$listOfServicesHeaderId}">Go up</a>
 					</div>
 
-					<div class="serviceDescriptionText">
+					<p>
 						<xsl:apply-templates select="description"/>
-					</div>
+					</p>
 
 					<xsl:if test="count(requirements) > 0">
 						<h4>Requirements</h4>
-						<div class="serviceDescriptionText">
+						<p>
 							<xsl:value-of select="normalize-space(requirements)"/>
-						</div>
+						</p>
 					</xsl:if>
 
 					<xsl:if test="count(argument) > 0">
 						<h4>Parameters</h4>
-						<dl class="serviceArgumentsList">
+						<dl>
 							<xsl:for-each select="argument">
 								<dt>
 									<xsl:text>[</xsl:text>
@@ -144,17 +144,21 @@
 					</xsl:if>
 
 					<h4>Return value</h4>
-					<div class="serviceDescriptionText">
-						<xsl:choose>
-							<xsl:when test="count(return-value) > 0">
-								[<xsl:value-of select="normalize-space(return-value/@type)"/>]
-								<xsl:apply-templates select="return-value"/>
-							</xsl:when>
-							<xsl:otherwise>
-								No return value.
-							</xsl:otherwise>
-						</xsl:choose>
-					</div>
+					<xsl:choose>
+						<xsl:when test="count(return-value) > 0">
+							<dl>
+								<dt>
+									<xsl:value-of select="normalize-space(return-value/@type)"/>
+								</dt>
+								<dd>
+									<xsl:apply-templates select="return-value"/>
+								</dd>
+							</dl>
+						</xsl:when>
+						<xsl:otherwise>
+							<p>No return value.</p>
+						</xsl:otherwise>
+					</xsl:choose>
 				</li>
 			</xsl:for-each>
 		</xsl:copy>

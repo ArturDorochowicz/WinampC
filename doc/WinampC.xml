@@ -132,20 +132,21 @@
 				padding: 2px 3.4em 2px 6px;
 			}
 
-			.serviceDescriptionText {
+			ul#servicesDescriptions>li p {
+				margin: 0;
 			}
 
-			dl.serviceArgumentsList {
+			ul#servicesDescriptions>li>dl {
 				list-style-type: none;
 			}
 
-			dl.serviceArgumentsList > dt {
+			ul#servicesDescriptions>li>dl>dt {
 				font-size: 95%;
 				font-style: italic;
 				margin-top: 2px;
 			}
 			
-			dl.serviceArgumentsList > dd {
+			ul#servicesDescriptions>li>dl>dd {
 				margin-left: 30px;
 			}
 
@@ -298,19 +299,19 @@
 				<div class="serviceDefinition">
 					example_service( argument1, argument2, argument3 )
 				</div>
-				<div class="serviceDescriptionText">
+				<p>
 					The description of the example_service. The description of the example_service.
 					The description of the example_service. The description of the example_service.
 					The description of the example_service. The description of the example_service.
-				</div>
+				</p>
 
 				<h4>Requirements</h4>
-				<div class="serviceDescriptionText">
+				<p>
 					The requirements go here.
-				</div>
+				</p>
 
 				<h4>Parameters</h4>
-				<dl class="serviceArgumentsList">
+				<dl>
 					<dt>
 						[string] argument1
 					</dt>
@@ -332,9 +333,10 @@
 				</dl>
 
 				<h4>Return value</h4>
-				<div class="serviceDescriptionText">
-					[mixed] The return value description.
-				</div>
+				<dl>
+					<dt>mixed</dt>
+					<dd>The return value description.</dd>					
+				</dl>
 			</li>
 		</ul>
 		
