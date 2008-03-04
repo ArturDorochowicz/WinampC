@@ -13,8 +13,7 @@
 		omit-xml-declaration="yes"
 		method="xml"
 		doctype-public="-//W3C//DTD XHTML 1.1//EN"
-		doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"
-		cdata-section-elements="style"/>
+		doctype-system="http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"/>
 
 	<!-- declare parameters and their default values -->
 	<xsl:param name="pluginVersion" select="'x.x.x'"/>
@@ -30,6 +29,15 @@
 	<xsl:template match="node()|@*">
 		<xsl:copy xml:space="default">
 			<xsl:apply-templates select="node()|@*"/>
+		</xsl:copy>
+	</xsl:template>
+
+	<!-- copy the style without escaping the contents -->
+	<xsl:template match="//htm:style">
+		<xsl:copy>
+			<!-- let attributes be copied -->
+			<xsl:apply-templates select="@*"/>
+			<xsl:value-of select="." disable-output-escaping="yes"/>
 		</xsl:copy>
 	</xsl:template>
 

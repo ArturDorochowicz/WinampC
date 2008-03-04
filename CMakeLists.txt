@@ -35,16 +35,16 @@ get_target_property( WINAMPC_LOCATION "WinampC" "LOCATION" )
 add_custom_target( "Distribution"
 	COMMAND
 		"${CMAKE_COMMAND}"
-			"-E make_directory \"${DISTRIBUTION_DIR}\""
+			-E "make_directory" "${DISTRIBUTION_DIR}"
 	COMMAND
 		"${CMAKE_COMMAND}"
-			"-E copy \"${CMAKE_CURRENT_BINARY_DIR}/doc/WinampC.xhtml\" \"${DISTRIBUTION_DIR}\"" 
+			-E "copy" "${CMAKE_CURRENT_BINARY_DIR}/doc/WinampC.html" "${DISTRIBUTION_DIR}"
 	COMMAND
 		"${CMAKE_COMMAND}"
-			"-E copy \"${WINAMPC_LOCATION}\" \"${DISTRIBUTION_DIR}\""
+			-E "copy" "${WINAMPC_LOCATION}" "${DISTRIBUTION_DIR}"
 	COMMAND
 		"${CMAKE_COMMAND}"
-			"-E copy \"${CMAKE_CURRENT_SOURCE_DIR}/licence.txt\" \"${DISTRIBUTION_DIR}\"" )
+			-E "copy" "${CMAKE_CURRENT_SOURCE_DIR}/licence.txt" "${DISTRIBUTION_DIR}" )
 
 add_dependencies( "Distribution"
 	"WinampC"
