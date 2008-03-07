@@ -54,6 +54,7 @@ add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml"
 		"${XSLT}"
 			--output "${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml"
 			--novalid
+			--nonet
 			--stringparam "servicesPath" "${CMAKE_CURRENT_BINARY_DIR}/services.xml"
 			--stringparam "pluginVersion" "${WINAMPC_VERSION_MAJOR}.${WINAMPC_VERSION_MINOR}.${WINAMPC_VERSION_BUILD}"
 			--stringparam "lastCopyrightYear" "${CURRENT_YEAR}"
@@ -66,18 +67,24 @@ add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml"
 
 
 # Tidy the output from XSL transform
+# Due to some problems with doctype emmited by Tidy (no system indentifier and
+# no way to specify one), we provide it ourselves.
 add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/WinampC.html"
+	COMMAND
+		"${CMAKE_COMMAND}"
+			"-E echo \"<!DOCTYPE HTML PUBLIC \\\"-//W3C//DTD HTML 4.01//EN\\\" \\\"http://www.w3.org/TR/html4/strict.dtd\\\">\""
+			" > \"${CMAKE_CURRENT_BINARY_DIR}/WinampC.html\""
 	COMMAND
 		"${TIDY}"
 			-quiet
 			-utf8
 			-indent
 			-wrap "100"
-			--doctype "strict"
+			--doctype "omit"
 			--break-before-br "no"
 			-ashtml
-			-output "${CMAKE_CURRENT_BINARY_DIR}/WinampC.html"
 			"${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml"
+			>> "${CMAKE_CURRENT_BINARY_DIR}/WinampC.html"
 	DEPENDS
 		"${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml" )
 
