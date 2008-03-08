@@ -67,7 +67,7 @@ add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml"
 
 
 # Tidy the output from XSL transform
-# Due to some problems with doctype emmited by Tidy (no system indentifier and
+# Due to some problems with doctype emitted by Tidy (no system indentifier and
 # no way to specify one), we provide it ourselves.
 add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/WinampC.html"
 	COMMAND
