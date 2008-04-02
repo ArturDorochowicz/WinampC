@@ -176,7 +176,7 @@ static void PerformResponse( ResponseType response_type, const char *response_ms
 }
 
 
-/** Read a string from process memory.
+/** Read a string from memory of a process that owns the specified window.
  *  @param wnd The window handle by which the process is found.
  *  @param src_start The address of the beginning of the string.
  *  @param dst The destination buffer.
@@ -291,10 +291,10 @@ BEGIN_PPRO_SVC( add_track_as_bookmark )
 END_PPRO_SVC
 
 
-/*! <service name="autoload_preset_dialog">
-/*!  <description>Open autoload presets dialog. Doesn't seem to work on Winamp 2.80.</description>
+/*! <service name="dlg_load_autoload_preset">
+/*!  <description>Open "Load auto-load preset" dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( autoload_preset_dialog )
+BEGIN_PPRO_SVC( dlg_load_autoload_preset )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_LOADMP3, 0 );
@@ -302,10 +302,10 @@ BEGIN_PPRO_SVC( autoload_preset_dialog )
 END_PPRO_SVC
 
 
-/*! <service name="autoload_save_preset_dialog">
-/*!  <description>Open autoload preset save dialog. Doesn't seem to work on Winamp 2.80.</description>
+/*! <service name="dlg_save_autoload_preset">
+/*!  <description>Open "Save auto-load preset" dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( autoload_save_preset_dialog )
+BEGIN_PPRO_SVC( dlg_save_autoload_preset )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_SAVEMP3, 0 );
@@ -342,7 +342,7 @@ END_PPRO_SVC
 /*! <service name="get_plist_entry_path">
 /*!  <description>Get full path of playlist entry at specified position.</description>
 /*!  <requirements>Winamp 2.04+</requirements>
-/*!  <argument name="index" type="int">The position. First entry is at 1.</argument>
+/*!  <argument name="index" type="int">The position. First playlist entry is at 1.</argument>
 /*!  <return-value type="string">The path. The path is limited to 531 characters.</return-value>
 /*! </service> */
 BEGIN_PPRO_SVC( get_plist_entry_path )
@@ -514,9 +514,9 @@ END_PPRO_SVC
 BEGIN_PPRO_SVC( change_directory )
 {
 	COPYDATASTRUCT cds;
-	
+
 	STARTUP( 1 );
-	
+
 	cds.dwData = IPC_CHDIR;
 	cds.lpData = argv[0];
 	cds.cbData = strlen( argv[0] ) + 1;
@@ -547,10 +547,10 @@ BEGIN_PPRO_SVC( close_winamp )
 END_PPRO_SVC
 
 
-/*! <service name="configure_visual_plugin">
-/*!  <description>Open configuration window of the current visualisation plugin.</description>
+/*! <service name="dlg_cfg_vis_plugin">
+/*!  <description>Open configuration dialog of the current visualisation plugin.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( configure_visual_plugin )
+BEGIN_PPRO_SVC( dlg_cfg_vis_plugin )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_VISCONF, 0 );
@@ -559,9 +559,9 @@ END_PPRO_SVC
 
 
 /*! <service name="delete_autoload_preset_dialog">
-/*!  <description>Open delete an auto load preset dialog. Doesn't seem to work on Winamp 2.80.</description>
+/*!  <description>Open "Delete auto-load preset" dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( delete_autoload_preset_dialog )
+BEGIN_PPRO_SVC( dlg_del_autoload_preset )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_DELMP3, 0 );
@@ -569,10 +569,10 @@ BEGIN_PPRO_SVC( delete_autoload_preset_dialog )
 END_PPRO_SVC
 
 
-/*! <service name="delete_preset_dialog">
-/*!  <description>Open delete preset dialog. Doesn't seem to work on Winamp 2.80.</description>
+/*! <service name="dlg_del_preset">
+/*!  <description>Open "Delete preset" dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( delete_preset_dialog )
+BEGIN_PPRO_SVC( dlg_del_preset )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_DELPRE, 0 );
@@ -660,9 +660,9 @@ END_PPRO_SVC
 
 
 /*! <service name="file_open_dialog">
-/*!  <description>Open 'Open file(s)' dialog.</description>
+/*!  <description>Open "Open file(s)" dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( file_open_dialog )
+BEGIN_PPRO_SVC( dlg_open_file )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_FILE_PLAY, 0 );
@@ -671,7 +671,8 @@ END_PPRO_SVC
 
 
 /*! <service name="flush_plist_cache_buffer">
-/*!  <description>Flushes the playlist cache buffer.</description>
+/*!  <description>Flush the playlist cache buffer. Makes Winamp refetch the 
+/*!    titles for all of the entries in the current playlist.</description>
 /*! </service> */
 BEGIN_PPRO_SVC( flush_plist_cache_buffer )
 {
@@ -780,14 +781,14 @@ END_PPRO_SVC
 /*! <service name="get_eq_data">
 /*!  <description>Query the status of equaliser.</description>
 /*!  <argument name="position" type="int">Specifies the information to query. <br />
-/*!    0&#8211;9 - The 10 bands of EQ data, <br />
+/*!    0&ndash;9 - The 10 bands of EQ data, <br />
 /*!    10 - the preamp value, <br />
 /*!    11 - enabled status, <br />
 /*!    12 - autoload status.
 /*!  </argument>
 /*!  <return-value type="mixed">The value and its type depend on the specified argument. <br />
-/*!    For 0&#8211;10 - return value is a float from -20 to +20 (db). <br />
-/*!    For 11&#8211;12 - return value is an integer: 0 (disabled) or 1 (enabled). <br />
+/*!    For 0&ndash;10 - return value is a float from -20 to +20 (db). <br />
+/*!    For 11&ndash;12 - return value is an integer: 0 (disabled) or 1 (enabled). <br />
 /*!  </return-value>
 /*!  <requirements>Winamp 2.05+</requirements>
 /*! </service> */
@@ -815,14 +816,14 @@ END_PPRO_SVC
 /*! <service name="get_eq_data63">
 /*!  <description>Query the status of equaliser. Data is returned exactly as received from Winamp.</description>
 /*!  <argument name="position" type="int">Specifies the information to query. <br />
-/*!    0&#8211;9 - The 10 bands of EQ data, <br />
+/*!    0&ndash;9 - The 10 bands of EQ data, <br />
 /*!    10 - the preamp value, <br />
 /*!    11 - enabled status, <br />
 /*!    12 - autoload status.
 /*!  </argument>
 /*!  <return-value type="int">The value depends on the specified argument. <br />
-/*!    For 0&#8211;10 - return value is an integer from 63 to 0 (which corresponds to -20&#8211;+20 db).<br />
-/*!    For 11&#8211;12 - return value is 0 (disabled) or 1 (enabled).<br />
+/*!    For 0&ndash;10 - return value is an integer from 63 to 0 (which corresponds to -20&ndash;+20 db).<br />
+/*!    For 11&ndash;12 - return value is 0 (disabled) or 1 (enabled).<br />
 /*!  </return-value>
 /*!  <requirements>Winamp 2.05+</requirements>
 /*! </service> */
@@ -1412,6 +1413,17 @@ BEGIN_PPRO_SVC( load_default_preset )
 END_PPRO_SVC
 
 
+/*! <service name="save_default_preset">
+/*!  <description>Save default equaliser preset. Doesn't seem to work on Winamp 2.80.</description>
+/*! </service> */
+BEGIN_PPRO_SVC( save_default_preset )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_SAVEDEFAULT, 0 );
+}
+END_PPRO_SVC
+
+
 /*! <service name="load_preset_dialog">
 /*!  <description>Open load preset dialog. Doesn't seem to work on Winamp 2.80.</description>
 /*! </service> */
@@ -1771,14 +1783,14 @@ END_PPRO_SVC
 /*! <service name="set_eq_data">
 /*!  <description>Change the status of equaliser.</description>
 /*!  <argument name="position" type="int">Specifies the information to alter. <br />
-/*!    0&#8211;9 - The 10 bands of EQ data, <br />
+/*!    0&ndash;9 - The 10 bands of EQ data, <br />
 /*!    10 - the preamp value, <br />
 /*!    11 - enabled status, <br />
 /*!    12 - autoload status.
 /*!  </argument>
 /*!  <argument name="value" type="mixed">The accepted value and its type depend on the 'position' argument. <br />
-/*!   For 0&#8211;10 specify a float from -20 to +20 (db). <br />
-/*!   For 11&#8211;12 specify 0 to disable or 1 to enable.
+/*!   For 0&ndash;10 specify a float from -20 to +20 (db). <br />
+/*!   For 11&ndash;12 specify 0 to disable or 1 to enable.
 /*!  </argument>
 /*!  <requirements>Winamp 2.92+</requirements>
 /*! </service> */
@@ -1809,14 +1821,14 @@ END_PPRO_SVC
 /*! <service name="set_eq_data63">
 /*!  <description>Change the status of equaliser using Winamp's data format.</description>
 /*!  <argument name="position" type="int">Specifies the information to alter. <br />
-/*!    0&#8211;9 - The 10 bands of EQ data, <br />
+/*!    0&ndash;9 - The 10 bands of EQ data, <br />
 /*!    10 - the preamp value, <br />
 /*!    11 - enabled status, <br />
 /*!    12 - autoload status.
 /*!  </argument>
 /*!  <argument name="value" type="int">The accepted value depends on the 'position' argument. <br />
-/*!   For 0&#8211;10 specify a number from 63 to 0 (which corresponds to -20&#8211;+20 db). <br />
-/*!   For 11&#8211;12 specify 0 to disable or 1 to enable.
+/*!   For 0&ndash;10 specify a number from 63 to 0 (which corresponds to -20&ndash;+20 db). <br />
+/*!   For 11&ndash;12 specify 0 to disable or 1 to enable.
 /*!  </argument>
 /*!  <requirements>Winamp 2.92+</requirements>
 /*! </service> */

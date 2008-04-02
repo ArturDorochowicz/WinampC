@@ -28,10 +28,10 @@ endif( )
 
 
 # Command that creates services.xml by grepping the source code file.
-add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/services.xml" 
+add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/services.xml"
 	COMMAND
 		"${CMAKE_COMMAND}"
-			"-E echo \"<services>\""
+			"-E echo \"<!DOCTYPE x [<!ENTITY nbsp '&#160;'><!ENTITY ndash '&#8211;'><!ENTITY mdash '&#8212;'>]> <services>\""
 			" > \"${CMAKE_CURRENT_BINARY_DIR}/services.xml\""
 	COMMAND
 		"${GREP}"
