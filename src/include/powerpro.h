@@ -4,12 +4,12 @@
 #define _POWERPRO_H_
 
 
-/* PPRO_VERSION specifies the oldest PowerPro version supported by the plugin
- * that includes this file. The version is specified as 4 digit decimal number.
- * This is the same format that is used by PowerPro variable 'pproversion'.
+/* PPRO_VERSION specifies the oldest PowerPro version supported by a plugin that
+ * includes this file. The version is specified as 4 digit decimal number.
+ * This is the same format that is used in PowerPro variable 'pproversion'.
  */
 #ifndef PPRO_VERSION
-#error "PPRO_VERSION must specify the oldest PowerPro version that you intent to support."
+#error "PPRO_VERSION must specify the oldest PowerPro version that you intend to support."
 #endif
 
 /* 3500 (and earlier) is not supported because it has no PPROSERVICES struct and
@@ -149,7 +149,7 @@ typedef struct PPROSERVICES
 
 /* Help file for 3600 says that one should set **szargs to '\0' if one doesn't
  * want to return anything. Help in 3700 does not mention that.
- * No information available for versions between 3600 and 3700
+ * No information available for versions between 3600 and 3700.
  */
 #if PPRO_VERSION < 3700
 #define PPRO_RETURN_NOTHING_BY_DEFAULT   retval[0] = '\0';
