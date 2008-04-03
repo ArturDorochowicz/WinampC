@@ -345,11 +345,241 @@
 
 		<ol id="versionsList">
 			<li>
-				1.2.0 - 2008-03-XX
+				1.2.0 - 2008-04-04
 				<ul>
 					<li>Developed against Winamp 5 API</li>
-					<li>Numerous breaking changes</li>
 					<li>Requires PowerPro version 4.5.12 or newer to run</li>
+					<li>Numerous breaking changes</li>
+					<li>Fixed: Problem in <span class="code">get_version</span> service (e.g. version 0x5052 became 5.05, it now correctly is 5.52)</li>
+					<li>
+						Changed: <span class="code">get_plist_position1</span> returned 0-based index. Now returns 1-based index and thus mimics the behaviour of <span class="code">get_plist_position</span>.
+					</li>
+					<li>
+						Changed: <span class="code">set_plist_position</span> accepted 0-based index. Now accepts only a 1-based index.
+					</li>
+					<li>
+						Changed: <span class="code">get_eq_data</span> for some arguments returns PowerPro floats.
+					</li>
+					<li>
+						Changed: <span class="code">set_eq_data</span> accepts PowerPro float type argument in specific cases.
+					</li>
+					<li>
+						Changed: <span class="code">jump_to_time</span> returns error code
+					</li>
+					<li>
+						Changed: <span class="code">play_any_audio_cd</span> erroneously claimed to support up to 26 drives.
+						In fact it supports only 4 drives. corrected implementation and documentation.
+					</li>
+					
+					<li>
+						New service: <span class="code">add_bookmark</span>
+					</li>
+					<li>
+						New service: <span class="code">get_config_dir</span>
+					</li>
+					<li>
+						New service: <span class="code">get_file_metadata</span>
+					</li>
+					<li>
+						New service: <span class="code">get_panning127</span>
+					</li>
+					<li>
+						New service: <span class="code">get_panning</span>
+					</li>
+					<li>
+						New service: <span class="code">get_plist_entry_metadata</span>
+					</li>
+					<li>
+						New service: <span class="code">get_plist_entry_path</span>
+					</li>
+					<li>
+						New service: <span class="code">get_plist_entry_path</span>
+					</li>
+					<li>
+						New service: <span class="code">get_plist_entry_title</span>
+					</li>
+					<li>
+						New service: <span class="code">get_plist_manual_advance</span>
+					</li>
+					<li>
+						New service: <span class="code">get_plist_selected_metadata</span>
+					</li>
+					<li>
+						New service: <span class="code">get_plist_selected_title</span>
+					</li>
+					<li>
+						New service: <span class="code">get_plugin_dir</span>
+					</li>
+					<li>
+						New service: <span class="code">get_rating</span>
+					</li>
+					<li>
+						New service: <span class="code">get_samplerate_hz</span>
+					</li>
+					<li>
+						New service: <span class="code">get_time_display_mode</span>
+					</li>
+					<li>
+						New service: <span class="code">get_video_height</span>
+					</li>
+					<li>
+						New service: <span class="code">get_video_width</span>
+					</li>
+					<li>
+						New service: <span class="code">get_volume255</span>
+					</li>
+					<li>
+						New service: <span class="code">get_volume</span>
+					</li>
+					<li>
+						New service: <span class="code">get_winamp_ini_path</span>
+					</li>
+					<li>
+						New service: <span class="code">get_winamp_m3u_dir</span>
+					</li>
+					<li>
+						New service: <span class="code">is_double_size</span>
+					</li>
+					<li>
+						New service: <span class="code">is_fullscreen</span>
+					</li>
+					<li>
+						New service: <span class="code">is_running</span>
+					</li>
+					<li>
+						New service: <span class="code">is_vis_running</span>
+					</li>
+					<li>
+						New service: <span class="code">is_wnd_in_wndshade</span>
+					</li>
+					<li>
+						New service: <span class="code">is_wnd_visible</span>
+					</li>
+					<li>
+						New service: <span class="code">move_10_tracks_forward</span>
+					</li>
+					<li>
+						New service: <span class="code">save_default_preset</span>
+					</li>
+					<li>
+						New service: <span class="code">set_plist_manual_advance</span>
+					</li>
+					<li>
+						New service: <span class="code">set_rating</span>
+					</li>
+					<li>
+						New service: <span class="code">set_time_display_mode</span>, replaces removed services <span class="code">display_time_remaining</span> and <span class="code">display_time_elapsed</span>
+					</li>
+					<li>
+						New service: <span class="code">windows_disable</span>
+					</li>
+					<li>
+						New service: <span class="code">windows_enable</span>
+					</li>
+
+					<li>
+						Service renamed: <span class="code">add_file_to_plist</span> to <span class="code">enqueue_file</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">autoload_preset_dialog</span> to <span class="code">dlg_load_autoload_preset</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">autoload_save_preset_dialog</span> to <span class="code">dlg_save_autoload_preset</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">caption</span> to <span class="code">caption_full</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">configure_visual_plugin</span> to <span class="code">dlg_cfg_vis_plugin</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">delete_autoload_preset_dialog</span> to <span class="code">dlg_del_autoload_preset</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">delete_plist</span> to <span class="code">clear_plist</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">delete_preset_dialog</span> to <span class="code">dlg_del_preset</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">execute_visual_plugin</span> to <span class="code">start_vis_plugin</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">file_open_dialog</span> to <span class="code">dlg_open_file</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">get_number_of_channels</span> to <span class="code">get_num_channels</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">jump_to_file_dialog</span> to <span class="code">dlg_jump_to_file</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">jump_to_time_dialog</span> to <span class="code">dlg_jump_to_time</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">load_preset_dialog</span> to <span class="code">dlg_load_preset</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">load_preset_from_eq</span> to <span class="code">dlg_load_preset_from_eqf</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">open_about_box</span> to <span class="code">dlg_about_winamp</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">open_file_info_box</span> to <span class="code">dlg_file_info</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">open_preferences</span> to <span class="code">dlg_preferences</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">open_skin_selector</span> to <span class="code">dlg_skin_selector</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">open_url_dialog</span> to <span class="code">dlg_open_url</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">open_visual_plugin_options</span> to <span class="code">dlg_vis_plugin_options</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">play_selected</span> to <span class="code">play</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">reload_current_skin</span> to <span class="code">reload_skin</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">save_preset_dialog</span> to <span class="code">dlg_save_preset</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">save_preset_to_eqf</span> to <span class="code">dlg_save_preset_to_eqf</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">show_edit_bookmarks</span> to <span class="code">dlg_edit_bookmarks</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">song_and_number</span> to <span class="code">caption_num_and_title</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">song_name</span> to <span class="code">caption_title</span>
+					</li>
+
+					<li>
+						Service removed: <span class="code">block_minibrowser</span>
+					</li>
+					<li>
+						Service removed: <span class="code">display_elapsed_time</span>, <span class="code">display_remaining_time</span>. Replaced by <span class="code">set_display_time_mode</span>.
+					</li>
+					<li>
+						Service removed: <span class="code">open_visual_options</span>
+					</li>
+					<li>
+						Service removed: <span class="code">toggle_minibrowser</span>
+					</li>
+					<li>
+						Service removed: <span class="code">toggle_title_scrolling</span>
+					</li>
+					<li>
+						Service removed: <span class="code">unblock_minibrowser</span>
+					</li>
 				</ul>
 			</li>
 			<li>
@@ -401,8 +631,8 @@
 
 		<h1>Contacting the author</h1>
 
-		<p>All comments, feature requests, bug reports are welcome and greatly appreciated.<br/>
-			Please use Yahoo PowerPro group for any of the above.
+		<p>All comments, feature requests, bug reports are welcome and appreciated.<br/>
+			Please use Yahoo PowerPro group to contact the author.
 		</p>
 
 	</body>
