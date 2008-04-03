@@ -176,6 +176,30 @@ static void PerformResponse( ResponseType response_type, const char *response_ms
 }
 
 
+/** Find Winamp process by window it owns and open it with specified
+ *  access rights. Returned handle must be closed with CloseHandle.
+**/
+HANDLE OpenWinampProcess( HWND wnd, DWORD access )
+{
+	DWORD process_id = 0;
+
+	GetWindowThreadProcessId( wnd, &process_id );
+	return OpenProcess( access, FALSE, process_id );	
+}
+
+
+void* AllocProcessMem( HANDLE process, DWORD size )
+{
+	return VirtualAllocEx( process, NULL, size, MEM_COMMIT, PAGE_READWRITE );
+}
+
+
+BOOL FreeProcessMem( HANDLE process, void* remote_mem )
+{
+	return VirtualFreeEx( process, remote_mem, 0, MEM_RELEASE );
+}
+
+
 /** Read a string from memory of a process that owns the specified window.
  *  @param wnd The window handle by which the process is found.
  *  @param src_start The address of the beginning of the string.
@@ -186,14 +210,11 @@ void ReadStringFromProcessMemory( HWND wnd, const void *src_start, char *dst, si
 {
 	if( dst_size > 0 )
 	{
-		DWORD process_id;
-		HANDLE process;
+		HANDLE process = OpenWinampProcess( wnd, PROCESS_VM_READ );
 
 		dst[0] = '\0';
 
-		GetWindowThreadProcessId( wnd, &process_id );
-		process = OpenProcess( PROCESS_VM_READ, 0, process_id );
-		if( process != INVALID_HANDLE_VALUE )
+		if( process != NULL )
 		{
 			SIZE_T bytes_read;
 
@@ -239,10 +260,11 @@ static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, unsigned int ar
 	if( NULL == winamp_wnd ) return;
 
 
-/* Argument types used in documentation are:
+/* Argument types used in the documentation are:
    string - string value, possible PowerPro arguments: integer (is converted to string), string 
    int - integer value, possible PowerPro arguments: integer, string (containing an integer), float (is truncated to integer)
    float - float value, possible PowerPro arguments: integer, string (containing a float), float
+   mixed
 */
 
 
@@ -313,28 +335,191 @@ BEGIN_PPRO_SVC( dlg_save_autoload_preset )
 END_PPRO_SVC
 
 
-/*! <service name="block_minibrowser">
-/*!  <description>Block the Minibrowser from updates.</description>
-/*!  <requirements>Winamp 2.4+</requirements>
-/*! </service> */
-BEGIN_PPRO_SVC( block_minibrowser )
-{
-	STARTUP( 0 );
-	PostMessage( winamp_wnd, WM_WA_IPC, 1, IPC_MBBLOCK );
-}
-END_PPRO_SVC
-
-
-/*! <service name="caption">
+/*! <service name="caption_full">
 /*!  <description>Get full caption of the Winamp window. This is something like: 'Number. Song title - Winamp'.
 /*!   Obviously, Winamp's option 'Scroll song title in the Windows taskbar' influences the output from this service.
 /*!  </description>
 /*!  <return-value type="string">The caption of the Winamp window.</return-value>
 /*! </service> */
-BEGIN_PPRO_SVC( caption )
+BEGIN_PPRO_SVC( caption_full )
 {
 	STARTUP( 0 );
 	GetWindowText( winamp_wnd, retval, retval_size );
+}
+END_PPRO_SVC
+
+
+static unsigned int GetCurrentPlistEntryIndex( HWND winamp_wnd )
+{
+	return SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETLISTPOS );
+}
+
+
+static void GetPlistEntryPath( HWND winamp_wnd, unsigned int index, char *file_path, size_t file_path_size )
+{
+	if( file_path_size > 0 )
+	{
+		const void *path = (const void*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
+
+		if( path != NULL )
+		{
+			ReadStringFromProcessMemory( winamp_wnd, path, file_path, file_path_size );
+		}
+		else 
+		{
+			file_path[0] = '\0';
+		}
+	}
+}
+
+
+static void GetPlistEntryTitle( HWND winamp_wnd, unsigned int index, char *title, size_t title_size )
+{
+	if( title_size > 0 )
+	{
+		const void *t = (const void*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTTITLE );
+		if( t != NULL )
+		{
+			ReadStringFromProcessMemory( winamp_wnd, t, title, title_size );
+		}
+		else
+		{
+			title[0] = '\0';
+		}
+	}
+}
+
+
+static void GetFileMetadata( const char *file, const void *remote_file,
+	const char *metadata, HWND winamp_wnd, char *retval, size_t retval_size )
+{
+	HANDLE winamp;
+
+	if( retval_size > 0 )
+		retval[0] = '\0';
+	else
+		return;
+
+	if( file != NULL && remote_file != NULL )
+		return;
+
+	winamp = OpenWinampProcess( winamp_wnd,
+			PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ );
+
+	if( winamp != NULL )
+	{
+		size_t filename_size = ( file != NULL ? strlen( file ) + 1 : 0 );
+		size_t metadata_size = strlen( metadata ) + 1;
+		extendedFileInfoStruct info;
+		extendedFileInfoStruct *remote_info = AllocProcessMem( winamp, sizeof( remote_info ) );
+
+		info.filename = ( file != NULL ? AllocProcessMem( winamp, filename_size ) : remote_file );
+		info.metadata = AllocProcessMem( winamp, metadata_size );
+		info.ret = AllocProcessMem( winamp, retval_size );
+		info.retlen = retval_size;
+
+		if( remote_info != NULL && info.filename != NULL 
+			&& info.metadata != NULL && info.ret != NULL )
+		{
+			size_t bytes;
+
+			WriteProcessMemory( winamp, remote_info, &info, sizeof( info ), &bytes );
+			if( bytes == sizeof( info ) )
+			{
+				if( file != NULL )
+					WriteProcessMemory( winamp, (void*) info.filename, file, filename_size, &bytes );
+				else
+					bytes = filename_size;
+
+				if( bytes == filename_size )
+				{
+					WriteProcessMemory( winamp, (void*) info.metadata, metadata, metadata_size, &bytes );
+					if( bytes == metadata_size )
+					{
+						LRESULT result = SendMessage( winamp_wnd, WM_WA_IPC, (WPARAM) remote_info, IPC_GET_EXTENDED_FILE_INFO );
+						if( 1 == result )
+						{
+							ReadProcessMemory( winamp, info.ret, retval, retval_size, &bytes );
+							if( bytes > 0 )   /* make sure whatever we've read is null-terminated */
+							{
+								retval[ bytes - 1 ] = '\0';
+							}
+						}
+					}
+
+				}
+			}
+		}
+
+		FreeProcessMem( winamp, remote_info );
+		if( file != NULL )
+			FreeProcessMem( winamp, (void*) info.filename );
+		FreeProcessMem( winamp, (void*) info.metadata );
+		FreeProcessMem( winamp, info.ret );
+		CloseHandle( winamp );
+	}
+}
+
+
+/*! <service name="get_plist_selected_metadata">
+/*!  <description>Get metadata information from current entry in the playlist.</description>
+/*!  <requirements>Winamp 2.9+</requirements>
+/*!  <argument name="metadata" type="string">The metadata field to query. Among possible values are: title, artist, album, track, year etc.</argument>
+/*!  <return-value type="string">The value of metadata field. Returned data is limited to 531 characters.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( get_plist_selected_metadata )
+{
+	unsigned int index;
+	const void *file;
+
+	STARTUP( 1 );
+
+	index = GetCurrentPlistEntryIndex( winamp_wnd );
+	file = (const void*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
+	if( file != NULL )
+	{
+		GetFileMetadata( NULL, file, argv[0], winamp_wnd, retval, retval_size );
+	}
+}
+END_PPRO_SVC
+
+
+/*! <service name="get_plist_entry_metadata">
+/*!  <description>Get metadata information from specified entry in the playlist.</description>
+/*!  <requirements>Winamp 2.9+</requirements>
+/*!  <argument name="index" type="string">The position in the playlist. First playlist entry is at 1.</argument>
+/*!  <argument name="metadata" type="string">The metadata field to query. Among possible values are: title, artist, album, track, year etc.</argument>
+/*!  <return-value type="string">The value of metadata field. Returned data is limited to 531 characters.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( get_plist_entry_metadata )
+{
+	unsigned int index;
+	const void *file;
+	
+	STARTUP( 2 );
+
+	index = (unsigned int) ( ppro_svcs->DecodeFloat( argv[0] ) - 1 );
+	file = (const void*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
+	if( file != NULL )
+	{
+		GetFileMetadata( NULL, file, argv[1], winamp_wnd, retval, retval_size );
+	}
+}
+END_PPRO_SVC
+
+
+/*! <service name="get_file_metadata">
+/*!  <description>Get metadata information from specified file.</description>
+/*!  <requirements>Winamp 2.9+</requirements>
+/*!  <argument name="file" type="string">The file path.</argument>
+/*!  <argument name="metadata" type="string">The metadata field to query. Among possible values are: title, artist, album, track, year etc.</argument>
+/*!  <return-value type="string">The value of metadata field. Returned data is limited to 531 characters.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( get_file_metadata )
+{	
+	STARTUP( 2 );
+
+	GetFileMetadata( argv[0], NULL, argv[1], winamp_wnd, retval, retval_size );
 }
 END_PPRO_SVC
 
@@ -347,18 +532,13 @@ END_PPRO_SVC
 /*! </service> */
 BEGIN_PPRO_SVC( get_plist_entry_path )
 {
-	WPARAM index;
-	char *file_path;
+	unsigned int index;
 
 	STARTUP( 1 );
 
 	/* change 1-based input into Winamp's 0-based index */
-	index = (WPARAM) ppro_svcs->DecodeFloat( argv[0] ) - 1;
-	file_path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
-	if( file_path != NULL )
-	{
-		ReadStringFromProcessMemory( winamp_wnd, file_path, retval, retval_size );
-	}
+	index = (unsigned int) ( ppro_svcs->DecodeFloat( argv[0] ) - 1 );
+	GetPlistEntryPath( winamp_wnd, index, retval, retval_size );
 }
 END_PPRO_SVC
 
@@ -371,18 +551,13 @@ END_PPRO_SVC
 /*! </service> */
 BEGIN_PPRO_SVC( get_plist_entry_title )
 {
-	WPARAM index;
-	const char *title;
+	unsigned int index;
 
 	STARTUP( 1 );
 
 	/* change 1-based input into Winamp's 0-based index */
-	index = (WPARAM) ppro_svcs->DecodeFloat( argv[0] ) - 1;
-	title = (const char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTTITLE );
-	if( title != NULL )
-	{
-		ReadStringFromProcessMemory( winamp_wnd, title, retval, retval_size );
-	}
+	index = (unsigned int) ( ppro_svcs->DecodeFloat( argv[0] ) - 1 );
+	GetPlistEntryTitle( winamp_wnd, index, retval, retval_size );
 }
 END_PPRO_SVC
 
@@ -394,17 +569,12 @@ END_PPRO_SVC
 /*! </service> */
 BEGIN_PPRO_SVC( get_plist_selected_path )
 {
-	LRESULT index;
-	char *file_path;
+	unsigned int index;
 	
 	STARTUP( 0 );
 
-	index = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETLISTPOS );
-	file_path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
-	if( file_path != NULL )
-	{
-		ReadStringFromProcessMemory( winamp_wnd, file_path, retval, retval_size );
-	}
+	index = GetCurrentPlistEntryIndex( winamp_wnd );
+	GetPlistEntryPath( winamp_wnd, index, retval, retval_size );
 }
 END_PPRO_SVC
 
@@ -417,16 +587,11 @@ END_PPRO_SVC
 BEGIN_PPRO_SVC( get_plist_selected_title )
 {
 	LRESULT index;
-	char *title;
 
 	STARTUP( 0 );
 
-	index = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETLISTPOS );
-	title = (char*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTTITLE );
-	if( title != NULL )
-	{
-		ReadStringFromProcessMemory( winamp_wnd, title, retval, retval_size );
-	}
+	index = GetCurrentPlistEntryIndex( winamp_wnd );
+	GetPlistEntryTitle( winamp_wnd, index, retval, retval_size );
 }
 END_PPRO_SVC
 
@@ -558,7 +723,7 @@ BEGIN_PPRO_SVC( dlg_cfg_vis_plugin )
 END_PPRO_SVC
 
 
-/*! <service name="delete_autoload_preset_dialog">
+/*! <service name="dlg_del_autoload_preset">
 /*!  <description>Open "Delete auto-load preset" dialog.</description>
 /*! </service> */
 BEGIN_PPRO_SVC( dlg_del_autoload_preset )
@@ -576,28 +741,6 @@ BEGIN_PPRO_SVC( dlg_del_preset )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_DELPRE, 0 );
-}
-END_PPRO_SVC
-
-
-/*! <service name="display_elapsed_time">
-/*!  <description>Set time display mode to elapsed time.</description>
-/*! </service> */
-BEGIN_PPRO_SVC( display_elapsed_time )
-{
-	STARTUP( 0 );
-	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_ELAPSED, 0 );
-}
-END_PPRO_SVC
-
-
-/*! <service name="display_remaining_time">
-/*!  <description>Set time display mode to remaining time.</description>
-/*! </service> */
-BEGIN_PPRO_SVC( display_remaining_time )
-{
-	STARTUP( 0 );
-	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_REMAINING, 0 );
 }
 END_PPRO_SVC
 
@@ -648,10 +791,10 @@ BEGIN_PPRO_SVC( enqueue_file_w )
 END_PPRO_SVC
 
 
-/*! <service name="execute_visual_plugin">
-/*!  <description>Execute current visualisation plugin.</description>
+/*! <service name="start_vis_plugin">
+/*!  <description>Start current visualisation plugin.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( execute_visual_plugin )
+BEGIN_PPRO_SVC( start_vis_plugin )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_VISPLUGIN, 0 );
@@ -659,7 +802,7 @@ BEGIN_PPRO_SVC( execute_visual_plugin )
 END_PPRO_SVC
 
 
-/*! <service name="file_open_dialog">
+/*! <service name="dlg_open_file">
 /*!  <description>Open "Open file(s)" dialog.</description>
 /*! </service> */
 BEGIN_PPRO_SVC( dlg_open_file )
@@ -689,74 +832,6 @@ BEGIN_PPRO_SVC( forward_5sec )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_FFWD5S, 0 );
-}
-END_PPRO_SVC
-
-
-/*! <service name="get_num_audio_tracks">
-/*!  <description>Get number of audio tracks for the currently playing item.</description>
-/*!  <requirements>Winamp 5.04+</requirements>
-/*!  <return-value type="int">The number of audio tracks.</return-value>
-/*! </service> */
-BEGIN_PPRO_SVC( get_num_audio_tracks )
-{
-	LRESULT num;
-
-	STARTUP( 0 );
-
-	num = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETNUMAUDIOTRACKS );
-	PPRO_SVC_RETURN_UINT( num );
-}
-END_PPRO_SVC
-
-
-/*! <service name="get_audio_track_index">
-/*!  <description>Get index of current audio track for the currently playing item.</description>
-/*!  <requirements>Winamp 5.04+</requirements>
-/*!  <return-value type="int">The index.</return-value>
-/*! </service> */
-BEGIN_PPRO_SVC( get_audio_track_index )
-{
-	LRESULT index;
-
-	STARTUP( 0 );
-
-	index = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETAUDIOTRACK );
-	PPRO_SVC_RETURN_UINT( index );
-}
-END_PPRO_SVC
-
-
-/*! <service name="get_num_video_tracks">
-/*!  <description>Get number of video tracks for the currently playing item.</description>
-/*!  <requirements>Winamp 5.04+</requirements>
-/*!  <return-value type="int">The number of video tracks.</return-value>
-/*! </service> */
-BEGIN_PPRO_SVC( get_num_video_tracks )
-{
-	LRESULT num;
-
-	STARTUP( 0 );
-
-	num = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETNUMVIDEOTRACKS );
-	PPRO_SVC_RETURN_UINT( num );
-}
-END_PPRO_SVC
-
-
-/*! <service name="get_video_track_index">
-/*!  <description>Get index of current video track for the currently playing item.</description>
-/*!  <requirements>Winamp 5.04+</requirements>
-/*!  <return-value type="int">The index.</return-value>
-/*! </service> */
-BEGIN_PPRO_SVC( get_video_track_index )
-{
-	LRESULT index;
-
-	STARTUP( 0 );
-
-	index = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETVIDEOTRACK );
-	PPRO_SVC_RETURN_UINT( index );
 }
 END_PPRO_SVC
 
@@ -803,7 +878,7 @@ BEGIN_PPRO_SVC( get_eq_data )
 	data = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_GETEQDATA );
 	if( position >= 0 && position <= 10 )
 	{
-		PPRO_SVC_RETURN_FLOAT( - (double) data * (20 + 20 ) / 63 + 20 );
+		PPRO_SVC_RETURN_FLOAT( 20 - (double) data * (20 + 20 ) / 63 );
 	}
 	else
 	{
@@ -877,12 +952,12 @@ BEGIN_PPRO_SVC( get_net_status )
 END_PPRO_SVC
 
 
-/*! <service name="get_number_of_channels">
+/*! <service name="get_num_channels">
 /*!  <description>Get number of channels of the current song.</description>
 /*!  <requirements>Winamp 2.05+</requirements>
 /*!  <return-value type="int">Number of channels.</return-value>
 /*! </service> */
-BEGIN_PPRO_SVC( get_number_of_channels )
+BEGIN_PPRO_SVC( get_num_channels )
 {
 	LRESULT channels;
 	
@@ -1013,7 +1088,7 @@ BEGIN_PPRO_SVC( get_position )
 END_PPRO_SVC
 
 
-/*! <service name="get_position">
+/*! <service name="get_position_in_sec">
 /*!  <description>Get position in the current track.</description>
 /*!  <return-value type="int">The position in seconds.</return-value>
 /*! </service> */
@@ -1116,7 +1191,7 @@ END_PPRO_SVC
 
 /*! <service name="get_time_display_mode">
 /*!  <description>Get time display mode.</description>
-/*!  <return-value type="int">1 - displaying elapsed time, 0 - displaying remaining time.</return-value>
+/*!  <return-value type="int">0 - displaying elapsed time, 1 - displaying remaining time.</return-value>
 /*!  <requirements>Winamp 2.05+</requirements>
 /*! </service> */
 BEGIN_PPRO_SVC( get_time_display_mode )
@@ -1127,6 +1202,28 @@ BEGIN_PPRO_SVC( get_time_display_mode )
 
 	mode = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETTIMEDISPLAYMODE );
 	PPRO_SVC_RETURN_UINT( mode );
+}
+END_PPRO_SVC
+
+
+/*! <service name="set_time_display_mode">
+/*!  <description>Set time display mode.</description>
+/*!  <argument name="mode" type="int">The display mode: 0 - elapsed time, 1 - remaining time.</argument>
+/*! </service> */
+BEGIN_PPRO_SVC( set_time_display_mode )
+{
+	WPARAM mode;
+
+	STARTUP( 1 );
+
+	mode = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
+	switch( mode )
+	{
+	case 0: mode = WINAMP_OPTIONS_ELAPSED;    break;
+	case 1: mode = WINAMP_OPTIONS_REMAINING;  break;
+	default: return;
+	}
+	PostMessage( winamp_wnd, WM_COMMAND, mode, 0 );
 }
 END_PPRO_SVC
 
@@ -1302,7 +1399,8 @@ END_PPRO_SVC
 
 /*! <service name="is_wnd_visible">
 /*!  <description>Check if specified Winamp window is visible.</description>
-/*!  <argument name="window" type="int">The window to check. Possible values are: -1 - main window, 0 - equaliser, 1 - playlist, 2 - minibrowser, 3 - video.</argument>
+/*!  <argument name="window" type="int">The window to check. Possible values are:
+/*!   0 - equaliser, 1 - playlist, 2 - minibrowser, 3 - video.</argument>
 /*!  <return-value type="int">1 if window is visible, 0 if window is hidden.</return-value>
 /*!  <requirements>Winamp 2.9+</requirements>
 /*! </service> */
@@ -1317,7 +1415,6 @@ BEGIN_PPRO_SVC( is_wnd_visible )
 
 	switch( wnd )
 	{
-	case (WPARAM) -1:
 	case IPC_GETWND_EQ:
 	case IPC_GETWND_MB:
 	case IPC_GETWND_PE:
@@ -1331,7 +1428,8 @@ END_PPRO_SVC
 
 
 /*! <service name="is_wnd_in_wndshade">
-/*!  <description>Check if specified Winamp window is set to Windowshade mode.</description>
+/*!  <description>Check if specified Winamp window is set to Windowshade mode.
+/*!   Works with classic Winamp skins only.</description>
 /*!  <argument name="window" type="int">The window to check. Possible values are: -1 - main window, 0 - equaliser, 1 - playlist, 2 - minibrowser, 3 - video.</argument>
 /*!  <return-value type="int">1 if window is set to Windowshade mode, 0 if not.</return-value>
 /*!  <requirements>Winamp 5.04+</requirements>
@@ -1360,10 +1458,10 @@ BEGIN_PPRO_SVC( is_wnd_in_wndshade )
 END_PPRO_SVC
 
 
-/*! <service name="jump_to_file_dialog">
-/*!  <description>Open 'Jump to file' dialog.</description>
+/*! <service name="dlg_jump_to_file">
+/*!  <description>Open "Jump to file" dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( jump_to_file_dialog )
+BEGIN_PPRO_SVC( dlg_jump_to_file )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_JUMPFILE, 0 );
@@ -1391,10 +1489,10 @@ BEGIN_PPRO_SVC( jump_to_time )
 END_PPRO_SVC
 
 
-/*! <service name="jump_to_time_dialog">
-/*!  <description>Open 'Jump to time' dialog.</description>
+/*! <service name="dlg_jump_to_time">
+/*!  <description>Open "Jump to time" dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( jump_to_time_dialog )
+BEGIN_PPRO_SVC( dlg_jump_to_time )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_JUMP, 0 );
@@ -1403,7 +1501,7 @@ END_PPRO_SVC
 
 
 /*! <service name="load_default_preset">
-/*!  <description>Load default equaliser preset. Doesn't seem to work on Winamp 2.80.</description>
+/*!  <description>Load default equaliser preset.</description>
 /*! </service> */
 BEGIN_PPRO_SVC( load_default_preset )
 {
@@ -1414,7 +1512,7 @@ END_PPRO_SVC
 
 
 /*! <service name="save_default_preset">
-/*!  <description>Save default equaliser preset. Doesn't seem to work on Winamp 2.80.</description>
+/*!  <description>Save default equaliser preset.</description>
 /*! </service> */
 BEGIN_PPRO_SVC( save_default_preset )
 {
@@ -1424,10 +1522,10 @@ BEGIN_PPRO_SVC( save_default_preset )
 END_PPRO_SVC
 
 
-/*! <service name="load_preset_dialog">
-/*!  <description>Open load preset dialog. Doesn't seem to work on Winamp 2.80.</description>
+/*! <service name="dlg_load_preset">
+/*!  <description>Open "Load EQ preset" dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( load_preset_dialog )
+BEGIN_PPRO_SVC( dlg_load_preset )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_LOADPRE, 0 );
@@ -1435,10 +1533,10 @@ BEGIN_PPRO_SVC( load_preset_dialog )
 END_PPRO_SVC
 
 
-/*! <service name="load_preset_from_eqf">
-/*!  <description>Load equaliser preset from EQF. Doesn't seem to work on Winamp 2.80.</description>
+/*! <service name="dlg_load_preset_from_eqf">
+/*!  <description>Open "Load preset from EQF" dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( load_preset_from_eqf )
+BEGIN_PPRO_SVC( dlg_load_preset_from_eqf )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, ID_LOAD_EQF, 0 );
@@ -1455,7 +1553,7 @@ static void MinimizeWindow( HWND wnd )
 static void RestoreWindow( HWND wnd, PPROSERVICES *ppro_svcs )
 {
 	ppro_svcs->Show( wnd );
-	SetForegroundWindow( wnd);
+	SetForegroundWindow( wnd );
 }
 
 
@@ -1523,10 +1621,10 @@ BEGIN_PPRO_SVC( next_track )
 END_PPRO_SVC
 
 
-/*! <service name="open_about_box">
-/*!  <description>Open 'About Winamp' window.</description>
+/*! <service name="dlg_about_winamp">
+/*!  <description>Open "About Winamp" window.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( open_about_box )
+BEGIN_PPRO_SVC( dlg_about_winamp )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_HELP_ABOUT, 0 );
@@ -1534,10 +1632,10 @@ BEGIN_PPRO_SVC( open_about_box )
 END_PPRO_SVC
 
 
-/*! <service name="open_file_info_box">
-/*!  <description>Open file info window.</description>
+/*! <service name="dlg_file_info">
+/*!  <description>Open "File info" window.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( open_file_info_box )
+BEGIN_PPRO_SVC( dlg_file_info )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_EDIT_ID3, 0 );
@@ -1545,10 +1643,10 @@ BEGIN_PPRO_SVC( open_file_info_box )
 END_PPRO_SVC
 
 
-/*! <service name="open_preferences">
-/*!  <description>Open preferences window.</description>
+/*! <service name="dlg_preferences">
+/*!  <description>Open "Winamp preferences" window.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( open_preferences )
+BEGIN_PPRO_SVC( dlg_preferences )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_PREFS, 0 );
@@ -1556,10 +1654,10 @@ BEGIN_PPRO_SVC( open_preferences )
 END_PPRO_SVC
 
 
-/*! <service name="open_skin_selector">
-/*!  <description>Open skin selector window.</description>
+/*! <service name="dlg_skin_selector">
+/*!  <description>Open skin selector dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( open_skin_selector )
+BEGIN_PPRO_SVC( dlg_skin_selector )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_SELSKIN, 0 );
@@ -1567,10 +1665,10 @@ BEGIN_PPRO_SVC( open_skin_selector )
 END_PPRO_SVC
 
 
-/*! <service name="open_url_dialog">
-/*!  <description>Open 'Open location' dialog.</description>
+/*! <service name="dlg_open_url">
+/*!  <description>Open "Open URL" dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( open_url_dialog )
+BEGIN_PPRO_SVC( dlg_open_url )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON2_CTRL, 0 );
@@ -1578,21 +1676,10 @@ BEGIN_PPRO_SVC( open_url_dialog )
 END_PPRO_SVC
 
 
-/*! <service name="open_visual_options">
-/*!  <description>Open visualisation options. Doesn't seem to work on Winamp 2.80.</description>
+/*! <service name="dlg_vis_plugin_options">
+/*!  <description>Open "Visualisation plug-ins options" dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( open_visual_options )
-{
-	STARTUP( 0 );
-	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_VISSETUP, 0 );
-}
-END_PPRO_SVC
-
-
-/*! <service name="open_visual_plugin_options">
-/*!  <description>Open visualisation plug-in options.</description>
-/*! </service> */
-BEGIN_PPRO_SVC( open_visual_plugin_options )
+BEGIN_PPRO_SVC( dlg_vis_plugin_options )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_PLGSETUP, 0 );
@@ -1601,7 +1688,7 @@ END_PPRO_SVC
 
 
 /*! <service name="pause_unpause">
-/*!  <description>Pause when playing, start playing when paused.</description>
+/*!  <description>Pause if playing, start playing if paused.</description>
 /*! </service> */
 BEGIN_PPRO_SVC( pause_unpause )
 {
@@ -1625,7 +1712,8 @@ END_PPRO_SVC
 
 /*! <service name="play_any_audio_cd">
 /*!  <description>Begin playing Audio CD in specified drive.</description>
-/*!  <argument name="drive" type="int">The drive number. First CD drive in the system is at 0. Supports up to 4 drives (thus accepted values are: 0, 1, 2, 3.)</argument>
+/*!  <argument name="drive" type="int">The drive number. First CD drive in the system is at 0.
+/*!   Supports up to 4 drives (thus accepted values are: 0, 1, 2, 3.)</argument>
 /*! </service> */
 BEGIN_PPRO_SVC( play_any_audio_cd )
 {
@@ -1652,8 +1740,7 @@ END_PPRO_SVC
 
 /*! <service name="play_button">
 /*!  <description>Same as hitting play button.
-/*!   There's also play_selected service (see below).
-/*!   According to Nullsoft there are some differences between them.
+/*!   There's also play service and according to Nullsoft there are some differences between them.
 /*!  </description>
 /*! </service> */
 BEGIN_PPRO_SVC( play_button )
@@ -1664,10 +1751,10 @@ BEGIN_PPRO_SVC( play_button )
 END_PPRO_SVC
 
 
-/*! <service name="play_selected">
-/*!  <description>Begin playing selected track.</description>
+/*! <service name="play">
+/*!  <description>Start playback.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( play_selected )
+BEGIN_PPRO_SVC( play )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_STARTPLAY );
@@ -1686,10 +1773,10 @@ BEGIN_PPRO_SVC( previous_track )
 END_PPRO_SVC
 
 
-/*! <service name="reload_current_skin">
+/*! <service name="reload_skin">
 /*!  <description>Reload current skin.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( reload_current_skin )
+BEGIN_PPRO_SVC( reload_skin )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_REFRESHSKIN, 0 );
@@ -1758,10 +1845,10 @@ BEGIN_PPRO_SVC( rewind_5sec )
 END_PPRO_SVC
 
 
-/*! <service name="save_preset_dialog">
-/*!  <description>Open save preset dialog. Doesn't seem to work on Winamp 2.80.</description>
+/*! <service name="dlg_save_preset">
+/*!  <description>Open "Save EQ preset" dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( save_preset_dialog )
+BEGIN_PPRO_SVC( dlg_save_preset )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, IDM_EQ_SAVEPRE, 0 );
@@ -1769,10 +1856,10 @@ BEGIN_PPRO_SVC( save_preset_dialog )
 END_PPRO_SVC
 
 
-/*! <service name="save_preset_to_eqf">
-/*!  <description>Save equaliser preset to EQF. Doesn't seem to work on Winamp 2.80.</description>
+/*! <service name="dlg_save_preset_to_eqf">
+/*!  <description>Open "Save equaliser preset to EQF" dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( save_preset_to_eqf )
+BEGIN_PPRO_SVC( dlg_save_preset_to_eqf )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, ID_SAVE_EQF, 0 );
@@ -1806,7 +1893,7 @@ BEGIN_PPRO_SVC( set_eq_data )
 	if( pos >= 0 && pos <= 10 )
 	{
 		double value = ppro_svcs->DecodeFloat( argv[1] );
-		value63 = (WORD) ( ( -value + 20 ) * 63 / ( 20 + 20 ) );
+		value63 = (WORD) ( ( 20 - value ) * 63 / ( 20 + 20 ) );
 	}
 	else
 	{
@@ -1855,12 +1942,12 @@ END_PPRO_SVC
 /*! </service> */
 BEGIN_PPRO_SVC( set_panning )
 {
-	WPARAM panning;
+	double panning;
 
 	STARTUP( 1 );
 
-	panning = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
-	PostMessage( winamp_wnd, WM_WA_IPC, panning * 100 / 127, IPC_SETPANNING );
+	panning = ppro_svcs->DecodeFloat( argv[0] );
+	PostMessage( winamp_wnd, WM_WA_IPC, (WPARAM) (BYTE) ( panning * 127 / 100 ), IPC_SETPANNING );
 }
 END_PPRO_SVC
 
@@ -1989,10 +2076,10 @@ BEGIN_PPRO_SVC( set_volume255 )
 END_PPRO_SVC
 
 
-/*! <service name="show_edit_bookmarks">
-/*!  <description>Show edit bookmarks window.</description>
+/*! <service name="dlg_edit_bookmarks">
+/*!  <description>Open "Edit bookmarks" dialog.</description>
 /*! </service> */
-BEGIN_PPRO_SVC( show_edit_bookmarks )
+BEGIN_PPRO_SVC( dlg_edit_bookmarks )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_EDIT_BOOKMARKS, 0 );
@@ -2026,27 +2113,34 @@ BEGIN_PPRO_SVC( shuffle_on )
 END_PPRO_SVC
 
 
-/** Trim the ending " - Winamp"
+/** Trim the ending " - Winamp ..."
 **/
 static void trim_caption_end( char *caption )
 {
 	static const char winamp[] = " - Winamp";
-	char *p = &caption[strlen( caption ) - strlen( winamp )];
+	char *p = caption;
+	char *last = NULL;
 
-	if( p >= caption && 0 == _stricmp( p, winamp ) )
+	while( NULL != ( p = strstr( p, winamp ) ) )
 	{
-		p = '\0';
+		last = p;
+		p++;
+	}
+
+	if( last != NULL )
+	{
+		*last = '\0';
 	}
 }
 
 
-/*! <service name="song_and_number">
+/*! <service name="caption_num_and_title">
 /*!  <description>Get the track title with preceding playlist entry number. The information is retrieved from Winamp's window caption.
-/*!   In order for this to work properly, Winamp's option 'Scroll song title in the Windows taskbar'
+/*!   In order for this to work properly, Winamp's option "Scroll song title in the Windows taskbar"
 /*!   must be disabled. Otherwise the result is undefined.
 /*!  </description>
 /*! </service> */
-BEGIN_PPRO_SVC( song_and_number )
+BEGIN_PPRO_SVC( caption_num_and_title )
 {
 	char caption[600];
 	STARTUP( 0 );
@@ -2058,13 +2152,13 @@ BEGIN_PPRO_SVC( song_and_number )
 END_PPRO_SVC
 
 
-/*! <service name="song_name">
+/*! <service name="caption_title">
 /*!  <description>Get the title of the current track. The information is retrieved from Winamp's window caption.
 /*!   In order for this to work properly, Winamp's option 'Scroll song title in the Windows taskbar'
 /*!   must be disabled. Otherwise the result is undefined.
 /*!  </description>
 /*! </service> */
-BEGIN_PPRO_SVC( song_name )
+BEGIN_PPRO_SVC( caption_title )
 {	
 	char caption[600];
 	char *p;
@@ -2080,7 +2174,11 @@ BEGIN_PPRO_SVC( song_name )
 	
 	if( p != NULL )
 	{
-		strcpys( retval, retval_size , p + 1 );
+		strcpys( retval, retval_size , p + 2 /* == strlen( ". " ) */ );
+	}
+	else /* The number was not found (there is an option in Winamp to not show it) */
+	{
+		strcpys( retval, retval_size, caption );
 	}
 }
 END_PPRO_SVC
@@ -2141,6 +2239,7 @@ BEGIN_PPRO_SVC( toggle_doublesize )
 }
 END_PPRO_SVC
 
+
 /*! <service name="toggle_easymove">
 /*!  <description>Toggle easy move option.</description>
 /*! </service> */
@@ -2170,17 +2269,6 @@ BEGIN_PPRO_SVC( toggle_main_window )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_MAIN_WINDOW, 0 );
-}
-END_PPRO_SVC
-
-
-/*! <service name="toggle_minibrowser">
-/*!  <description>Toggle visibility of the minibrowser window.</description>
-/*! </service> */
-BEGIN_PPRO_SVC( toggle_minibrowser )
-{
-	STARTUP( 0 );
-	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_MINIBROWSER, 0 );
 }
 END_PPRO_SVC
 
@@ -2240,17 +2328,6 @@ BEGIN_PPRO_SVC( toggle_shuffle )
 END_PPRO_SVC
 
 
-/*! <service name="toggle_title_scrolling">
-/*!  <description>Toggle title scrolling option.</description>
-/*! </service> */
-BEGIN_PPRO_SVC( toggle_title_scrolling )
-{
-	STARTUP( 0 );
-	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_TOGGLE_AUTOSCROLL, 0 );
-}
-END_PPRO_SVC
-
-
 /*! <service name="toggle_windowshade">
 /*!  <description>Toggle window shade option of the Winamp's main window.</description>
 /*! </service> */
@@ -2258,19 +2335,6 @@ BEGIN_PPRO_SVC( toggle_windowshade )
 {
 	STARTUP( 0 );
 	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_OPTIONS_WINDOWSHADE, 0 );
-}
-END_PPRO_SVC
-
-
-/*! <service name="unblock_minibrowser">
-/*!  <description>Unblock the Minibrowser from updates.</description>
-/*!  <requirements>Winamp 2.4+</requirements>
-/*! </service> */
-BEGIN_PPRO_SVC( unblock_minibrowser )
-{
-	STARTUP( 0 );
-
-	PostMessage( winamp_wnd, WM_WA_IPC, 0, IPC_MBBLOCK );
 }
 END_PPRO_SVC
 
