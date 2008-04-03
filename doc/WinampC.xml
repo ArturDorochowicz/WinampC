@@ -143,6 +143,10 @@
 			font-style: italic;
 			margin-top: 2px;
 		}
+		
+		ul#servicesDescriptions>li>dl>dt>span {
+			font-style: normal;
+		}
 
 		ul#servicesDescriptions>li>dl>dd {
 			margin-left: 30px;
@@ -310,19 +314,19 @@
 				<h4>Parameters</h4>
 				<dl>
 					<dt>
-						[string] argument1
+						string <span>argument1</span>
 					</dt>
 					<dd>
 						The argument1 description.
 					</dd>
 					<dt>
-						[float] argument2
+						float <span>argument2</span>
 					</dt>
 					<dd>
 						The argument2 description.
 					</dd>
 					<dt>
-						[int] argument3
+						int <span>argument3</span>
 					</dt>
 					<dd>
 						The argument3 description.

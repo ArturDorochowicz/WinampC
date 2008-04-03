@@ -137,10 +137,11 @@
 						<dl>
 							<xsl:for-each select="argument">
 								<dt>
-									<xsl:text>[</xsl:text>
 									<xsl:value-of select="normalize-space(@type)"/>
-									<xsl:text>] </xsl:text>
-									<xsl:value-of select="normalize-space(@name)"/>
+									<xsl:text> </xsl:text>
+									<span>
+										<xsl:value-of select="normalize-space(@name)"/>
+									</span>
 								</dt>
 								<dd>
 									<xsl:apply-templates select="self::node()"/>
