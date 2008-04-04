@@ -395,6 +395,121 @@ static void GetPlistEntryTitle( HWND winamp_wnd, unsigned int index, char *title
 }
 
 
+/** Release memory allocated in other process for elements of 
+ *  extendedFileInfoStruct and the struct itself.
+ *  Can safely accept NULL values.
+**/
+static void DestroyRemoteExtFileInfoStruct( HANDLE process, void *remote_info, 
+	void *remote_filename, void *remote_metadata, void *remote_ret )
+{
+	if( remote_info != NULL )
+		FreeProcessMem( process, remote_info );
+	if( remote_filename != NULL )
+		FreeProcessMem( process, (void*) remote_filename );
+	if( remote_metadata != NULL )
+		FreeProcessMem( process, (void*) remote_metadata );
+	if( remote_ret != NULL )
+		FreeProcessMem( process, remote_ret );
+}
+
+
+/** Allocate and fill extendedFileInfoStruct in other process.
+ *  @param process The other process.
+ *  @param filename The file path.
+ *  @param remote_filename The pointer to file path in other process memory.
+ *  @param metadata The metadata field name.
+ *  @param ret The pointer to value of ret field in the structure
+ *         (not NULL in set metadata scenario (retlen is meaningless then),
+ *          must be NULL in get metadata scenario (retlen is used then)).
+ *  @param retlen The length of buffer to allocate (in get metadata scenario).
+ *  @param info OUT Pointer to remote elements of the struct are stored here.
+ *  @param remote_info OUT Pointer to structure in other process memory.
+ *  @return TRUE if operation successful, FALSE otherwise.
+ *  @note Only one of file or remote_file can be specified. The other must be NULL.
+ *  @note Release results with DestroyRemoteExtFileInfoStruct. Do not release
+ *        info->filename if remote_filename was used.
+**/
+static BOOL CreateRemoteExtFileInfoStruct( HANDLE process, const char *filename,
+	const void *remote_filename, const char *metadata, const char *ret, size_t retlen,
+	extendedFileInfoStruct *info, void **remote_info )
+{
+	size_t filename_size;
+	size_t metadata_size;
+	size_t ret_size;
+
+	/* cannot be both specified */
+	if( filename != NULL && remote_filename != NULL )
+	{
+		return FALSE;
+	}
+
+	metadata_size = strlen( metadata ) + 1;
+	info->metadata = AllocProcessMem( process, metadata_size );
+	*remote_info = AllocProcessMem( process, sizeof( *remote_info ) );
+
+	if( filename != NULL )   /* use filename */
+	{
+		filename_size = strlen( filename ) + 1;
+		info->filename = AllocProcessMem( process, filename_size );
+	}
+	else   /* use remote_filename */
+	{
+		filename_size = 0;
+		info->filename = remote_filename;
+	}
+	
+	if( ret != NULL )   /* ret is a string to copy, retlen is meaningless */
+	{
+		ret_size = strlen( ret ) + 1;
+		info->ret = AllocProcessMem( process, ret_size );
+		info->retlen = 0;
+	}
+	else   /* allocate memory as indicated by retlen */
+	{
+		ret_size = 0;
+		info->ret = AllocProcessMem( process, retlen );
+		info->retlen = retlen;
+	}
+
+
+	if( *remote_info != NULL && info->filename != NULL 
+		&& info->metadata != NULL && info->ret != NULL )
+	{
+		size_t remote_info_written;
+		size_t metadata_written;
+		size_t filename_written;
+		size_t ret_written;
+		
+		WriteProcessMemory( process, *remote_info, info, sizeof( *info ), &remote_info_written );
+		WriteProcessMemory( process, (void*) info->metadata, metadata, metadata_size, &metadata_written );
+
+		if( filename != NULL )
+			WriteProcessMemory( process, (void*) info->filename, filename, filename_size, &filename_written );
+
+		if( ret != NULL )
+			WriteProcessMemory( process, info->ret, ret, ret_size, &ret_written );
+		/* else no need to write zeros, because VirtualAllocEx in AllocProcessMem zeros memory at allocation */
+
+		if( ( NULL == filename || ( filename != NULL && filename_written == filename_size ) )
+			&& remote_info_written == sizeof( *info )
+			&& metadata_written == metadata_size
+			&& ( NULL == ret || ( ret != NULL && ret_written == ret_size ) ) )
+		{
+			return TRUE;
+		}
+	}
+
+	/* something went wrong if we got this far */
+	FreeProcessMem( process, *remote_info );
+	FreeProcessMem( process, (void*) info->metadata );
+	FreeProcessMem( process, info->ret );
+	if( filename != NULL )
+		FreeProcessMem( process, (void*) info->filename );
+
+	return FALSE;
+}
+
+
 /** Read metadata information from file.
  *  @param file The pointer to file name.
  *  @param remote_file The pointer to file name in other process memory.
@@ -422,55 +537,76 @@ static void GetFileMetadata( const char *file, const void *remote_file,
 
 	if( winamp != NULL )
 	{
-		size_t filename_size = ( file != NULL ? strlen( file ) + 1 : 0 );
-		size_t metadata_size = strlen( metadata ) + 1;
 		extendedFileInfoStruct info;
-		extendedFileInfoStruct *remote_info = AllocProcessMem( winamp, sizeof( remote_info ) );
-
-		info.filename = ( file != NULL ? AllocProcessMem( winamp, filename_size ) : remote_file );
-		info.metadata = AllocProcessMem( winamp, metadata_size );
-		info.ret = AllocProcessMem( winamp, retval_size );
-		info.retlen = retval_size;
-
-		if( remote_info != NULL && info.filename != NULL 
-			&& info.metadata != NULL && info.ret != NULL )
-		{
-			size_t bytes;
-
-			WriteProcessMemory( winamp, remote_info, &info, sizeof( info ), &bytes );
-			if( bytes == sizeof( info ) )
+		void *remote_info;
+		
+		if( TRUE == CreateRemoteExtFileInfoStruct( winamp, file, remote_file,
+			metadata, NULL, retval_size, &info, &remote_info ) )
+		{			
+			if( 1 == SendMessage( winamp_wnd, WM_WA_IPC, (WPARAM) remote_info,
+				IPC_GET_EXTENDED_FILE_INFO ) )
 			{
-				if( file != NULL )
-					WriteProcessMemory( winamp, (void*) info.filename, file, filename_size, &bytes );
-				else
-					bytes = filename_size;
+				size_t bytes_read;
 
-				if( bytes == filename_size )
+				ReadProcessMemory( winamp, info.ret, retval, retval_size, &bytes_read );
+				if( bytes_read > 0 )   /* make sure whatever we've read is null-terminated */
 				{
-					WriteProcessMemory( winamp, (void*) info.metadata, metadata, metadata_size, &bytes );
-					if( bytes == metadata_size )
-					{
-						LRESULT result = SendMessage( winamp_wnd, WM_WA_IPC, (WPARAM) remote_info, IPC_GET_EXTENDED_FILE_INFO );
-						if( 1 == result )
-						{
-							ReadProcessMemory( winamp, info.ret, retval, retval_size, &bytes );
-							if( bytes > 0 )   /* make sure whatever we've read is null-terminated */
-							{
-								retval[ bytes - 1 ] = '\0';
-							}
-						}
-					}
+					retval[ bytes_read - 1 ] = '\0';
 				}
 			}
+
+			DestroyRemoteExtFileInfoStruct( winamp, remote_info,
+				( file != NULL ? (void*) info.filename : NULL ), (void*) info.metadata, info.ret );
 		}
 
-		FreeProcessMem( winamp, remote_info );
-		if( file != NULL )
-			FreeProcessMem( winamp, (void*) info.filename );
-		FreeProcessMem( winamp, (void*) info.metadata );
-		FreeProcessMem( winamp, info.ret );
 		CloseHandle( winamp );
 	}
+}
+
+
+/** Write metadata information to a file.
+ *  @param file The pointer to file name.
+ *  @param remote_file The pointer to file name in other process memory.
+ *  @param metadata The pointer to metadata field to set.
+ *  @param value The pointer to metadata field value.
+ *  @param winamp_wnd The Winamp window handler.
+ *  @return TRUE if call successful, FALSE otherwise.
+ *  @note Only one of file or remote_file can be specified. The other must be NULL.
+**/
+static BOOL SetFileMetadata( const char *file, const void *remote_file,
+	const char *metadata, const char *value, HWND winamp_wnd )
+{
+	HANDLE winamp;
+	BOOL retval = FALSE;
+
+	if( file != NULL && remote_file != NULL )
+		return retval;
+
+	winamp = OpenWinampProcess( winamp_wnd,
+		PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ );
+
+	if( winamp != NULL )
+	{
+		extendedFileInfoStruct info;
+		void *remote_info;
+
+		if( TRUE == CreateRemoteExtFileInfoStruct( winamp, file, remote_file,
+			metadata, value, 0, &info, &remote_info ) )
+		{			
+			if( 1 == SendMessage( winamp_wnd, WM_WA_IPC, (WPARAM) remote_info, IPC_SET_EXTENDED_FILE_INFO ) 
+				&& 1 == SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_WRITE_EXTENDED_FILE_INFO ) )
+			{
+				retval = TRUE;
+			}
+
+			DestroyRemoteExtFileInfoStruct( winamp, remote_info,
+				( file != NULL ? (void*) info.filename : NULL ), (void*) info.metadata, info.ret );
+		}
+
+		CloseHandle( winamp );
+	}
+
+	return retval;
 }
 
 
@@ -497,6 +633,51 @@ BEGIN_PPRO_SVC( get_plist_selected_metadata )
 END_PPRO_SVC
 
 
+/*! <service name="set_plist_selected_metadata">
+/*!  <description>Write metadata information for the current entry in the playlist.</description>
+/*!  <requirements>Winamp 2.9+</requirements>
+/*!  <argument name="metadata" type="string">The metadata field to change. Among possible values are: title, artist, album, track, year etc.</argument>
+/*!  <argument name="value" type="string">The new value of specified metadata field.</argument>
+/*!  <return-value type="int">Returns 1 if call was successful, 0 otherwise.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( set_plist_selected_metadata )
+{
+	unsigned int index;
+	const void *file;
+
+	STARTUP( 2 );
+
+	index = GetCurrentPlistEntryIndex( winamp_wnd );
+	file = (const void*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
+
+	PPRO_SVC_RETURN_UINT( file != NULL && TRUE == SetFileMetadata( NULL, file, argv[0], argv[1], winamp_wnd ) );
+}
+END_PPRO_SVC
+
+
+/*! <service name="set_plist_entry_metadata">
+/*!  <description>Write metadata information for the specified entry in the playlist.</description>
+/*!  <requirements>Winamp 2.9+</requirements>
+/*!  <argument name="index" type="int">The position in the playlist. First playlist entry is at 1.</argument>
+/*!  <argument name="metadata" type="string">The metadata field to change. Among possible values are: title, artist, album, track, year etc.</argument>
+/*!  <argument name="value" type="string">The new value of specified metadata field.</argument>
+/*!  <return-value type="int">Returns 1 if call was successful, 0 otherwise.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( set_plist_entry_metadata )
+{
+	unsigned int index;
+	const void *file;
+
+	STARTUP( 3 );
+
+	index = (unsigned int) ( ppro_svcs->DecodeFloat( argv[0] ) - 1 );
+	file = (const void*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
+
+	PPRO_SVC_RETURN_UINT( file != NULL && TRUE == SetFileMetadata( NULL, file, argv[1], argv[2], winamp_wnd ) );
+}
+END_PPRO_SVC
+
+
 /*! <service name="get_plist_entry_metadata">
 /*!  <description>Get metadata information from specified entry in the playlist.</description>
 /*!  <requirements>Winamp 2.9+</requirements>
@@ -517,6 +698,23 @@ BEGIN_PPRO_SVC( get_plist_entry_metadata )
 	{
 		GetFileMetadata( NULL, file, argv[1], winamp_wnd, retval, retval_size );
 	}
+}
+END_PPRO_SVC
+
+
+/*! <service name="set_file_metadata">
+/*!  <description>Write metadata information to the specified file.</description>
+/*!  <requirements>Winamp 2.9+</requirements>
+/*!  <argument name="file" type="string">The path to the file.</argument>
+/*!  <argument name="metadata" type="string">The metadata field to change. Among possible values are: title, artist, album, track, year etc.</argument>
+/*!  <argument name="value" type="string">The new value of specified metadata field.</argument>
+/*!  <return-value type="int">Returns 1 if call was successful, 0 otherwise.</return-value>
+/*! </service> */
+BEGIN_PPRO_SVC( set_file_metadata )
+{
+	STARTUP( 3 );
+
+	PPRO_SVC_RETURN_UINT( SetFileMetadata( argv[0], NULL, argv[1], argv[2], winamp_wnd ) );
 }
 END_PPRO_SVC
 

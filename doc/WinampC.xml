@@ -462,7 +462,16 @@
 						New service: <span class="code">save_default_preset</span>
 					</li>
 					<li>
+						New service: <span class="code">set_file_metadata</span>
+					</li>
+					<li>
+						New service: <span class="code">set_plist_entry_metadata</span>
+					</li>
+					<li>
 						New service: <span class="code">set_plist_manual_advance</span>
+					</li>
+					<li>
+						New service: <span class="code">set_plist_selected_metadata</span>
 					</li>
 					<li>
 						New service: <span class="code">set_rating</span>
