@@ -94,7 +94,7 @@ static const char* RequiredArgsCountInfo( int required_count )
 /**
  *  @param required_count Includes two optional arguments.
 **/
-BOOL CheckArgCount( unsigned int argc, const char **argv, unsigned int required_count,
+static BOOL CheckArgCount( unsigned int argc, const char **argv, unsigned int required_count,
 	PPROSERVICES *ppro_svcs, char *window_class, size_t window_class_size,
 	ResponseType *response_type, char *response_msg, size_t response_msg_size )
 {
@@ -179,7 +179,7 @@ static void PerformResponse( ResponseType response_type, const char *response_ms
 /** Find Winamp process by window it owns and open it with specified
  *  access rights. Returned handle must be closed with CloseHandle.
 **/
-HANDLE OpenWinampProcess( HWND wnd, DWORD access )
+static HANDLE OpenWinampProcess( HWND wnd, DWORD access )
 {
 	DWORD process_id = 0;
 
@@ -188,13 +188,13 @@ HANDLE OpenWinampProcess( HWND wnd, DWORD access )
 }
 
 
-void* AllocProcessMem( HANDLE process, DWORD size )
+static void* AllocProcessMem( HANDLE process, DWORD size )
 {
 	return VirtualAllocEx( process, NULL, size, MEM_COMMIT, PAGE_READWRITE );
 }
 
 
-BOOL FreeProcessMem( HANDLE process, void* remote_mem )
+static BOOL FreeProcessMem( HANDLE process, void* remote_mem )
 {
 	return VirtualFreeEx( process, remote_mem, 0, MEM_RELEASE );
 }
@@ -206,7 +206,7 @@ BOOL FreeProcessMem( HANDLE process, void* remote_mem )
  *  @param dst The destination buffer.
  *  @param dst_size The size of the destination buffer.
 **/
-void ReadStringFromProcessMemory( HWND wnd, const void *src_start, char *dst, size_t dst_size )
+static void ReadStringFromProcessMemory( HWND wnd, const void *src_start, char *dst, size_t dst_size )
 {
 	if( dst_size > 0 )
 	{
@@ -390,6 +390,15 @@ static void GetPlistEntryTitle( HWND winamp_wnd, unsigned int index, char *title
 }
 
 
+/** Read metadata information from file.
+ *  @param file The pointer to file name.
+ *  @param remote_file The pointer to file name in other process memory.
+ *  @param metadata The pointer to metadata field to query.
+ *  @param winamp_wnd The Winamp window handler.
+ *  @param retval The pointer to buffer for metadata field value.
+ *  @param retval_size The size of the buffer in bytes.
+ *  @note Only one of file or remote_file can be specified. The other must be NULL.
+**/
 static void GetFileMetadata( const char *file, const void *remote_file,
 	const char *metadata, HWND winamp_wnd, char *retval, size_t retval_size )
 {
@@ -446,7 +455,6 @@ static void GetFileMetadata( const char *file, const void *remote_file,
 							}
 						}
 					}
-
 				}
 			}
 		}

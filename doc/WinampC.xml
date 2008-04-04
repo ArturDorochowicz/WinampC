@@ -364,11 +364,11 @@
 						Changed: <span class="code">set_eq_data</span> accepts PowerPro float type argument in specific cases.
 					</li>
 					<li>
-						Changed: <span class="code">jump_to_time</span> returns error code
+						Changed: <span class="code">jump_to_time</span> returns error code.
 					</li>
 					<li>
 						Changed: <span class="code">play_any_audio_cd</span> erroneously claimed to support up to 26 drives.
-						In fact it supports only 4 drives. corrected implementation and documentation.
+						In fact it supports only 4 drives. Corrected the implementation and documentation .
 					</li>
 					
 					<li>
