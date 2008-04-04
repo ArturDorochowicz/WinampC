@@ -27,7 +27,7 @@ typedef enum ResponseType
 
 
 /* MSDN doesn't specify if it includes the terminating null character or not.
- * Assuming it does not.
+ * Assuming it does not (later in the code).
  */
 #define MAX_WND_CLASS_NAME_LENGTH 256 
 
@@ -52,19 +52,24 @@ static HWND FindWinampWindow( const char *window_class )
  *  @param dst_size The destination buffer size in bytes.
  *  @param src The source.
 **/
-static void strcpys( char *dst, size_t dst_size, const char *src )
+static void SafeStringCopy( char *dst, size_t dst_size, const char *src )
 {
-	if( src != 0 && dst_size != 0 && dst != NULL )
+	if( dst != NULL && dst_size > 0 )
 	{
-		while( dst_size > 0 && *src != '\0' )
-		{
-			*dst = *src;
-			dst++;
-			src++;
-			dst_size--;
-		}
+		dst[0] = '\0';
 
-		*dst = '\0';
+		if( src != NULL )
+		{
+			while( dst_size > 0 && *src != '\0' )
+			{
+				*dst = *src;
+				dst++;
+				src++;
+				dst_size--;
+			}
+
+			*dst = '\0';
+		}
 	}
 }
 
@@ -121,7 +126,7 @@ static BOOL CheckArgCount( unsigned int argc, const char **argv, unsigned int re
 		if( response_type_arg[0] == '3' )
 		{
 			*response_type = ResponseTypeReturnGivenMsg;
-			strcpys( response_msg, response_msg_size, &response_type_arg[1] );
+			SafeStringCopy( response_msg, response_msg_size, &response_type_arg[1] );
 		}
 		else if( response_type_arg[0] == '2' && response_type_arg[1] == '\0' )
 		{
@@ -134,7 +139,7 @@ static BOOL CheckArgCount( unsigned int argc, const char **argv, unsigned int re
 
 		if( argc == required_count )   /* both optional present */
 		{
-			strcpys( window_class, window_class_size, argv[required_count - 1] );
+			SafeStringCopy( window_class, window_class_size, argv[required_count - 1] );
 		}
 	}
 	/* else no optional arguments were specified */
@@ -170,7 +175,7 @@ static void PerformResponse( ResponseType response_type, const char *response_ms
 		/* if response type is 3abcde... then return abcde... */
 		else if( ResponseTypeReturnGivenMsg == response_type )
 		{
-			strcpys( retval, retval_size, response_msg );
+			SafeStringCopy( retval, retval_size, response_msg );
 		}
 	}
 }
@@ -2155,7 +2160,7 @@ BEGIN_PPRO_SVC( caption_num_and_title )
 
 	GetWindowText( winamp_wnd, caption, sizeof( caption ) );
 	trim_caption_end( caption );
-	strcpys( retval, retval_size, caption );
+	SafeStringCopy( retval, retval_size, caption );
 }
 END_PPRO_SVC
 
@@ -2182,11 +2187,11 @@ BEGIN_PPRO_SVC( caption_title )
 	
 	if( p != NULL )
 	{
-		strcpys( retval, retval_size , p + 2 /* == strlen( ". " ) */ );
+		SafeStringCopy( retval, retval_size , p + 2 /* == strlen( ". " ) */ );
 	}
 	else /* The number was not found (there is an option in Winamp to not show it) */
 	{
-		strcpys( retval, retval_size, caption );
+		SafeStringCopy( retval, retval_size, caption );
 	}
 }
 END_PPRO_SVC
