@@ -41,10 +41,7 @@ add_custom_target( "Distribution"
 			-E "copy" "${CMAKE_CURRENT_BINARY_DIR}/doc/WinampC.html" "${DISTRIBUTION_DIR}"
 	COMMAND
 		"${CMAKE_COMMAND}"
-			-E "copy" "${WINAMPC_LOCATION}" "${DISTRIBUTION_DIR}"
-	COMMAND
-		"${CMAKE_COMMAND}"
-			-E "copy" "${CMAKE_CURRENT_SOURCE_DIR}/licence.txt" "${DISTRIBUTION_DIR}" )
+			-E "copy" "${WINAMPC_LOCATION}" "${DISTRIBUTION_DIR}" )
 
 add_dependencies( "Distribution"
 	"WinampC"
