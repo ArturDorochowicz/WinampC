@@ -62,34 +62,6 @@ static HWND FindWinampWindow( const char *window_class )
 }
 
 
-/** Safe string copy.
- *  Destination string is always null-terminated (unless its buffer size is 0 ).
- *  @param dst The destination.
- *  @param dst_size The destination buffer size in bytes.
- *  @param src The source.
-**/
-static void SafeStringCopy( char *dst, size_t dst_size, const char *src )
-{
-	if( dst != NULL && dst_size > 0 )
-	{
-		dst[0] = '\0';
-
-		if( src != NULL )
-		{
-			while( dst_size > 0 && *src != '\0' )
-			{
-				*dst = *src;
-				dst++;
-				src++;
-				dst_size--;
-			}
-
-			*dst = '\0';
-		}
-	}
-}
-
-
 static const char* RequiredArgsCountInfo( int required_count )
 {
 	switch( required_count )
@@ -112,86 +84,26 @@ static const char* RequiredArgsCountInfo( int required_count )
 }
 
 
-/**
- *  @param required_count Includes two optional arguments.
-**/
-static BOOL CheckArgCount( unsigned int argc, const char **argv, unsigned int required_count,
-	PPROSERVICES *ppro_svcs, char *window_class, size_t window_class_size,
-	ResponseType *response_type, char *response_msg, size_t response_msg_size )
+static void PerformResponse( BOOL wnd_found, const char *response_arg, PPROHELPER *pp )
 {
-	BOOL rv = TRUE;
-
-	if( argc > required_count )
+	if( response_arg != NULL )
 	{
-		const char *error_msg1 = "Too many arguments for the service.\n";
-		const char *error_msg2 = RequiredArgsCountInfo( required_count );
-		ppro_svcs->ErrMessage( (LPSTR) error_msg1, (LPSTR) error_msg2 );
-		rv = FALSE;   /* error */
-	}
-	else if( argc < required_count - 2 )
-	{
-		const char *error_msg1 = "Not enough arguments for the service.\n";
-		const char *error_msg2 = RequiredArgsCountInfo( required_count );
-		ppro_svcs->ErrMessage( (LPSTR) error_msg1, (LPSTR) error_msg2 );
-		rv = FALSE;   /* error */
-	}
-	else if( argc >= required_count - 1 )   /* at least one optional present */
-	{
-		const char *response_type_arg = argv[required_count - 2];
-		
-		if( response_type_arg[0] == '3' )
+		if( TRUE == wnd_found )
 		{
-			*response_type = ResponseTypeReturnGivenMsg;
-			SafeStringCopy( response_msg, response_msg_size, &response_type_arg[1] );
+			if( response_arg[0] == '2' && response_arg[1] == '\0' )
+				*(pp->flgs) |= 1;
 		}
-		else if( response_type_arg[0] == '2' && response_type_arg[1] == '\0' )
+		else
 		{
-			*response_type = ResponseTypeSetFlag;
-		}
-		else if( response_type_arg[0] == '1' && response_type_arg[1] == '\0' )
-		{
-			*response_type = ResponseTypeShowErrorMsg;
-		}
-
-		if( argc == required_count )   /* both optional present */
-		{
-			SafeStringCopy( window_class, window_class_size, argv[required_count - 1] );
-		}
-	}
-	/* else no optional arguments were specified */
-
-	return rv;
-}
-
-
-static void PerformResponse( ResponseType response_type, const char *response_msg,
-	HWND winamp_wnd, PPROSERVICES *ppro_svcs, DWORD *ppro_flags, char *retval,
-	size_t retval_size )
-{
-	if( winamp_wnd != NULL )   /* window found */
-	{
-		/* if response_type is 2, set flag f0 to 1 */
-		if( ResponseTypeSetFlag == response_type )
-		{
-			*ppro_flags |= 1;
-		}			
-	}
-	else   /* window not found */
-	{
-		/* if response type is 1 then show window with error explanation */
-		if( ResponseTypeShowErrorMsg == response_type )
-		{
-			ppro_svcs->ErrMessage( "Specified Winamp window does not exist.", "" );
-		}
-		/* if response type is 2 then set flag f0 to 0 */
-		else if( ResponseTypeSetFlag == response_type )
-		{
-			*ppro_flags &= ~1;
-		}
-		/* if response type is 3abcde... then return abcde... */
-		else if( ResponseTypeReturnGivenMsg == response_type )
-		{
-			SafeStringCopy( retval, retval_size, response_msg );
+			if( response_arg[0] == '1' && response_arg[1] == '\0' )
+				pp->svcs->ErrMessage( "Specified Winamp window does not exist.", "" );
+			else if( response_arg[0] == '2' && response_arg[1] == '\0' )
+				*(pp->flgs) &= ~1;
+			else if( response_arg[3] == '3' )
+			{
+				pp->ret[0] = '\0';
+				strncat( pp->ret, &response_arg[1], pp->retsize - 1 );
+			}
 		}
 	}
 }
@@ -251,33 +163,55 @@ static void ReadStringFromProcessMemory( HWND wnd, const void *src_start, char *
 }
 
 
-static HWND Startup( PPROSERVICES *ppro_svcs, DWORD *ppro_flags, unsigned int argc,
-	char **argv, unsigned int argc_required, char *retval,
-	size_t retval_size )
+static HWND Startup( PPROHELPER *pp, unsigned int argc_required )
 {
-	char wnd_class[MAX_WND_CLASS_NAME_LENGTH + 1] = { 0 };
-	ResponseType response_type = ResponseTypeNone;
-	char response_msg[PPRO_MAX_VAR_LENGTH + 1] = { 0 };
+	const char *wnd_class;
+	const char *response_arg;
 	HWND winamp_wnd = NULL;
+	int optional = argc_required - pp->argc;
 
-	if( TRUE == CheckArgCount( argc, argv, argc_required + 2, ppro_svcs, wnd_class,
-		sizeof( wnd_class ), &response_type, response_msg, sizeof( response_msg ) ) )
+	/* check number of arguments */
+	if( optional < 0 || optional > 2 )
 	{
-		winamp_wnd = FindWinampWindow( wnd_class );
-		PerformResponse( response_type, response_msg, winamp_wnd, ppro_svcs,
-			ppro_flags, retval, retval_size );
+		const char *error_msg1 =
+			( optional > 2 ? "Too many arguments for the service.\n"
+				: "Not enough arguments for the service.\n" );
+		const char *error_msg2 = RequiredArgsCountInfo( argc_required );
+		pp->svcs->ErrMessage( (char*) error_msg1, (char*) error_msg2 );
+		
+		return NULL;   /* error */
 	}
+
+	/* find the Winamp window */
+	if( optional != 2   /* no class name specified */
+		|| '\0' == pp->argv[pp->argc - 1][0] )   /* specified empty class name */
+	{
+		wnd_class = "Winamp v1.x";
+	}
+	else
+		wnd_class = pp->argv[pp->argc - 1];
+
+	winamp_wnd = FindWindow( wnd_class, NULL );
+
+	/* response to Winamp window found or not found situation */
+	if( 1 == optional )
+		response_arg = pp->argv[pp->argc - 1];
+	else if( 2 == optional )
+		response_arg = pp->argv[pp->argc - 2];
+	else
+		response_arg = NULL;
+
+	PerformResponse( winamp_wnd != NULL, response_arg, pp );
 
 	return winamp_wnd;
 }
 
 
-#define STARTUP_NO_EXIT( argc_required ) \
-	HWND winamp_wnd = Startup( ppro_svcs, ppro_flags, argc, argv, \
-		(argc_required), retval, retval_size );
+#define STARTUP_NO_EXIT( argc_required_without_optional ) \
+	HWND winamp_wnd = Startup( &pp, (argc_required_without_optional) + 2 );
 
-#define STARTUP( argc_required ) \
-	STARTUP_NO_EXIT( argc_required ); \
+#define STARTUP( argc_required_without_optional ) \
+	STARTUP_NO_EXIT( (argc_required_without_optional) ); \
 	if( NULL == winamp_wnd ) return;
 
 
@@ -301,13 +235,14 @@ BEGIN_PPRO_SVC( add_bookmark )
 	STARTUP( 1 );
 
 	cds.dwData = IPC_ADDBOOKMARK;
-	cds.lpData = argv[0];
-	cds.cbData = strlen( argv[0] ) + 1;
+	cds.lpData = pp.argv[0];
+	cds.cbData = strlen( pp.argv[0] ) + 1;
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
 END_PPRO_SVC
 
 
+#if 0  /* there is no use for that below at the moment */
 /* Works but requires Unicode input */
 BEGIN_PPRO_SVC( add_bookmark_w )
 {
@@ -316,12 +251,12 @@ BEGIN_PPRO_SVC( add_bookmark_w )
 	STARTUP( 1 );
 
 	cds.dwData = IPC_ADDBOOKMARKW;
-	cds.lpData = argv[0];
-	cds.cbData = ( wcslen( (wchar_t*) argv[0] ) + 1 ) * sizeof( wchar_t);
+	cds.lpData = pp.argv[0];
+	cds.cbData = ( wcslen( (wchar_t*) pp.argv[0] ) + 1 ) * sizeof( wchar_t);
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
 END_PPRO_SVC
-
+#endif
 
 /*! <service name="add_track_as_bookmark">
 /*!  <description>Add current track as bookmark.</description>
@@ -365,7 +300,7 @@ END_PPRO_SVC
 BEGIN_PPRO_SVC( caption_full )
 {
 	STARTUP( 0 );
-	GetWindowText( winamp_wnd, retval, retval_size );
+	GetWindowText( winamp_wnd, pp.ret, pp.retsize );
 }
 END_PPRO_SVC
 
@@ -643,7 +578,7 @@ BEGIN_PPRO_SVC( get_plist_selected_metadata )
 	file = (const void*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
 	if( file != NULL )
 	{
-		GetFileMetadata( NULL, file, argv[0], winamp_wnd, retval, retval_size );
+		GetFileMetadata( NULL, file, pp.argv[0], winamp_wnd, pp.ret, pp.retsize );
 	}
 }
 END_PPRO_SVC
@@ -666,7 +601,7 @@ BEGIN_PPRO_SVC( set_plist_selected_metadata )
 	index = GetCurrentPlistEntryIndex( winamp_wnd );
 	file = (const void*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
 
-	PPRO_SVC_RETURN_UINT( file != NULL && TRUE == SetFileMetadata( NULL, file, argv[0], argv[1], winamp_wnd ) );
+	PPRO_SVC_RETURN_UINT( file != NULL && TRUE == SetFileMetadata( NULL, file, pp.argv[0], pp.argv[1], winamp_wnd ) );
 }
 END_PPRO_SVC
 
@@ -686,10 +621,10 @@ BEGIN_PPRO_SVC( set_plist_entry_metadata )
 
 	STARTUP( 3 );
 
-	index = (unsigned int) ( ppro_svcs->DecodeFloat( argv[0] ) - 1 );
+	index = (unsigned int) ( pp.svcs->DecodeFloat( pp.argv[0] ) - 1 );
 	file = (const void*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
 
-	PPRO_SVC_RETURN_UINT( file != NULL && TRUE == SetFileMetadata( NULL, file, argv[1], argv[2], winamp_wnd ) );
+	PPRO_SVC_RETURN_UINT( file != NULL && TRUE == SetFileMetadata( NULL, file, pp.argv[1], pp.argv[2], winamp_wnd ) );
 }
 END_PPRO_SVC
 
@@ -708,11 +643,11 @@ BEGIN_PPRO_SVC( get_plist_entry_metadata )
 	
 	STARTUP( 2 );
 
-	index = (unsigned int) ( ppro_svcs->DecodeFloat( argv[0] ) - 1 );
+	index = (unsigned int) ( pp.svcs->DecodeFloat( pp.argv[0] ) - 1 );
 	file = (const void*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
 	if( file != NULL )
 	{
-		GetFileMetadata( NULL, file, argv[1], winamp_wnd, retval, retval_size );
+		GetFileMetadata( NULL, file, pp.argv[1], winamp_wnd, pp.ret, pp.retsize );
 	}
 }
 END_PPRO_SVC
@@ -730,7 +665,7 @@ BEGIN_PPRO_SVC( set_file_metadata )
 {
 	STARTUP( 3 );
 
-	PPRO_SVC_RETURN_UINT( SetFileMetadata( argv[0], NULL, argv[1], argv[2], winamp_wnd ) );
+	PPRO_SVC_RETURN_UINT( SetFileMetadata( pp.argv[0], NULL, pp.argv[1], pp.argv[2], winamp_wnd ) );
 }
 END_PPRO_SVC
 
@@ -746,7 +681,7 @@ BEGIN_PPRO_SVC( get_file_metadata )
 {	
 	STARTUP( 2 );
 
-	GetFileMetadata( argv[0], NULL, argv[1], winamp_wnd, retval, retval_size );
+	GetFileMetadata( pp.argv[0], NULL, pp.argv[1], winamp_wnd, pp.ret, pp.retsize );
 }
 END_PPRO_SVC
 
@@ -764,8 +699,8 @@ BEGIN_PPRO_SVC( get_plist_entry_path )
 	STARTUP( 1 );
 
 	/* change 1-based input into Winamp's 0-based index */
-	index = (unsigned int) ( ppro_svcs->DecodeFloat( argv[0] ) - 1 );
-	GetPlistEntryPath( winamp_wnd, index, retval, retval_size );
+	index = (unsigned int) ( pp.svcs->DecodeFloat( pp.argv[0] ) - 1 );
+	GetPlistEntryPath( winamp_wnd, index, pp.ret, pp.retsize );
 }
 END_PPRO_SVC
 
@@ -783,8 +718,8 @@ BEGIN_PPRO_SVC( get_plist_entry_title )
 	STARTUP( 1 );
 
 	/* change 1-based input into Winamp's 0-based index */
-	index = (unsigned int) ( ppro_svcs->DecodeFloat( argv[0] ) - 1 );
-	GetPlistEntryTitle( winamp_wnd, index, retval, retval_size );
+	index = (unsigned int) ( pp.svcs->DecodeFloat( pp.argv[0] ) - 1 );
+	GetPlistEntryTitle( winamp_wnd, index, pp.ret, pp.retsize );
 }
 END_PPRO_SVC
 
@@ -801,7 +736,7 @@ BEGIN_PPRO_SVC( get_plist_selected_path )
 	STARTUP( 0 );
 
 	index = GetCurrentPlistEntryIndex( winamp_wnd );
-	GetPlistEntryPath( winamp_wnd, index, retval, retval_size );
+	GetPlistEntryPath( winamp_wnd, index, pp.ret, pp.retsize );
 }
 END_PPRO_SVC
 
@@ -818,7 +753,7 @@ BEGIN_PPRO_SVC( get_plist_selected_title )
 	STARTUP( 0 );
 
 	index = GetCurrentPlistEntryIndex( winamp_wnd );
-	GetPlistEntryTitle( winamp_wnd, index, retval, retval_size );
+	GetPlistEntryTitle( winamp_wnd, index, pp.ret, pp.retsize );
 }
 END_PPRO_SVC
 
@@ -836,7 +771,7 @@ BEGIN_PPRO_SVC( get_winamp_ini_path )
 	path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETINIFILE );
 	if( path != NULL )
 	{
-		ReadStringFromProcessMemory( winamp_wnd, path, retval, retval_size );
+		ReadStringFromProcessMemory( winamp_wnd, path, pp.ret, pp.retsize );
 	}
 }
 END_PPRO_SVC
@@ -855,7 +790,7 @@ BEGIN_PPRO_SVC( get_config_dir )
 	path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETINIDIRECTORY );
 	if( path != NULL )
 	{
-		ReadStringFromProcessMemory( winamp_wnd, path, retval, retval_size );
+		ReadStringFromProcessMemory( winamp_wnd, path, pp.ret, pp.retsize );
 	}
 }
 END_PPRO_SVC
@@ -874,7 +809,7 @@ BEGIN_PPRO_SVC( get_plugin_dir )
 	path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETPLUGINDIRECTORY );
 	if( path != NULL )
 	{
-		ReadStringFromProcessMemory( winamp_wnd, path, retval, retval_size );
+		ReadStringFromProcessMemory( winamp_wnd, path, pp.ret, pp.retsize );
 	}
 }
 END_PPRO_SVC
@@ -893,7 +828,7 @@ BEGIN_PPRO_SVC( get_winamp_m3u_dir )
 	path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETM3UDIRECTORY );
 	if( path != NULL )
 	{
-		ReadStringFromProcessMemory( winamp_wnd, path, retval, retval_size );
+		ReadStringFromProcessMemory( winamp_wnd, path, pp.ret, pp.retsize );
 	}
 }
 END_PPRO_SVC
@@ -910,8 +845,8 @@ BEGIN_PPRO_SVC( change_directory )
 	STARTUP( 1 );
 
 	cds.dwData = IPC_CHDIR;
-	cds.lpData = argv[0];
-	cds.cbData = strlen( argv[0] ) + 1;
+	cds.lpData = pp.argv[0];
+	cds.cbData = strlen( pp.argv[0] ) + 1;
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
 END_PPRO_SVC
@@ -996,13 +931,14 @@ BEGIN_PPRO_SVC( enqueue_file )
 	STARTUP( 1 );
 
 	cds.dwData = IPC_ENQUEUEFILE;
-	cds.lpData = argv[0];
-	cds.cbData = strlen( argv[0] ) + 1;
+	cds.lpData = pp.argv[0];
+	cds.cbData = strlen( pp.argv[0] ) + 1;
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
 END_PPRO_SVC
 
 
+#if 0  /* there is no use for that below at the moment */
 /* Works but requires Unicode input */
 BEGIN_PPRO_SVC( enqueue_file_w )
 {
@@ -1011,11 +947,12 @@ BEGIN_PPRO_SVC( enqueue_file_w )
 	STARTUP( 1 );
 
 	cds.dwData = IPC_PLAYFILEW;
-	cds.lpData = argv[0];
-	cds.cbData = ( wcslen( (wchar_t*) argv[0] ) + 1 ) * sizeof( wchar_t);
+	cds.lpData = pp.argv[0];
+	cds.cbData = ( wcslen( (wchar_t*) pp.argv[0] ) + 1 ) * sizeof( wchar_t);
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
 END_PPRO_SVC
+#endif
 
 
 /*! <service name="start_vis_plugin">
@@ -1101,7 +1038,7 @@ BEGIN_PPRO_SVC( get_eq_data )
 
 	STARTUP( 1 );
 
-	position = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
+	position = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
 	data = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_GETEQDATA );
 	if( position >= 0 && position <= 10 )
 	{
@@ -1136,7 +1073,7 @@ BEGIN_PPRO_SVC( get_eq_data63 )
 
 	STARTUP( 1 );
 
-	position = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
+	position = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
 	data = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_GETEQDATA );
 	PPRO_SVC_RETURN_UINT( ( ( position >= 0 && position <= 10 ) ? data : MAKE_BOOL( data ) ) );
 }
@@ -1443,7 +1380,7 @@ BEGIN_PPRO_SVC( set_time_display_mode )
 
 	STARTUP( 1 );
 
-	mode = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
+	mode = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
 	switch( mode )
 	{
 	case 0: mode = WINAMP_OPTIONS_ELAPSED;    break;
@@ -1470,7 +1407,7 @@ BEGIN_PPRO_SVC( get_version )
 	STARTUP( 0 );
 
 	version = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETVERSION );
-	sprintf( retval, "%X.%X", WINAMP_VERSION_MAJOR( version ), WINAMP_VERSION_MINOR( version ) );
+	sprintf( pp.ret, "%X.%X", WINAMP_VERSION_MAJOR( version ), WINAMP_VERSION_MINOR( version ) );
 }
 END_PPRO_SVC
 
@@ -1496,7 +1433,7 @@ BEGIN_PPRO_SVC( get_version_hex )
 	STARTUP( 0 );
 
 	version = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETVERSION );
-	sprintf( retval, "%X", version );
+	sprintf( pp.ret, "%X", version );
 }
 END_PPRO_SVC
 
@@ -1638,7 +1575,7 @@ BEGIN_PPRO_SVC( is_wnd_visible )
 
 	STARTUP( 1 );
 
-	wnd = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
+	wnd = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
 
 	switch( wnd )
 	{
@@ -1668,7 +1605,7 @@ BEGIN_PPRO_SVC( is_wnd_in_wndshade )
 
 	STARTUP( 1 );
 
-	wnd = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
+	wnd = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
 
 	switch( wnd )
 	{
@@ -1709,7 +1646,7 @@ BEGIN_PPRO_SVC( jump_to_time )
 
 	STARTUP( 1 );
 
-	position = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
+	position = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
 	result = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_JUMPTOTIME );
 	PPRO_SVC_RETURN_INT( result );
 }
@@ -1805,7 +1742,7 @@ BEGIN_PPRO_SVC( min_restore )
 
 	if( IsIconic( winamp_wnd ) )
 	{		
-		RestoreWindow( winamp_wnd, ppro_svcs );
+		RestoreWindow( winamp_wnd, pp.svcs );
 	}
 	else
 	{
@@ -1949,7 +1886,7 @@ BEGIN_PPRO_SVC( play_any_audio_cd )
 
 	STARTUP( 1 );
 
-	drive = (unsigned int) ppro_svcs->DecodeFloat( argv[0] );
+	drive = (unsigned int) pp.svcs->DecodeFloat( pp.argv[0] );
 
 	switch( drive )
 	{
@@ -2056,7 +1993,7 @@ END_PPRO_SVC
 BEGIN_PPRO_SVC( restore )
 {
 	STARTUP( 0 );
-	RestoreWindow( winamp_wnd, ppro_svcs );
+	RestoreWindow( winamp_wnd, pp.svcs );
 }
 END_PPRO_SVC
 
@@ -2116,15 +2053,15 @@ BEGIN_PPRO_SVC( set_eq_data )
 
 	STARTUP( 2 );
 
-	pos = (BYTE) ppro_svcs->DecodeFloat( argv[0] );
+	pos = (BYTE) pp.svcs->DecodeFloat( pp.argv[0] );
 	if( pos >= 0 && pos <= 10 )
 	{
-		double value = ppro_svcs->DecodeFloat( argv[1] );
+		double value = pp.svcs->DecodeFloat( pp.argv[1] );
 		value63 = (WORD) ( ( 20 - value ) * 63 / ( 20 + 20 ) );
 	}
 	else
 	{
-		value63 = (WORD) ppro_svcs->DecodeFloat( argv[1] );
+		value63 = (WORD) pp.svcs->DecodeFloat( pp.argv[1] );
 	}
 	position = MAKEWPARAM( value63, MAKEWORD( pos, 0xDB ) );
 	PostMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETEQDATA );
@@ -2154,8 +2091,8 @@ BEGIN_PPRO_SVC( set_eq_data63 )
 
 	STARTUP( 2 );
 
-	pos = (BYTE) ppro_svcs->DecodeFloat( argv[0] );
-	value = (WORD) ppro_svcs->DecodeFloat( argv[1] );
+	pos = (BYTE) pp.svcs->DecodeFloat( pp.argv[0] );
+	value = (WORD) pp.svcs->DecodeFloat( pp.argv[1] );
 	position = MAKEWPARAM( value, MAKEWORD( pos, 0xDB ) );
 	PostMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETEQDATA );
 }
@@ -2173,7 +2110,7 @@ BEGIN_PPRO_SVC( set_panning )
 
 	STARTUP( 1 );
 
-	panning = ppro_svcs->DecodeFloat( argv[0] );
+	panning = pp.svcs->DecodeFloat( pp.argv[0] );
 	PostMessage( winamp_wnd, WM_WA_IPC, (WPARAM) (BYTE) ( panning * 127 / 100 ), IPC_SETPANNING );
 }
 END_PPRO_SVC
@@ -2190,7 +2127,7 @@ BEGIN_PPRO_SVC( set_panning127 )
 
 	STARTUP( 1 );
 
-	panning = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
+	panning = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
 	PostMessage( winamp_wnd, WM_WA_IPC, panning, IPC_SETPANNING );
 }
 END_PPRO_SVC
@@ -2208,7 +2145,7 @@ BEGIN_PPRO_SVC( set_plist_position )
 	STARTUP( 1 );
 
 	/* change 1-based input into Winamp's 0-based index */
-	position = (WPARAM) ( ppro_svcs->DecodeFloat( argv[0] ) - 1 );
+	position = (WPARAM) ( pp.svcs->DecodeFloat( pp.argv[0] ) - 1 );
 	PostMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETPLAYLISTPOS );
 }
 END_PPRO_SVC
@@ -2225,7 +2162,7 @@ BEGIN_PPRO_SVC( set_plist_manual_advance )
 
 	STARTUP( 1 );
 
-	status = MAKE_BOOL( (WPARAM) ppro_svcs->DecodeFloat( argv[0] ) );
+	status = MAKE_BOOL( (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] ) );
 	PostMessage( winamp_wnd, WM_WA_IPC, status, IPC_SET_MANUALPLADVANCE );
 }
 END_PPRO_SVC
@@ -2259,7 +2196,7 @@ BEGIN_PPRO_SVC( set_rating )
 
 	STARTUP( 1 );
 	
-	rating = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
+	rating = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
 	PostMessage( winamp_wnd, WM_WA_IPC, rating, IPC_SETRATING );
 }
 END_PPRO_SVC
@@ -2277,7 +2214,7 @@ BEGIN_PPRO_SVC( set_volume )
 
 	STARTUP( 1 );
 	
-	volume = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
+	volume = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
 	volume255 = (WPARAM) ( volume * 2.55 );
 	if( volume255 / 2.55 < volume )
 		++volume255;
@@ -2297,7 +2234,7 @@ BEGIN_PPRO_SVC( set_volume255 )
 
 	STARTUP( 1 );
 
-	volume = (WPARAM) ppro_svcs->DecodeFloat( argv[0] );
+	volume = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
 	PostMessage( winamp_wnd, WM_WA_IPC, volume, IPC_SETVOLUME );
 }
 END_PPRO_SVC
@@ -2374,7 +2311,8 @@ BEGIN_PPRO_SVC( caption_num_and_title )
 
 	GetWindowText( winamp_wnd, caption, sizeof( caption ) );
 	trim_caption_end( caption );
-	SafeStringCopy( retval, retval_size, caption );
+	pp.ret[0] = '\0';
+	strncat( pp.ret, caption, pp.retsize - 1 );
 }
 END_PPRO_SVC
 
@@ -2399,13 +2337,14 @@ BEGIN_PPRO_SVC( caption_title )
 	/* trim the beginning number "XX. " */
 	p = strstr( caption, ". " );
 	
+	pp.ret[0] = '\0';
 	if( p != NULL )
 	{
-		SafeStringCopy( retval, retval_size , p + 2 /* == strlen( ". " ) */ );
+		strncat( pp.ret, p + 2 /* 2 == strlen( ". " ) */, pp.retsize - 1 );
 	}
 	else /* The number was not found (there is an option in Winamp to not show it) */
 	{
-		SafeStringCopy( retval, retval_size, caption );
+		strncat( pp.ret, caption, pp.retsize - 1 );
 	}
 }
 END_PPRO_SVC

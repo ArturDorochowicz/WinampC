@@ -4,8 +4,17 @@ if( MSVC60 )
 	if( NOT CMAKE_BUILD_TYPE STREQUAL "Distribution" )
 		set( CMAKE_BUILD_TYPE "Distribution" )
 		message( STATUS "Changed CMAKE_BUILD_TYPE to: ${CMAKE_BUILD_TYPE}" )
-	endif( )		
-	set( CMAKE_C_FLAGS_DISTRIBUTION "/MD /O1 /Ob1 /Og /GD /GR- /GX- /Gi-" )
+	endif( )
+
+	set( CMAKE_C_FLAGS_DISTRIBUTION "/MD /O2 /Ob2 /G6 /GF" )
+# /O2 maximize speed = /Ogityb1 /Gfy
+# /O1 minimize size  = /Ogsyb1  /Gfy
+# /Ob2 inline expantion - any suitable
+# /GF enable read-only string pooling (overrides /Gf)
+# /GR- disable RTTI
+# /GX- disable C++ exception handling
+# /Gi- disable incremental compilation
+# /Gm- disable minimal rebuild
 	set( LINK_FLAGS_DISTRIBUTION "/INCREMENTAL:NO /OPT:NOWIN98 /OPT:REF /OPT:ICF" )
 endif( )
 

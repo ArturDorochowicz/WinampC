@@ -176,10 +176,23 @@ typedef struct PPROSERVICES
  * No information available for versions between 3600 and 3700.
  */
 #if PPRO_VERSION < 3700
-#define PPRO_RETURN_NOTHING_BY_DEFAULT   retval[0] = '\0';
+#define PPRO_RETURN_NOTHING_BY_DEFAULT   pp.ret[0] = '\0';
 #else
 #define PPRO_RETURN_NOTHING_BY_DEFAULT
 #endif
+
+
+typedef struct PPROHELPER
+{
+	unsigned int argc;               /*< number of arguments */
+	char **argv;                     /*< array of arguments */
+	char *ret;                       /*< pointer to place for string with return value */
+	size_t retsize;            /*< size of ret buffer in bytes (532 bytes in recent versions) */
+	unsigned long *flgs;             /*< pointer to PowerPro flags */
+	PPROSERVICES *svcs;              /*< PowerPro services */
+	BOOL (*GetVar)( char*, char* );  /*< the usual GetVar function */
+	void (*SetVar)( char*, char* );  /*< the usual SetVar function */
+} PPROHELPER;
 
 
 /* Use these macros like this:
@@ -191,42 +204,41 @@ typedef struct PPROSERVICES
  * }
  * END_PPRO_SVC
  *
- * The following meaningful variables are defined inside the block:
- * BOOL (*GetVar)(LPSTR, LPSTR) - the usual GetVar function
- * void (*SetVar)(LPSTR, LPSTR) - the usual SetVar function
- * DWORD *ppro_flags - pointer to PowerPro flags
- * PPROSERVICES *ppro_svcs - PowerPro services
- * UINT argc - number of arguments
- * char **argv - array of service arguments
- * char *retval - place for string with return value
- * size_t retval_size - size of retval buffer in bytes (532 bytes in recent versions)
+ * The following meaningful variable is defined inside the block:
+ *    PPROHELPER pp;
  */
 #define BEGIN_PPRO_SVC( service_name ) \
-	_declspec(dllexport) void service_name( LPVOID ppro_unused1, LPVOID ppro_unused2, \
-		BOOL (*GetVar)(LPSTR, LPSTR), void (*SetVar)(LPSTR, LPSTR), DWORD *ppro_flags, \
-		UINT argc, LPSTR *ppro_args, PPROSERVICES *ppro_svcs ) \
+	_declspec(dllexport) void service_name( LPVOID __ppro_unused1, LPVOID __ppro_unused2, \
+		BOOL (*__ppro_get_var)(LPSTR, LPSTR), void (*__ppro_set_var)(LPSTR, LPSTR), \
+		DWORD *__ppro_flags, UINT __ppro_argc, LPSTR *__ppro_argv, PPROSERVICES *__ppro_services ) \
 	{ \
-		static const size_t retval_size = PPRO_MAX_VAR_LENGTH + 1; \
-		char *retval = ppro_args[0]; \
-		char **argv = &ppro_args[1]; \
+		PPROHELPER pp; \
+		pp.argc = __ppro_argc; \
+		pp.argv = &__ppro_argv[1]; \
+		pp.ret = __ppro_argv[0]; \
 		PPRO_RETURN_NOTHING_BY_DEFAULT \
+		pp.retsize = PPRO_MAX_VAR_LENGTH + 1; \
+		pp.svcs = __ppro_services; \
+		pp.flgs = __ppro_flags; \
+		pp.GetVar = __ppro_get_var; \
+		pp.SetVar = __ppro_set_var; \
 		/* prevent 'argument not used' warnings */ \
-		(void) ppro_unused1; (void) ppro_unused2; (void) GetVar; (void) SetVar; \
-		(void) ppro_flags; (void) argc; (void) ppro_args; (void) ppro_svcs; \
-		(void) retval_size; (void) retval; (void) argv;
-
-#define END_PPRO_SVC  }
+		(void) __ppro_unused1; (void) __ppro_unused2; (void) pp;
 
 
-#define PPRO_SVC_RETURN_INT( integer )  sprintf( retval, "%d", (int) (integer) )
-#define PPRO_SVC_RETURN_UINT( uinteger )  sprintf( retval, "%u", (unsigned int) (uinteger) )
+#define END_PPRO_SVC \
+	}
+
+
+#define PPRO_SVC_RETURN_INT( integer )  sprintf( pp.ret, "%d", (int) (integer) )
+#define PPRO_SVC_RETURN_UINT( uinteger )  sprintf( pp.ret, "%u", (unsigned int) (uinteger) )
 
 /* PowerPro 4.5.12 is the first version to support EncodeFloat/DecodeFloat */
 #if PPRO_VERSION < 4512
 #pragma message( "PPRO_SVC_RETURN_FLOAT returns string instead of PowerPro float" )
 #define PPRO_SVC_RETURN_FLOAT( double_num )  sprintf( retval, "%.3f", (double) (double_num) )
 #else
-#define PPRO_SVC_RETURN_FLOAT( double_num )  ppro_svcs->EncodeFloat( (double) (double_num), retval )
+#define PPRO_SVC_RETURN_FLOAT( double_num )  pp.svcs->EncodeFloat( (double) (double_num), pp.ret )
 #endif
 
 
