@@ -236,6 +236,10 @@
 			If specific service requires some minimum version of Winamp to work, 
 			such information is given in the service description.
 		</p>
+		<p>
+			Some of the services will work with <a href="http://www.foobar2000.org/">Foobar2000</a>
+			player with foo_winamp_spam extension installed. However, this option is really not supported.
+		</p>
 		
 		<h1>List of services</h1>
 
@@ -362,7 +366,7 @@
 
 		<ol id="versionsList">
 			<li>
-				1.2.0 - 2008-04-04
+				1.2.0 - 2008-04-07
 				<ul>
 					<li>Developed against Winamp 5 API</li>
 					<li>Requires PowerPro version 4.5.12 or newer to run</li>
@@ -385,7 +389,7 @@
 					</li>
 					<li>
 						Changed: <span class="code">play_any_audio_cd</span> erroneously claimed to support up to 26 drives.
-						In fact it supports only 4 drives. Corrected the implementation and documentation .
+						In fact it supports only 4 drives. Corrected the implementation and documentation.
 					</li>
 					
 					<li>
@@ -404,10 +408,13 @@
 						New service: <span class="code">get_panning</span>
 					</li>
 					<li>
-						New service: <span class="code">get_plist_entry_metadata</span>
+						New service: <span class="code">get_plist_current_metadata</span>
 					</li>
 					<li>
-						New service: <span class="code">get_plist_entry_path</span>
+						New service: <span class="code">get_plist_current_title</span>
+					</li>
+					<li>
+						New service: <span class="code">get_plist_entry_metadata</span>
 					</li>
 					<li>
 						New service: <span class="code">get_plist_entry_path</span>
@@ -417,12 +424,6 @@
 					</li>
 					<li>
 						New service: <span class="code">get_plist_manual_advance</span>
-					</li>
-					<li>
-						New service: <span class="code">get_plist_selected_metadata</span>
-					</li>
-					<li>
-						New service: <span class="code">get_plist_selected_title</span>
 					</li>
 					<li>
 						New service: <span class="code">get_plugin_dir</span>
@@ -482,13 +483,13 @@
 						New service: <span class="code">set_file_metadata</span>
 					</li>
 					<li>
+						New service: <span class="code">set_plist_current_metadata</span>
+					</li>
+					<li>
 						New service: <span class="code">set_plist_entry_metadata</span>
 					</li>
 					<li>
 						New service: <span class="code">set_plist_manual_advance</span>
-					</li>
-					<li>
-						New service: <span class="code">set_plist_selected_metadata</span>
 					</li>
 					<li>
 						New service: <span class="code">set_rating</span>
@@ -535,6 +536,9 @@
 					</li>
 					<li>
 						Service renamed: <span class="code">get_number_of_channels</span> to <span class="code">get_num_channels</span>
+					</li>
+					<li>
+						Service renamed: <span class="code">get_plist_selected_path</span> to <span class="code">get_plist_current_path</span>
 					</li>
 					<li>
 						Service renamed: <span class="code">jump_to_file_dialog</span> to <span class="code">dlg_jump_to_file</span>

@@ -168,7 +168,7 @@ static HWND Startup( PPROHELPER *pp, unsigned int argc_required )
 	const char *wnd_class;
 	const char *response_arg;
 	HWND winamp_wnd = NULL;
-	int optional = argc_required - pp->argc;
+	int optional = pp->argc - argc_required + 2;
 
 	/* check number of arguments */
 	if( optional < 0 || optional > 2 )
@@ -561,13 +561,13 @@ static BOOL SetFileMetadata( const char *file, const void *remote_file,
 }
 
 
-/*! <service name="get_plist_selected_metadata">
+/*! <service name="get_plist_current_metadata">
 /*!  <description>Get metadata information from current entry in the playlist.</description>
 /*!  <requirements>Winamp 2.9+</requirements>
 /*!  <argument name="metadata" type="string">The metadata field to query. Among possible values are: title, artist, album, track, year etc.</argument>
 /*!  <return-value type="string">The value of metadata field. Returned data is limited to 531 characters.</return-value>
 /*! </service> */
-BEGIN_PPRO_SVC( get_plist_selected_metadata )
+BEGIN_PPRO_SVC( get_plist_current_metadata )
 {
 	unsigned int index;
 	const void *file;
@@ -584,14 +584,14 @@ BEGIN_PPRO_SVC( get_plist_selected_metadata )
 END_PPRO_SVC
 
 
-/*! <service name="set_plist_selected_metadata">
+/*! <service name="set_plist_current_metadata">
 /*!  <description>Write metadata information for the current entry in the playlist.</description>
 /*!  <requirements>Winamp 2.9+</requirements>
 /*!  <argument name="metadata" type="string">The metadata field to change. Among possible values are: title, artist, album, track, year etc.</argument>
 /*!  <argument name="value" type="string">The new value of specified metadata field.</argument>
 /*!  <return-value type="int">Returns 1 if call was successful, 0 otherwise.</return-value>
 /*! </service> */
-BEGIN_PPRO_SVC( set_plist_selected_metadata )
+BEGIN_PPRO_SVC( set_plist_current_metadata )
 {
 	unsigned int index;
 	const void *file;
@@ -724,12 +724,12 @@ BEGIN_PPRO_SVC( get_plist_entry_title )
 END_PPRO_SVC
 
 
-/*! <service name="get_plist_selected_path">
-/*!  <description> Get full path of currently selected playlist entry.</description>
+/*! <service name="get_plist_current_path">
+/*!  <description> Get full path of current playlist entry.</description>
 /*!  <requirements>Winamp 2.04+</requirements>
 /*!  <return-value type="string">The path. The path is limited to 531 characters.</return-value>
 /*! </service> */
-BEGIN_PPRO_SVC( get_plist_selected_path )
+BEGIN_PPRO_SVC( get_plist_current_path )
 {
 	unsigned int index;
 	
@@ -741,12 +741,12 @@ BEGIN_PPRO_SVC( get_plist_selected_path )
 END_PPRO_SVC
 
 
-/*! <service name="get_plist_selected_title">
-/*!  <description> Get title of currently selected playlist entry.</description>
+/*! <service name="get_plist_current_title">
+/*!  <description> Get title of current playlist entry.</description>
 /*!  <requirements>Winamp 2.04+</requirements>
 /*!  <return-value type="string">The title. The title is limited to 531 characters.</return-value>
 /*! </service> */
-BEGIN_PPRO_SVC( get_plist_selected_title )
+BEGIN_PPRO_SVC( get_plist_current_title )
 {
 	LRESULT index;
 
