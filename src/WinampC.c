@@ -51,17 +51,6 @@ typedef enum ResponseType
 #define MAKE_BOOL( number )  ( (number) != 0 ? 1 : 0 )
 
 
-static HWND FindWinampWindow( const char *window_class )
-{
-	static const char default_class[] = "Winamp v1.x";
-	
-	if( window_class != NULL && window_class[0] != '\0' )
-		return FindWindow( window_class, NULL );
-	else
-		return FindWindow( default_class, NULL );
-}
-
-
 static const char* RequiredArgsCountInfo( int required_count )
 {
 	switch( required_count )
