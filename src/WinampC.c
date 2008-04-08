@@ -384,30 +384,30 @@ static BOOL CreateRemoteExtFileInfoStruct( HANDLE process, const char *filename,
 	}
 
 	metadata_size = strlen( metadata ) + 1;
-	info->metadata = AllocProcessMem( process, metadata_size );
+	info->metadata = (const char*) AllocProcessMem( process, metadata_size );
 	*remote_info = AllocProcessMem( process, sizeof( *remote_info ) );
 
 	if( filename != NULL )   /* use filename */
 	{
 		filename_size = strlen( filename ) + 1;
-		info->filename = AllocProcessMem( process, filename_size );
+		info->filename = (const char*) AllocProcessMem( process, filename_size );
 	}
 	else   /* use remote_filename */
 	{
 		filename_size = 0;
-		info->filename = remote_filename;
+		info->filename = (const char*) remote_filename;
 	}
 	
 	if( ret != NULL )   /* ret is a string to copy, retlen is meaningless */
 	{
 		ret_size = strlen( ret ) + 1;
-		info->ret = AllocProcessMem( process, ret_size );
+		info->ret = (char*) AllocProcessMem( process, ret_size );
 		info->retlen = 0;
 	}
 	else   /* allocate memory as indicated by retlen */
 	{
 		ret_size = 0;
-		info->ret = AllocProcessMem( process, retlen );
+		info->ret = (char*) AllocProcessMem( process, retlen );
 		info->retlen = retlen;
 	}
 
@@ -415,10 +415,10 @@ static BOOL CreateRemoteExtFileInfoStruct( HANDLE process, const char *filename,
 	if( *remote_info != NULL && info->filename != NULL 
 		&& info->metadata != NULL && info->ret != NULL )
 	{
-		size_t remote_info_written;
-		size_t metadata_written;
-		size_t filename_written;
-		size_t ret_written;
+		SIZE_T remote_info_written;
+		SIZE_T metadata_written;
+		SIZE_T filename_written = 0;
+		SIZE_T ret_written = 0;
 		
 		WriteProcessMemory( process, *remote_info, info, sizeof( *info ), &remote_info_written );
 		WriteProcessMemory( process, (void*) info->metadata, metadata, metadata_size, &metadata_written );
@@ -486,7 +486,7 @@ static void GetFileMetadata( const char *file, const void *remote_file,
 			if( 1 == SendMessage( winamp_wnd, WM_WA_IPC, (WPARAM) remote_info,
 				IPC_GET_EXTENDED_FILE_INFO ) )
 			{
-				size_t bytes_read;
+				SIZE_T bytes_read;
 
 				ReadProcessMemory( winamp, info.ret, retval, retval_size, &bytes_read );
 				if( bytes_read > 0 )   /* make sure whatever we've read is null-terminated */

@@ -176,22 +176,29 @@ typedef struct PPROSERVICES
  * No information available for versions between 3600 and 3700.
  */
 #if PPRO_VERSION < 3700
-#define PPRO_RETURN_NOTHING_BY_DEFAULT   pp.ret[0] = '\0';
+	#define PPRO_RETURN_NOTHING_BY_DEFAULT   pp.ret[0] = '\0';
 #else
-#define PPRO_RETURN_NOTHING_BY_DEFAULT
+	#define PPRO_RETURN_NOTHING_BY_DEFAULT
+#endif
+
+
+#ifdef  __cplusplus
+	#define PPRO_EXTERN_C extern "C" 
+#else
+	#define PPRO_EXTERN_C
 #endif
 
 
 typedef struct PPROHELPER
 {
-	unsigned int argc;               /*< number of arguments */
-	char **argv;                     /*< array of arguments */
-	char *ret;                       /*< pointer to place for string with return value */
-	size_t retsize;            /*< size of ret buffer in bytes (532 bytes in recent versions) */
-	unsigned long *flgs;             /*< pointer to PowerPro flags */
-	PPROSERVICES *svcs;              /*< PowerPro services */
-	BOOL (*GetVar)( char*, char* );  /*< the usual GetVar function */
-	void (*SetVar)( char*, char* );  /*< the usual SetVar function */
+	unsigned int argc;              /*< number of arguments */
+	char **argv;                    /*< array of arguments */
+	char *ret;                      /*< pointer to place for string with return value */
+	size_t retsize;                 /*< size of ret buffer in bytes (532 bytes in recent versions) */
+	unsigned long *flgs;            /*< pointer to PowerPro flags */
+	PPROSERVICES *svcs;             /*< PowerPro services */
+	BOOL (*GetVar)( char*, char* ); /*< the usual GetVar function */
+	void (*SetVar)( char*, char* ); /*< the usual SetVar function */
 } PPROHELPER;
 
 
@@ -208,7 +215,7 @@ typedef struct PPROHELPER
  *    PPROHELPER pp;
  */
 #define BEGIN_PPRO_SVC( service_name ) \
-	_declspec(dllexport) void service_name( LPVOID __ppro_unused1, LPVOID __ppro_unused2, \
+	PPRO_EXTERN_C __declspec(dllexport) void service_name( LPVOID __ppro_unused1, LPVOID __ppro_unused2, \
 		BOOL (*__ppro_get_var)(LPSTR, LPSTR), void (*__ppro_set_var)(LPSTR, LPSTR), \
 		DWORD *__ppro_flags, UINT __ppro_argc, LPSTR *__ppro_argv, PPROSERVICES *__ppro_services ) \
 	{ \
@@ -236,7 +243,7 @@ typedef struct PPROHELPER
 /* PowerPro 4.5.12 is the first version to support EncodeFloat/DecodeFloat */
 #if PPRO_VERSION < 4512
 #pragma message( "PPRO_SVC_RETURN_FLOAT returns string instead of PowerPro float" )
-#define PPRO_SVC_RETURN_FLOAT( double_num )  sprintf( retval, "%.3f", (double) (double_num) )
+#define PPRO_SVC_RETURN_FLOAT( double_num )  sprintf( pp.ret, "%.3f", (double) (double_num) )
 #else
 #define PPRO_SVC_RETURN_FLOAT( double_num )  pp.svcs->EncodeFloat( (double) (double_num), pp.ret )
 #endif
