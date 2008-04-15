@@ -159,20 +159,22 @@
 		ol#versionsList {
 			list-style-position: outside;
 			list-style-type: none;
+			padding-left: 20px;
 		}
 
 		ol#versionsList>li {
 			margin-top: 15px;
-			padding-left: 20px;
+			padding-left: 0;
 		}
 
 		ol#versionsList>li>ul {
-			list-style-position: inside;
+			list-style-position: outside;
 			list-style-type: disc;
+			padding-left: 25px;
 		}
 
 		ol#versionsList>li>ul>li {
-			padding-left: 20px;
+			padding-left: 0;
 		}
 		</style>
 	</head>
@@ -365,6 +367,27 @@
 		<h1>History</h1>
 
 		<ol id="versionsList">
+			<li>
+				1.2.1 - 2008-04-15
+				<ul>
+					<li>
+						<span class="code">enqueue_file</span> service can take directory path to enqueue files in given directory.
+						This feature has always been available, but now it is also documented.
+					</li>
+					<li>
+						New service: <span class="code">dlg_open_dir</span>
+					</li>
+					<li>
+						New service: <span class="code">dlg_plist_add_dir</span>
+					</li>
+					<li>
+						New service: <span class="code">dlg_plist_add_file</span>
+					</li>
+					<li>
+						New service: <span class="code">dlg_plist_add_url</span>
+					</li>
+				</ul>
+			</li>
 			<li>
 				1.2.0 - 2008-04-07
 				<ul>
