@@ -1,0 +1,3194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta name="generator" content="HTML Tidy for Windows (vers 25 January 2008), see www.w3.org">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+  <title>WinampC Plugin for PowerPro</title>
+  <style type="text/css">
+              /* begin reset styles */
+                body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset, input, textarea, p, blockquote, th, td {
+                        margin:0;
+                        padding:0;
+                }
+                table {
+                        border-collapse:collapse;
+                        border-spacing:0;
+                }
+                fieldset, img { 
+                        border:0;
+                }
+                address, caption, cite, code, dfn, em, strong, th, var {
+                        font-style:normal;
+                        font-weight:normal;
+                }
+                ol, ul {
+                        list-style:none;
+                }
+                caption, th {
+                        text-align:left;
+                }
+                h1, h2, h3, h4, h5, h6 {
+                        font-size:100%;
+                        font-weight:normal;
+                }
+                q:before, q:after {
+                        content:'';
+                }
+                abbr, acronym {
+                        border:0;
+                }
+                /* end reset styles */
+
+                body {
+                        font-size: 14px;
+                        font-family: Verdana, Arial, Helvetica, sans-serif;
+                        line-height: 135%;
+                        margin: 20px auto;
+                        text-align: justify;
+                        width: 80%;
+                }
+
+                hr {
+                        margin: 10px 0;
+                }
+
+                h1 {
+                        font-size: 130%;
+                        font-weight: bold;
+                        margin: 20px 0 10px 0;
+                }
+
+                p {
+                        margin: 10px 0 0 0;
+                }
+
+                ul {
+                        list-style-type: disc;
+                        list-style-position: inside;
+                }
+
+                ol {
+                        list-style-type: decimal;
+                        list-style-position: inside;
+                }
+
+                ul>li, ol>li {
+                        padding-left: 20px;
+                }
+
+                div#softwareName {
+                        font-size: 120%;
+                        font-weight: bold;
+                }
+
+                ol#tableOfContents {
+                }
+
+                ul#listOfServices {
+                }
+
+                ul#servicesDescriptions {
+                        list-style-position: outside;
+                        list-style-type: none;
+                }
+                
+                ul#servicesDescriptions>li {
+                        margin-top: 20px;
+                        padding-left: 20px;
+                        padding-right: 15px;
+                        position: relative;
+                }
+                
+                ul#servicesDescriptions>li>h4 {
+                        font-size: 85%;
+                        font-weight: bold;
+                        margin: 5px -15px 2px -20px;
+                        padding-left: 5px;
+                }
+
+                ul#servicesDescriptions>li div:first-child {
+                        background-color: #eee;
+                        color: inherit;
+                        font-weight: bold;
+                        font-family: "Courier New", Courier, monospace;
+                        font-size: 110%;
+                        margin: 0 -15px 4px -20px;
+                        padding: 2px 3.4em 2px 6px;
+                }
+
+                ul#servicesDescriptions>li div:first-child + a {
+                        font-size: 80%;
+                        padding: 2px 0px;
+                        position: absolute;
+                        right: 0;
+                        text-align: right;
+                        top: 0;
+                }
+
+                ul#servicesDescriptions>li p {
+                        margin: 0;
+                }
+
+                ul#servicesDescriptions>li>dl {
+                        list-style-type: none;
+                }
+
+                ul#servicesDescriptions>li>dl>dt {
+                        font-size: 95%;
+                        font-style: italic;
+                        margin-top: 2px;
+                }
+                
+                ul#servicesDescriptions>li>dl>dt>span {
+                        font-style: normal;
+                }
+
+                ul#servicesDescriptions>li>dl>dd {
+                        margin-left: 30px;
+                }
+
+                .code {
+                        font-family: "Courier New", Courier, monospace;
+                }
+
+                ol#versionsList {
+                        list-style-position: outside;
+                        list-style-type: none;
+                        padding-left: 20px;
+                }
+
+                ol#versionsList>li {
+                        margin-top: 15px;
+                        padding-left: 0;
+                }
+
+                ol#versionsList>li>ul {
+                        list-style-position: outside;
+                        list-style-type: disc;
+                        padding-left: 25px;
+                }
+
+                ol#versionsList>li>ul>li {
+                        padding-left: 0;
+                }
+  </style>
+</head>
+
+<body>
+  <div id="softwareName">
+    WinampC 1.2.1
+  </div>
+
+  <p>Copyright © 2003–2008 Artur Dorochowicz<br></p>
+
+  <p>Released under the terms of the following MIT/X11 licence, however, at this time the source
+  code is not available.</p>
+
+  <p style="font-size: 70%; padding-left: 30px; padding-right: 30px;">Permission is hereby granted,
+  free of charge, to any person obtaining a copy of this software and associated documentation
+  files (the "Software"), to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+  following conditions:<br>
+  <br>
+  The above copyright notice and this permission notice shall be included in all copies or
+  substantial portions of the Software.<br>
+  <br>
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+  NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+  <hr>
+
+  <h1>Table of contents</h1>
+
+  <ol id="tableOfContents">
+    <li><a href="#id105249">Overview</a></li>
+
+    <li><a href="#id105313">List of services</a></li>
+
+    <li><a href="#id105333">Using the plugin</a></li>
+
+    <li><a href="#id105543">Description of services</a></li>
+
+    <li><a href="#id105685">History</a></li>
+
+    <li><a href="#id107068">Contacting the author</a></li>
+  </ol>
+  <hr>
+
+  <h1 id="id105249">1. Overview</h1>
+
+  <p>WinampC is a PowerPro plugin which gives you the ability to control Winamp from your PowerPro
+  bars, menus and scripts. The plugin allows you to control multiple Winamp instances
+  independently, even when they are minimized to system tray.</p>
+
+  <p>The plugin requires PowerPro version 4.5.12 or newer.</p>
+
+  <p>The plugin was developed against the newest SDK for Winamp 5. The exact used version is
+  <a href="http://download.nullsoft.com/winamp/beta/WA5.34_SDK.exe">Winamp SDK 5.34 BETA</a>,
+  additional information is available <a href=
+  "http://forums.winamp.com/showthread.php?threadid=252090">here</a>.</p>
+
+  <p>Almost all of the services will work with Winamp versions earlier than 5. If specific service
+  requires some minimum version of Winamp to work, such information is given in the service
+  description.</p>
+
+  <p>Some of the services will work with <a href="http://www.foobar2000.org/">Foobar2000</a> player
+  with foo_winamp_spam extension installed. However, this option is really not supported.</p>
+
+  <h1 id="id105313">2. List of services</h1>
+
+  <ul id="listOfServices">
+    <li><a href="#id104818">add_bookmark</a></li>
+
+    <li><a href="#id104841">add_track_as_bookmark</a></li>
+
+    <li><a href="#id107520">caption_full</a></li>
+
+    <li><a href="#id109682">caption_num_and_title</a></li>
+
+    <li><a href="#id109699">caption_title</a></li>
+
+    <li><a href="#id107980">change_directory</a></li>
+
+    <li><a href="#id108000">clear_plist</a></li>
+
+    <li><a href="#id108010">close_winamp</a></li>
+
+    <li><a href="#id109099">dlg_about_winamp</a></li>
+
+    <li><a href="#id108020">dlg_cfg_vis_plugin</a></li>
+
+    <li><a href="#id108031">dlg_del_autoload_preset</a></li>
+
+    <li><a href="#id108042">dlg_del_preset</a></li>
+
+    <li><a href="#id109642">dlg_edit_bookmarks</a></li>
+
+    <li><a href="#id109110">dlg_file_info</a></li>
+
+    <li><a href="#id108951">dlg_jump_to_file</a></li>
+
+    <li><a href="#id108993">dlg_jump_to_time</a></li>
+
+    <li><a href="#id104450">dlg_load_autoload_preset</a></li>
+
+    <li><a href="#id109025">dlg_load_preset</a></li>
+
+    <li><a href="#id109035">dlg_load_preset_from_eqf</a></li>
+
+    <li><a href="#id109151">dlg_open_dir</a></li>
+
+    <li><a href="#id108128">dlg_open_file</a></li>
+
+    <li><a href="#id109141">dlg_open_url</a></li>
+
+    <li><a href="#id108065">dlg_plist_add_dir</a></li>
+
+    <li><a href="#id108086">dlg_plist_add_file</a></li>
+
+    <li><a href="#id108076">dlg_plist_add_url</a></li>
+
+    <li><a href="#id109120">dlg_preferences</a></li>
+
+    <li><a href="#id104460">dlg_save_autoload_preset</a></li>
+
+    <li><a href="#id109326">dlg_save_preset</a></li>
+
+    <li><a href="#id109335">dlg_save_preset_to_eqf</a></li>
+
+    <li><a href="#id109131">dlg_skin_selector</a></li>
+
+    <li><a href="#id109162">dlg_vis_plugin_options</a></li>
+
+    <li><a href="#id108052">end_of_plist</a></li>
+
+    <li><a href="#id108097">enqueue_file</a></li>
+
+    <li><a href="#id108139">flush_plist_cache_buffer</a></li>
+
+    <li><a href="#id108153">forward_5sec</a></li>
+
+    <li><a href="#id108163">get_bitrate</a></li>
+
+    <li><a href="#id107926">get_config_dir</a></li>
+
+    <li><a href="#id108184">get_eq_data</a></li>
+
+    <li><a href="#id108236">get_eq_data63</a></li>
+
+    <li><a href="#id107761">get_file_metadata</a></li>
+
+    <li><a href="#id108435">get_length</a></li>
+
+    <li><a href="#id108451">get_net_status</a></li>
+
+    <li><a href="#id108247">get_num_channels</a></li>
+
+    <li><a href="#id108268">get_panning</a></li>
+
+    <li><a href="#id108289">get_panning127</a></li>
+
+    <li><a href="#id108311">get_playback_status</a></li>
+
+    <li><a href="#id107543">get_plist_current_metadata</a></li>
+
+    <li><a href="#id107865">get_plist_current_path</a></li>
+
+    <li><a href="#id107886">get_plist_current_title</a></li>
+
+    <li><a href="#id107668">get_plist_entry_metadata</a></li>
+
+    <li><a href="#id107803">get_plist_entry_path</a></li>
+
+    <li><a href="#id107834">get_plist_entry_title</a></li>
+
+    <li><a href="#id108329">get_plist_length</a></li>
+
+    <li><a href="#id109550">get_plist_manual_advance</a></li>
+
+    <li><a href="#id108349">get_plist_position</a></li>
+
+    <li><a href="#id108371">get_plist_position1</a></li>
+
+    <li><a href="#id107944">get_plugin_dir</a></li>
+
+    <li><a href="#id108487">get_position</a></li>
+
+    <li><a href="#id108503">get_position_in_sec</a></li>
+
+    <li><a href="#id108520">get_rating</a></li>
+
+    <li><a href="#id108541">get_repeat</a></li>
+
+    <li><a href="#id108562">get_samplerate</a></li>
+
+    <li><a href="#id108583">get_samplerate_hz</a></li>
+
+    <li><a href="#id108604">get_shuffle</a></li>
+
+    <li><a href="#id108625">get_time_display_mode</a></li>
+
+    <li><a href="#id108665">get_version</a></li>
+
+    <li><a href="#id108694">get_version_hex</a></li>
+
+    <li><a href="#id108738">get_video_height</a></li>
+
+    <li><a href="#id108758">get_video_width</a></li>
+
+    <li><a href="#id108779">get_volume</a></li>
+
+    <li><a href="#id108796">get_volume255</a></li>
+
+    <li><a href="#id107908">get_winamp_ini_path</a></li>
+
+    <li><a href="#id107962">get_winamp_m3u_dir</a></li>
+
+    <li><a href="#id108866">is_double_size</a></li>
+
+    <li><a href="#id108832">is_fullscreen</a></li>
+
+    <li><a href="#id108814">is_running</a></li>
+
+    <li><a href="#id108849">is_vis_running</a></li>
+
+    <li><a href="#id108916">is_wnd_in_wndshade</a></li>
+
+    <li><a href="#id108883">is_wnd_visible</a></li>
+
+    <li><a href="#id108962">jump_to_time</a></li>
+
+    <li><a href="#id109003">load_default_preset</a></li>
+
+    <li><a href="#id109056">min_restore</a></li>
+
+    <li><a href="#id109046">minimize</a></li>
+
+    <li><a href="#id109067">move_10_tracks_back</a></li>
+
+    <li><a href="#id109078">move_10_tracks_forward</a></li>
+
+    <li><a href="#id109089">next_track</a></li>
+
+    <li><a href="#id109173">pause_unpause</a></li>
+
+    <li><a href="#id109232">play</a></li>
+
+    <li><a href="#id109194">play_any_audio_cd</a></li>
+
+    <li><a href="#id109183">play_audio_cd</a></li>
+
+    <li><a href="#id109217">play_button</a></li>
+
+    <li><a href="#id109242">previous_track</a></li>
+
+    <li><a href="#id109252">reload_skin</a></li>
+
+    <li><a href="#id109262">repeat_off</a></li>
+
+    <li><a href="#id109276">repeat_on</a></li>
+
+    <li><a href="#id109290">restart_winamp</a></li>
+
+    <li><a href="#id109305">restore</a></li>
+
+    <li><a href="#id109315">rewind_5sec</a></li>
+
+    <li><a href="#id109014">save_default_preset</a></li>
+
+    <li><a href="#id109346">set_eq_data</a></li>
+
+    <li><a href="#id109400">set_eq_data63</a></li>
+
+    <li><a href="#id107711">set_file_metadata</a></li>
+
+    <li><a href="#id109455">set_panning</a></li>
+
+    <li><a href="#id109478">set_panning127</a></li>
+
+    <li><a href="#id107576">set_plist_current_metadata</a></li>
+
+    <li><a href="#id107618">set_plist_entry_metadata</a></li>
+
+    <li><a href="#id109526">set_plist_manual_advance</a></li>
+
+    <li><a href="#id109502">set_plist_position</a></li>
+
+    <li><a href="#id109572">set_rating</a></li>
+
+    <li><a href="#id108646">set_time_display_mode</a></li>
+
+    <li><a href="#id109596">set_volume</a></li>
+
+    <li><a href="#id109619">set_volume255</a></li>
+
+    <li><a href="#id109653">shuffle_off</a></li>
+
+    <li><a href="#id109667">shuffle_on</a></li>
+
+    <li><a href="#id109715">start_of_plist</a></li>
+
+    <li><a href="#id108118">start_vis_plugin</a></li>
+
+    <li><a href="#id109728">stop</a></li>
+
+    <li><a href="#id109738">stop_after_current</a></li>
+
+    <li><a href="#id109749">stop_with_fadeout</a></li>
+
+    <li><a href="#id109759">toggle_doublesize</a></li>
+
+    <li><a href="#id109770">toggle_easymove</a></li>
+
+    <li><a href="#id109780">toggle_eq_window</a></li>
+
+    <li><a href="#id109791">toggle_main_window</a></li>
+
+    <li><a href="#id109801">toggle_on_top</a></li>
+
+    <li><a href="#id109812">toggle_plist_window</a></li>
+
+    <li><a href="#id109822">toggle_plist_windowshade</a></li>
+
+    <li><a href="#id109833">toggle_repeat</a></li>
+
+    <li><a href="#id109843">toggle_shuffle</a></li>
+
+    <li><a href="#id109854">toggle_windowshade</a></li>
+
+    <li><a href="#id109865">update_info</a></li>
+
+    <li><a href="#id109880">volume_down</a></li>
+
+    <li><a href="#id109890">volume_up</a></li>
+
+    <li><a href="#id109900">windows_disable</a></li>
+
+    <li><a href="#id109915">windows_enable</a></li>
+  </ul>
+
+  <h1 id="id105333">3. Using the plugin</h1>
+
+  <p>The plugin must be placed in PowerPro's <span class="code">plugins</span> directory. After
+  that, its services can be used just like services of any other plugin. Read PowerPro's help for
+  general information on using plugins.</p>
+
+  <p>All services can take two additional, optional arguments: <span class=
+  "code">response_type</span> and <span class="code">class_name</span> (in this order only). For
+  clarity, these arguments are not listed in the descriptions.</p>
+
+  <p>Specify <span class="code">class_name</span> argument if given command should be issued
+  against specific Winamp instance (identified by Winamp's <a href=
+  "http://msdn2.microsoft.com/en-us/library/ms633574(VS.85).aspx">window class name</a>). If you
+  omit this argument or specify an empty string (<span class="code">""</span>), default class name
+  (which is <span class="code">"Winamp v1.x"</span>) will be used. The <span class=
+  "code">class_name</span> argument enables you to control many Winamp instances at the same time
+  as long as they use different class names. Winamp can be started with special command line
+  argument (<span class="code">/class="class name here"</span>), which makes it use a class name of
+  your choice.</p>
+
+  <p>The <span class="code">response_type</span> argument allows you to choose how the plugin
+  should react if specified Winamp window does not exist i.e. Winamp is not running at all or there
+  is no Winamp window of specified class.</p>
+
+  <ul>
+    <li>Giving <span class="code">1</span> as an argument shows a window with error explanation in
+    case of an error.</li>
+
+    <li>Giving <span class="code">2</span> sets F0 (flag 0) when Winamp window was found or clears
+    F0 if there was an error.</li>
+
+    <li>Giving <span class="code">3abcde...</span> returns <span class="code">abcde...</span> in
+    case of error.</li>
+  </ul>
+
+  <p>Any other value or when you omit this argument will make the plugin not react in any way if
+  specified Winamp window wasn't found.</p>
+
+  <p>If you want to specify <span class="code">class_name</span> argument, you must provide
+  <span class="code">response_type</span> argument as well. Example service usage might be:</p>
+
+  <ul>
+    <li><span class="code">WinampC.service_name( arg1, arg2, ..., response_type, class_name
+    )</span></li>
+
+    <li>or <span class="code">WinampC.service_name( arg1, arg2, ..., response_type )</span></li>
+
+    <li>or <span class="code">WinampC.service_name( arg1, arg2, ... )</span></li>
+  </ul>
+
+  <h1 id="id105543">4. Description of services</h1>
+
+  <p>In the desciptions below the following data types are used:</p>
+
+  <ul>
+    <li>string - possible PowerPro arguments are: string, integer (is converted to string)</li>
+
+    <li>int - integer, possible PowerPro arguments are: integer, string (containing an integer),
+    float (is truncated to integer)</li>
+
+    <li>float - possible PowerPro arguments are: float, integer, string (containing a float)</li>
+
+    <li>mixed - the actual type depends on the value of one of arguments</li>
+  </ul>
+
+  <ul id="servicesDescriptions">
+    <li id="id104818">
+      <div>
+        add_bookmark( file )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Add specified file/URL to Winamp's bookmark list.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.4+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>string <span>file</span></dt>
+
+        <dd>File path or URL.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id104841">
+      <div>
+        add_track_as_bookmark( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Add current track as bookmark.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id107520">
+      <div>
+        caption_full( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get full caption of the Winamp window. This is something like: 'Number. Song title -
+      Winamp'. Obviously, Winamp's option 'Scroll song title in the Windows taskbar' influences the
+      output from this service.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>string</dt>
+
+        <dd>The caption of the Winamp window.</dd>
+      </dl>
+    </li>
+
+    <li id="id109682">
+      <div>
+        caption_num_and_title( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get the track title with preceding playlist entry number. The information is retrieved
+      from Winamp's window caption. In order for this to work properly, Winamp's option "Scroll
+      song title in the Windows taskbar" must be disabled. Otherwise the result is undefined.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109699">
+      <div>
+        caption_title( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get the title of the current track. The information is retrieved from Winamp's window
+      caption. In order for this to work properly, Winamp's option 'Scroll song title in the
+      Windows taskbar' must be disabled. Otherwise the result is undefined.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id107980">
+      <div>
+        change_directory( directory )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Change Winamp's current working directory.</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>string <span>directory</span></dt>
+
+        <dd>The new working directory.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108000">
+      <div>
+        clear_plist( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Clear Winamp's internal playlist.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108010">
+      <div>
+        close_winamp( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Close Winamp.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109099">
+      <div>
+        dlg_about_winamp( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "About Winamp" window.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108020">
+      <div>
+        dlg_cfg_vis_plugin( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open configuration dialog of the current visualisation plugin.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108031">
+      <div>
+        dlg_del_autoload_preset( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Delete auto-load preset" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108042">
+      <div>
+        dlg_del_preset( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Delete preset" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109642">
+      <div>
+        dlg_edit_bookmarks( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Edit bookmarks" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109110">
+      <div>
+        dlg_file_info( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "File info" window.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108951">
+      <div>
+        dlg_jump_to_file( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Jump to file" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108993">
+      <div>
+        dlg_jump_to_time( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Jump to time" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id104450">
+      <div>
+        dlg_load_autoload_preset( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Load auto-load preset" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109025">
+      <div>
+        dlg_load_preset( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Load EQ preset" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109035">
+      <div>
+        dlg_load_preset_from_eqf( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Load preset from EQF" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109151">
+      <div>
+        dlg_open_dir( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Open Folder" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108128">
+      <div>
+        dlg_open_file( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Open file(s)" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109141">
+      <div>
+        dlg_open_url( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Open URL" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108065">
+      <div>
+        dlg_plist_add_dir( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Add Folder" playlist dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108086">
+      <div>
+        dlg_plist_add_file( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Add file(s) to playlist" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108076">
+      <div>
+        dlg_plist_add_url( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Add URL" playlist dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109120">
+      <div>
+        dlg_preferences( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Winamp preferences" window.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id104460">
+      <div>
+        dlg_save_autoload_preset( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Save auto-load preset" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109326">
+      <div>
+        dlg_save_preset( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Save EQ preset" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109335">
+      <div>
+        dlg_save_preset_to_eqf( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Save equaliser preset to EQF" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109131">
+      <div>
+        dlg_skin_selector( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open skin selector dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109162">
+      <div>
+        dlg_vis_plugin_options( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Open "Visualisation plug-ins options" dialog.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108052">
+      <div>
+        end_of_plist( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Play the last file on the playlist. When shuffle is on, it is the last played file.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108097">
+      <div>
+        enqueue_file( file )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Enqueue file.</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>string <span>file</span></dt>
+
+        <dd>The file to enqueue. It can also be a directory path, Winamp will then enqueue files in
+        that directory.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108139">
+      <div>
+        flush_plist_cache_buffer( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Flush the playlist cache buffer. Makes Winamp refetch the titles for all of the entries in
+      the current playlist.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108153">
+      <div>
+        forward_5sec( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Fast forward 5 seconds.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108163">
+      <div>
+        get_bitrate( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get momentary bitrate of current song.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.05+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>The bitrate in kbs.</dd>
+      </dl>
+    </li>
+
+    <li id="id107926">
+      <div>
+        get_config_dir( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get directory where Winamp configuration files are stored.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>string</dt>
+
+        <dd>The directory. The path is limited to 531 characters.</dd>
+      </dl>
+    </li>
+
+    <li id="id108184">
+      <div>
+        get_eq_data( position )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Query the status of equaliser.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.05+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>position</span></dt>
+
+        <dd>Specifies the information to query.<br>
+        0–9 - The 10 bands of EQ data,<br>
+        10 - the preamp value,<br>
+        11 - enabled status,<br>
+        12 - autoload status.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>mixed</dt>
+
+        <dd>The value and its type depend on the specified argument.<br>
+        For 0–10 - return value is a float from -20 to +20 (db).<br>
+        For 11–12 - return value is an integer: 0 (disabled) or 1 (enabled).<br></dd>
+      </dl>
+    </li>
+
+    <li id="id108236">
+      <div>
+        get_eq_data63( position )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Query the status of equaliser. Data is returned exactly as received from Winamp.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.05+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>position</span></dt>
+
+        <dd>Specifies the information to query.<br>
+        0–9 - The 10 bands of EQ data,<br>
+        10 - the preamp value,<br>
+        11 - enabled status,<br>
+        12 - autoload status.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>The value depends on the specified argument.<br>
+        For 0–10 - return value is an integer from 63 to 0 (which corresponds to -20–+20 db).<br>
+        For 11–12 - return value is 0 (disabled) or 1 (enabled).<br></dd>
+      </dl>
+    </li>
+
+    <li id="id107761">
+      <div>
+        get_file_metadata( file, metadata )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get metadata information from specified file.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.9+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>string <span>file</span></dt>
+
+        <dd>The file path.</dd>
+
+        <dt>string <span>metadata</span></dt>
+
+        <dd>The metadata field to query. Among possible values are: title, artist, album, track,
+        year etc.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>string</dt>
+
+        <dd>The value of metadata field. Returned data is limited to 531 characters.</dd>
+      </dl>
+    </li>
+
+    <li id="id108435">
+      <div>
+        get_length( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get length of the current song.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>The length in seconds.</dd>
+      </dl>
+    </li>
+
+    <li id="id108451">
+      <div>
+        get_net_status( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Check if the Internet connection is available for Winamp. Relates to the Internet
+      connection type setting on the main general preferences page in the Winamp preferences.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.05+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>Returns 1 when connection is available, 0 otherwise.</dd>
+      </dl>
+    </li>
+
+    <li id="id108247">
+      <div>
+        get_num_channels( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get number of channels of the current song.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.05+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>Number of channels.</dd>
+      </dl>
+    </li>
+
+    <li id="id108268">
+      <div>
+        get_panning( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get value describing panning setting.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.0+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>The panning value from -100 (all left) to +100 (all right).</dd>
+      </dl>
+    </li>
+
+    <li id="id108289">
+      <div>
+        get_panning127( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get value describing panning setting. Data is returned exactly as received from
+      Winamp.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.0+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>The panning value from -127 (all left) to +127 (all right).</dd>
+      </dl>
+    </li>
+
+    <li id="id108311">
+      <div>
+        get_playback_status( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get status of the playback.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>Returns 1 when Winamp is playing, 3 when paused, 0 when it is not playing.</dd>
+      </dl>
+    </li>
+
+    <li id="id107543">
+      <div>
+        get_plist_current_metadata( metadata )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get metadata information from current entry in the playlist.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.9+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>string <span>metadata</span></dt>
+
+        <dd>The metadata field to query. Among possible values are: title, artist, album, track,
+        year etc.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>string</dt>
+
+        <dd>The value of metadata field. Returned data is limited to 531 characters.</dd>
+      </dl>
+    </li>
+
+    <li id="id107865">
+      <div>
+        get_plist_current_path( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get full path of current playlist entry.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.04+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>string</dt>
+
+        <dd>The path. The path is limited to 531 characters.</dd>
+      </dl>
+    </li>
+
+    <li id="id107886">
+      <div>
+        get_plist_current_title( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get title of current playlist entry.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.04+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>string</dt>
+
+        <dd>The title. The title is limited to 531 characters.</dd>
+      </dl>
+    </li>
+
+    <li id="id107668">
+      <div>
+        get_plist_entry_metadata( index, metadata )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get metadata information from specified entry in the playlist.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.9+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>string <span>index</span></dt>
+
+        <dd>The position in the playlist. First playlist entry is at 1.</dd>
+
+        <dt>string <span>metadata</span></dt>
+
+        <dd>The metadata field to query. Among possible values are: title, artist, album, track,
+        year etc.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>string</dt>
+
+        <dd>The value of metadata field. Returned data is limited to 531 characters.</dd>
+      </dl>
+    </li>
+
+    <li id="id107803">
+      <div>
+        get_plist_entry_path( index )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get full path of playlist entry at specified position.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.04+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>index</span></dt>
+
+        <dd>The position. First playlist entry is at 1.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>string</dt>
+
+        <dd>The path. The path is limited to 531 characters.</dd>
+      </dl>
+    </li>
+
+    <li id="id107834">
+      <div>
+        get_plist_entry_title( index )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get title of playlist entry at specified position.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.04+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>index</span></dt>
+
+        <dd>The position. First entry is at 1.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>string</dt>
+
+        <dd>The title. The title is limited to 531 characters.</dd>
+      </dl>
+    </li>
+
+    <li id="id108329">
+      <div>
+        get_plist_length( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Gets playlist length in tracks.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.0+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>Number of tracks in the playlist.</dd>
+      </dl>
+    </li>
+
+    <li id="id109550">
+      <div>
+        get_plist_manual_advance( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get the status of the Manual Playlist Advance option.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 5.03+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>1 if option is enabled, 0 if disabled.</dd>
+      </dl>
+    </li>
+
+    <li id="id108349">
+      <div>
+        get_plist_position( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get position in the current playlist, in tracks.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.05+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>The position of the current track in the playlist. First track is at 1.</dd>
+      </dl>
+    </li>
+
+    <li id="id108371">
+      <div>
+        get_plist_position1( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Write current playlist to %winamp.ini.dir%\Winamp.m3u and return position in the
+      playlist.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 1.666+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>The position of the current track in the playlist. First track is at 1.</dd>
+      </dl>
+    </li>
+
+    <li id="id107944">
+      <div>
+        get_plugin_dir( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get directory where Winamp plugins are stored.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>string</dt>
+
+        <dd>The directory. The path is limited to 531 characters.</dd>
+      </dl>
+    </li>
+
+    <li id="id108487">
+      <div>
+        get_position( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get position in the current track.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>The position in miliseconds.</dd>
+      </dl>
+    </li>
+
+    <li id="id108503">
+      <div>
+        get_position_in_sec( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get position in the current track.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>The position in seconds.</dd>
+      </dl>
+    </li>
+
+    <li id="id108520">
+      <div>
+        get_rating( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get rating of the current track.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 5.04+ with Media Library</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>Rating value from 0 (no rating) to 5.</dd>
+      </dl>
+    </li>
+
+    <li id="id108541">
+      <div>
+        get_repeat( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get status of the repeat option.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.4+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>1 - enabled or 0 - disabled.</dd>
+      </dl>
+    </li>
+
+    <li id="id108562">
+      <div>
+        get_samplerate( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get sample rate of the current track.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.05+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>Sample rate in kHz.</dd>
+      </dl>
+    </li>
+
+    <li id="id108583">
+      <div>
+        get_samplerate_hz( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get sample rate of the current track.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 5.25+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>Sample rate in Hz.</dd>
+      </dl>
+    </li>
+
+    <li id="id108604">
+      <div>
+        get_shuffle( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get status of the shuffle option.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.4+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>1 - enabled or 0 - disabled.</dd>
+      </dl>
+    </li>
+
+    <li id="id108625">
+      <div>
+        get_time_display_mode( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get time display mode.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.05+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>0 - displaying elapsed time, 1 - displaying remaining time.</dd>
+      </dl>
+    </li>
+
+    <li id="id108665">
+      <div>
+        get_version( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get Winamp's version number.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>string</dt>
+
+        <dd>The version number in X.YZ format. Because of the wealth of hexadecimal Winamp version
+        formats (see get_version_hex) this service may not always return correct results. It works
+        by simply replacing second digit in hexadecimal version number (which should be 0) with a
+        dot.</dd>
+      </dl>
+    </li>
+
+    <li id="id108694">
+      <div>
+        get_version_hex( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get Winamp's version number.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>string</dt>
+
+        <dd>The version number as returned from Winamp. Usual, expected format is X0YZ for version
+        X.YZ.<br>
+        A quote from Winamp SDK:<br>
+        "The version returned will be 0x20yx for Winamp 2.yx. Versions previous to Winamp 2.0
+        typically (but not always) use 0x1zyx for 1.zx. Just a bit weird but that's the way it
+        goes.<br>
+        For Winamp 5.x it uses the format 0x50yx for Winamp 5.yx, e.g. 5.01 -&gt; 0x5001, 5.09
+        -&gt; 0x5009, 5.1 -&gt; 0x5010.<br>
+        Notes:<br>
+        For 5.02 this api will return the same value as for a 5.01 build.<br>
+        For 5.07 this api will return the same value as for a 5.06 build."</dd>
+      </dl>
+    </li>
+
+    <li id="id108738">
+      <div>
+        get_video_height( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get height of the current video.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 5+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>The height.</dd>
+      </dl>
+    </li>
+
+    <li id="id108758">
+      <div>
+        get_video_width( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get width of the current video.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 5+</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>The width.</dd>
+      </dl>
+    </li>
+
+    <li id="id108779">
+      <div>
+        get_volume( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get value of the volume setting.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>The volume as a value from 0 (mute) to 100.</dd>
+      </dl>
+    </li>
+
+    <li id="id108796">
+      <div>
+        get_volume255( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get value of the volume setting. Data is returned exactly as received from Winamp.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>The volume as a value from 0 (mute) to 255.</dd>
+      </dl>
+    </li>
+
+    <li id="id107908">
+      <div>
+        get_winamp_ini_path( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get path of the winamp.ini configuration file.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>string</dt>
+
+        <dd>The path. The path is limited to 531 characters.</dd>
+      </dl>
+    </li>
+
+    <li id="id107962">
+      <div>
+        get_winamp_m3u_dir( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Get directory where winamp.m3u file is saved.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>string</dt>
+
+        <dd>The directory. The path is limited to 531 characters.</dd>
+      </dl>
+    </li>
+
+    <li id="id108866">
+      <div>
+        is_double_size( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Check if Double size option is enabled.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>1 if option is enabled, 0 if not.</dd>
+      </dl>
+    </li>
+
+    <li id="id108832">
+      <div>
+        is_fullscreen( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Check if video or visualisation is in fullscreen mode.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>1 if in fullscreen mode, 0 if not.</dd>
+      </dl>
+    </li>
+
+    <li id="id108814">
+      <div>
+        is_running( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Check if Winamp is running. Check is done by searching for Winamp's window.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>1 if Winamp is running, 0 if Winamp is not running.</dd>
+      </dl>
+    </li>
+
+    <li id="id108849">
+      <div>
+        is_vis_running( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Check if visualisation is running.</p>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>1 if visualisation is running, 0 if not.</dd>
+      </dl>
+    </li>
+
+    <li id="id108916">
+      <div>
+        is_wnd_in_wndshade( window )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Check if specified Winamp window is set to Windowshade mode. Works with classic Winamp
+      skins only.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 5.04+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>window</span></dt>
+
+        <dd>The window to check. Possible values are: -1 - main window, 0 - equaliser, 1 -
+        playlist, 2 - minibrowser, 3 - video.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>1 if window is set to Windowshade mode, 0 if not.</dd>
+      </dl>
+    </li>
+
+    <li id="id108883">
+      <div>
+        is_wnd_visible( window )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Check if specified Winamp window is visible.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.9+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>window</span></dt>
+
+        <dd>The window to check. Possible values are: 0 - equaliser, 1 - playlist, 2 - minibrowser,
+        3 - video.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>1 if window is visible, 0 if window is hidden.</dd>
+      </dl>
+    </li>
+
+    <li id="id108962">
+      <div>
+        jump_to_time( position )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Jump to specified position in the current track.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 1.60+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>position</span></dt>
+
+        <dd>Requested position in miliseconds.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>Returns -1 if Winamp is not playing, 1 on end of file, or 0 if call was
+        successful.</dd>
+      </dl>
+    </li>
+
+    <li id="id109003">
+      <div>
+        load_default_preset( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Load default equaliser preset.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109056">
+      <div>
+        min_restore( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Minimize the Winamp's window if it is not minimized, restore if minimized.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109046">
+      <div>
+        minimize( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Minimize the Winamp's window.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109067">
+      <div>
+        move_10_tracks_back( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Move 10 tracks back and start playing.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109078">
+      <div>
+        move_10_tracks_forward( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Move 10 tracks forward and start playing.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109089">
+      <div>
+        next_track( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Start the next track.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109173">
+      <div>
+        pause_unpause( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Pause if playing, start playing if paused.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109232">
+      <div>
+        play( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Start playback.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109194">
+      <div>
+        play_any_audio_cd( drive )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Begin playing Audio CD in specified drive.</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>drive</span></dt>
+
+        <dd>The drive number. First CD drive in the system is at 0. Supports up to 4 drives (thus
+        accepted values are: 0, 1, 2, 3.)</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109183">
+      <div>
+        play_audio_cd( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Begin playing Audio CD.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109217">
+      <div>
+        play_button( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Same as hitting play button. There's also play service and according to Nullsoft there are
+      some differences between them.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109242">
+      <div>
+        previous_track( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Start previous track.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109252">
+      <div>
+        reload_skin( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Reload current skin.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109262">
+      <div>
+        repeat_off( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Turn repeat off.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.4+</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109276">
+      <div>
+        repeat_on( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Turn repeat on.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.4+</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109290">
+      <div>
+        restart_winamp( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Restart Winamp.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.2+</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109305">
+      <div>
+        restore( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Restore the Winamp's window and make it foreground.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109315">
+      <div>
+        rewind_5sec( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Rewind 5 seconds.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109014">
+      <div>
+        save_default_preset( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Save default equaliser preset.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109346">
+      <div>
+        set_eq_data( position, value )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Change the status of equaliser.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.92+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>position</span></dt>
+
+        <dd>Specifies the information to alter.<br>
+        0–9 - The 10 bands of EQ data,<br>
+        10 - the preamp value,<br>
+        11 - enabled status,<br>
+        12 - autoload status.</dd>
+
+        <dt>mixed <span>value</span></dt>
+
+        <dd>The accepted value and its type depend on the 'position' argument.<br>
+        For 0–10 specify a float from -20 to +20 (db).<br>
+        For 11–12 specify 0 to disable or 1 to enable.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109400">
+      <div>
+        set_eq_data63( position, value )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Change the status of equaliser using Winamp's data format.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.92+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>position</span></dt>
+
+        <dd>Specifies the information to alter.<br>
+        0–9 - The 10 bands of EQ data,<br>
+        10 - the preamp value,<br>
+        11 - enabled status,<br>
+        12 - autoload status.</dd>
+
+        <dt>int <span>value</span></dt>
+
+        <dd>The accepted value depends on the 'position' argument.<br>
+        For 0–10 specify a number from 63 to 0 (which corresponds to -20–+20 db).<br>
+        For 11–12 specify 0 to disable or 1 to enable.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id107711">
+      <div>
+        set_file_metadata( file, metadata, value )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Write metadata information to the specified file.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.9+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>string <span>file</span></dt>
+
+        <dd>The path to the file.</dd>
+
+        <dt>string <span>metadata</span></dt>
+
+        <dd>The metadata field to change. Among possible values are: title, artist, album, track,
+        year etc.</dd>
+
+        <dt>string <span>value</span></dt>
+
+        <dd>The new value of specified metadata field.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>Returns 1 if call was successful, 0 otherwise.</dd>
+      </dl>
+    </li>
+
+    <li id="id109455">
+      <div>
+        set_panning( panning )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Change panning setting.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.0+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>panning</span></dt>
+
+        <dd>The panning value from -100 (all left) to +100 (all right).</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109478">
+      <div>
+        set_panning127( panning )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Change panning setting using Winamp's data format.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.0+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>panning</span></dt>
+
+        <dd>The panning value from -127 (all left) to +127 (all right).</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id107576">
+      <div>
+        set_plist_current_metadata( metadata, value )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Write metadata information for the current entry in the playlist.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.9+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>string <span>metadata</span></dt>
+
+        <dd>The metadata field to change. Among possible values are: title, artist, album, track,
+        year etc.</dd>
+
+        <dt>string <span>value</span></dt>
+
+        <dd>The new value of specified metadata field.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>Returns 1 if call was successful, 0 otherwise.</dd>
+      </dl>
+    </li>
+
+    <li id="id107618">
+      <div>
+        set_plist_entry_metadata( index, metadata, value )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Write metadata information for the specified entry in the playlist.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.9+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>index</span></dt>
+
+        <dd>The position in the playlist. First playlist entry is at 1.</dd>
+
+        <dt>string <span>metadata</span></dt>
+
+        <dd>The metadata field to change. Among possible values are: title, artist, album, track,
+        year etc.</dd>
+
+        <dt>string <span>value</span></dt>
+
+        <dd>The new value of specified metadata field.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <dl>
+        <dt>int</dt>
+
+        <dd>Returns 1 if call was successful, 0 otherwise.</dd>
+      </dl>
+    </li>
+
+    <li id="id109526">
+      <div>
+        set_plist_manual_advance( status )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Set the status of the Manual Playlist Advance option.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 5.03+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>status</span></dt>
+
+        <dd>Specify 1 to enable the option, 0 to disable.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109502">
+      <div>
+        set_plist_position( position )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Set position in the playlist.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.0+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>position</span></dt>
+
+        <dd>The position to set. First playlist entry is at 1.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109572">
+      <div>
+        set_rating( rating )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Set rating of the current track.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 5.04+ with Media Library</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>rating</span></dt>
+
+        <dd>The rating value from 0 (no rating) to 5.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108646">
+      <div>
+        set_time_display_mode( mode )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Set time display mode.</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>mode</span></dt>
+
+        <dd>The display mode: 0 - elapsed time, 1 - remaining time.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109596">
+      <div>
+        set_volume( volume )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Change volume.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.0+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>volume</span></dt>
+
+        <dd>The volume value from 0 (mute) to 100.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109619">
+      <div>
+        set_volume255( volume )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Change volume using Winamp's data format.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.0+</p>
+
+      <h4>Parameters</h4>
+
+      <dl>
+        <dt>int <span>volume</span></dt>
+
+        <dd>The volume value from 0 (mute) to 255.</dd>
+      </dl>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109653">
+      <div>
+        shuffle_off( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Turn shuffle off.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.4+</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109667">
+      <div>
+        shuffle_on( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Turn shuffle on.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.4+</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109715">
+      <div>
+        start_of_plist( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Play the first file on the playlist. When shuffle is on it is the first played file.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id108118">
+      <div>
+        start_vis_plugin( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Start current visualisation plugin.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109728">
+      <div>
+        stop( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Stop playback.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109738">
+      <div>
+        stop_after_current( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Stop playback after current track.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109749">
+      <div>
+        stop_with_fadeout( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Stop playback with fadeout.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109759">
+      <div>
+        toggle_doublesize( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Toggle double size option.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109770">
+      <div>
+        toggle_easymove( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Toggle easy move option.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109780">
+      <div>
+        toggle_eq_window( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Toggle equalizer window.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109791">
+      <div>
+        toggle_main_window( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Toggle visibility of the Winamp's main window.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109801">
+      <div>
+        toggle_on_top( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Toggle always on top option.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109812">
+      <div>
+        toggle_plist_window( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Toggle playlist window.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109822">
+      <div>
+        toggle_plist_windowshade( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Toggle window shade of the playlist window.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109833">
+      <div>
+        toggle_repeat( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Toggle repeat setting.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109843">
+      <div>
+        toggle_shuffle( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Toggle shuffle setting.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109854">
+      <div>
+        toggle_windowshade( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Toggle window shade option of the Winamp's main window.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109865">
+      <div>
+        update_info( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Make Winamp update the information about the current track.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.2+</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109880">
+      <div>
+        volume_down( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Decrease the volume a bit.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109890">
+      <div>
+        volume_up( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Increase the volume a bit.</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109900">
+      <div>
+        windows_disable( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Disable all main Winamp windows. Works with simple skin only.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.9+</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+
+    <li id="id109915">
+      <div>
+        windows_enable( )
+      </div><a href="#id105313">Go up</a>
+
+      <p>Enable back Winamp windows.</p>
+
+      <h4>Requirements</h4>
+
+      <p>Winamp 2.9+</p>
+
+      <h4>Return value</h4>
+
+      <p>No return value.</p>
+    </li>
+  </ul>
+
+  <h1 id="id105685">5. History</h1>
+
+  <ol id="versionsList">
+    <li>1.2.1 - 2008-04-15
+
+      <ul>
+        <li><span class="code">enqueue_file</span> service can take directory path to enqueue files
+        in given directory. This feature has always been available, but now it is also
+        documented.</li>
+
+        <li>New service: <span class="code">dlg_open_dir</span></li>
+
+        <li>New service: <span class="code">dlg_plist_add_dir</span></li>
+
+        <li>New service: <span class="code">dlg_plist_add_file</span></li>
+
+        <li>New service: <span class="code">dlg_plist_add_url</span></li>
+      </ul>
+    </li>
+
+    <li>1.2.0 - 2008-04-07
+
+      <ul>
+        <li>Developed against Winamp 5 API</li>
+
+        <li>Requires PowerPro version 4.5.12 or newer to run</li>
+
+        <li>Numerous breaking changes</li>
+
+        <li>Fixed: Problem in <span class="code">get_version</span> service (e.g. version 0x5052
+        became 5.05, it now correctly is 5.52)</li>
+
+        <li>Changed: <span class="code">get_plist_position1</span> returned 0-based index. Now
+        returns 1-based index and thus mimics the behaviour of <span class=
+        "code">get_plist_position</span>.</li>
+
+        <li>Changed: <span class="code">set_plist_position</span> accepted 0-based index. Now
+        accepts only a 1-based index.</li>
+
+        <li>Changed: <span class="code">get_eq_data</span> for some arguments returns PowerPro
+        floats.</li>
+
+        <li>Changed: <span class="code">set_eq_data</span> accepts PowerPro float type argument in
+        specific cases.</li>
+
+        <li>Changed: <span class="code">jump_to_time</span> returns error code.</li>
+
+        <li>Changed: <span class="code">play_any_audio_cd</span> erroneously claimed to support up
+        to 26 drives. In fact it supports only 4 drives. Corrected the implementation and
+        documentation.</li>
+
+        <li>New service: <span class="code">add_bookmark</span></li>
+
+        <li>New service: <span class="code">get_config_dir</span></li>
+
+        <li>New service: <span class="code">get_file_metadata</span></li>
+
+        <li>New service: <span class="code">get_panning127</span></li>
+
+        <li>New service: <span class="code">get_panning</span></li>
+
+        <li>New service: <span class="code">get_plist_current_metadata</span></li>
+
+        <li>New service: <span class="code">get_plist_current_title</span></li>
+
+        <li>New service: <span class="code">get_plist_entry_metadata</span></li>
+
+        <li>New service: <span class="code">get_plist_entry_path</span></li>
+
+        <li>New service: <span class="code">get_plist_entry_title</span></li>
+
+        <li>New service: <span class="code">get_plist_manual_advance</span></li>
+
+        <li>New service: <span class="code">get_plugin_dir</span></li>
+
+        <li>New service: <span class="code">get_rating</span></li>
+
+        <li>New service: <span class="code">get_samplerate_hz</span></li>
+
+        <li>New service: <span class="code">get_time_display_mode</span></li>
+
+        <li>New service: <span class="code">get_video_height</span></li>
+
+        <li>New service: <span class="code">get_video_width</span></li>
+
+        <li>New service: <span class="code">get_volume255</span></li>
+
+        <li>New service: <span class="code">get_volume</span></li>
+
+        <li>New service: <span class="code">get_winamp_ini_path</span></li>
+
+        <li>New service: <span class="code">get_winamp_m3u_dir</span></li>
+
+        <li>New service: <span class="code">is_double_size</span></li>
+
+        <li>New service: <span class="code">is_fullscreen</span></li>
+
+        <li>New service: <span class="code">is_running</span></li>
+
+        <li>New service: <span class="code">is_vis_running</span></li>
+
+        <li>New service: <span class="code">is_wnd_in_wndshade</span></li>
+
+        <li>New service: <span class="code">is_wnd_visible</span></li>
+
+        <li>New service: <span class="code">move_10_tracks_forward</span></li>
+
+        <li>New service: <span class="code">save_default_preset</span></li>
+
+        <li>New service: <span class="code">set_file_metadata</span></li>
+
+        <li>New service: <span class="code">set_plist_current_metadata</span></li>
+
+        <li>New service: <span class="code">set_plist_entry_metadata</span></li>
+
+        <li>New service: <span class="code">set_plist_manual_advance</span></li>
+
+        <li>New service: <span class="code">set_rating</span></li>
+
+        <li>New service: <span class="code">set_time_display_mode</span>, replaces removed services
+        <span class="code">display_time_remaining</span> and <span class=
+        "code">display_time_elapsed</span></li>
+
+        <li>New service: <span class="code">windows_disable</span></li>
+
+        <li>New service: <span class="code">windows_enable</span></li>
+
+        <li>Service renamed: <span class="code">add_file_to_plist</span> to <span class=
+        "code">enqueue_file</span></li>
+
+        <li>Service renamed: <span class="code">autoload_preset_dialog</span> to <span class=
+        "code">dlg_load_autoload_preset</span></li>
+
+        <li>Service renamed: <span class="code">autoload_save_preset_dialog</span> to <span class=
+        "code">dlg_save_autoload_preset</span></li>
+
+        <li>Service renamed: <span class="code">caption</span> to <span class=
+        "code">caption_full</span></li>
+
+        <li>Service renamed: <span class="code">configure_visual_plugin</span> to <span class=
+        "code">dlg_cfg_vis_plugin</span></li>
+
+        <li>Service renamed: <span class="code">delete_autoload_preset_dialog</span> to
+        <span class="code">dlg_del_autoload_preset</span></li>
+
+        <li>Service renamed: <span class="code">delete_plist</span> to <span class=
+        "code">clear_plist</span></li>
+
+        <li>Service renamed: <span class="code">delete_preset_dialog</span> to <span class=
+        "code">dlg_del_preset</span></li>
+
+        <li>Service renamed: <span class="code">execute_visual_plugin</span> to <span class=
+        "code">start_vis_plugin</span></li>
+
+        <li>Service renamed: <span class="code">file_open_dialog</span> to <span class=
+        "code">dlg_open_file</span></li>
+
+        <li>Service renamed: <span class="code">get_number_of_channels</span> to <span class=
+        "code">get_num_channels</span></li>
+
+        <li>Service renamed: <span class="code">get_plist_selected_path</span> to <span class=
+        "code">get_plist_current_path</span></li>
+
+        <li>Service renamed: <span class="code">jump_to_file_dialog</span> to <span class=
+        "code">dlg_jump_to_file</span></li>
+
+        <li>Service renamed: <span class="code">jump_to_time_dialog</span> to <span class=
+        "code">dlg_jump_to_time</span></li>
+
+        <li>Service renamed: <span class="code">load_preset_dialog</span> to <span class=
+        "code">dlg_load_preset</span></li>
+
+        <li>Service renamed: <span class="code">load_preset_from_eq</span> to <span class=
+        "code">dlg_load_preset_from_eqf</span></li>
+
+        <li>Service renamed: <span class="code">open_about_box</span> to <span class=
+        "code">dlg_about_winamp</span></li>
+
+        <li>Service renamed: <span class="code">open_file_info_box</span> to <span class=
+        "code">dlg_file_info</span></li>
+
+        <li>Service renamed: <span class="code">open_preferences</span> to <span class=
+        "code">dlg_preferences</span></li>
+
+        <li>Service renamed: <span class="code">open_skin_selector</span> to <span class=
+        "code">dlg_skin_selector</span></li>
+
+        <li>Service renamed: <span class="code">open_url_dialog</span> to <span class=
+        "code">dlg_open_url</span></li>
+
+        <li>Service renamed: <span class="code">open_visual_plugin_options</span> to <span class=
+        "code">dlg_vis_plugin_options</span></li>
+
+        <li>Service renamed: <span class="code">play_selected</span> to <span class=
+        "code">play</span></li>
+
+        <li>Service renamed: <span class="code">reload_current_skin</span> to <span class=
+        "code">reload_skin</span></li>
+
+        <li>Service renamed: <span class="code">save_preset_dialog</span> to <span class=
+        "code">dlg_save_preset</span></li>
+
+        <li>Service renamed: <span class="code">save_preset_to_eqf</span> to <span class=
+        "code">dlg_save_preset_to_eqf</span></li>
+
+        <li>Service renamed: <span class="code">show_edit_bookmarks</span> to <span class=
+        "code">dlg_edit_bookmarks</span></li>
+
+        <li>Service renamed: <span class="code">song_and_number</span> to <span class=
+        "code">caption_num_and_title</span></li>
+
+        <li>Service renamed: <span class="code">song_name</span> to <span class=
+        "code">caption_title</span></li>
+
+        <li>Service removed: <span class="code">block_minibrowser</span></li>
+
+        <li>Service removed: <span class="code">display_elapsed_time</span>, <span class=
+        "code">display_remaining_time</span>. Replaced by <span class=
+        "code">set_display_time_mode</span>.</li>
+
+        <li>Service removed: <span class="code">open_visual_options</span></li>
+
+        <li>Service removed: <span class="code">toggle_minibrowser</span></li>
+
+        <li>Service removed: <span class="code">toggle_title_scrolling</span></li>
+
+        <li>Service removed: <span class="code">unblock_minibrowser</span></li>
+      </ul>
+    </li>
+
+    <li>1.1.2 - 2007-11-13
+
+      <ul>
+        <li>Added <span class="code">get_plist_selected_path</span></li>
+      </ul>
+    </li>
+
+    <li>1.1.1
+
+      <ul>
+        <li>Added <span class="code">play_any_audio_cd</span></li>
+      </ul>
+    </li>
+
+    <li>1.1.0
+
+      <ul>
+        <li><span class="code">response_type</span> and <span class="code">class_name</span> became
+        the last and optional arguments</li>
+
+        <li>New <span class="code">response_type</span> defined: <span class="code">3text...</span>
+        - see description</li>
+
+        <li>Plugin is much smaller now</li>
+      </ul>
+    </li>
+
+    <li>1.0.2
+
+      <ul>
+        <li>Renamed <span class="code">get_version</span> to <span class=
+        "code">get_version_hex</span></li>
+
+        <li>Added new <span class="code">get_version</span> service - see description</li>
+
+        <li>Added <span class="code">minimize</span>, <span class="code">restore</span>,
+        <span class="code">min_restore</span></li>
+
+        <li>Minor changes in plugin and info file</li>
+      </ul>
+    </li>
+
+    <li>1.0.1
+
+      <ul>
+        <li>Renamed <span class="code">set_panning</span> service to <span class=
+        "code">set_panning127</span></li>
+
+        <li>Added new <span class="code">set_panning</span> service - see description</li>
+
+        <li>Minor fixes in plugin and info file</li>
+      </ul>
+    </li>
+
+    <li>1.0.0
+
+      <ul>
+        <li>First public release</li>
+      </ul>
+    </li>
+  </ol>
+
+  <h1 id="id107068">6. Contacting the author</h1>
+
+  <p>All comments, feature requests, bug reports are welcome and appreciated.<br>
+  Please use Yahoo PowerPro group to contact the author.</p>
+</body>
+</html>
