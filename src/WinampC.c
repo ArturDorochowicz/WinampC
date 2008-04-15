@@ -33,15 +33,6 @@
 #include <stdio.h>
 
 
-typedef enum ResponseType
-{
-	ResponseTypeNone = 0,
-	ResponseTypeShowErrorMsg,
-	ResponseTypeSetFlag,
-	ResponseTypeReturnGivenMsg
-} ResponseType;
-
-
 /* MSDN doesn't specify if it includes the terminating null character or not.
  * Assuming it does not (later in the code).
  */
@@ -731,7 +722,7 @@ END_PPRO_SVC
 
 
 /*! <service name="get_plist_current_title">
-/*!  <description> Get title of current playlist entry.</description>
+/*!  <description>Get title of current playlist entry.</description>
 /*!  <requirements>Winamp 2.04+</requirements>
 /*!  <return-value type="string">The title. The title is limited to 531 characters.</return-value>
 /*! </service> */
@@ -745,6 +736,45 @@ BEGIN_PPRO_SVC( get_plist_current_title )
 	GetPlistEntryTitle( winamp_wnd, index, pp.ret, pp.retsize );
 }
 END_PPRO_SVC
+
+
+#if 0    /* don't know if there is any need for it */  /* add ! to description comments */
+/* <service name="set_plist_current_file">
+/*  <description>Replace current playlist item with specified file.</description>
+/*  <requirements>Winamp 2.05+</requirements>
+/*  <argument name="file" type="string">The path to the file.</return-value>
+/* </service> */
+BEGIN_PPRO_SVC( set_plist_current_file )
+{
+	HANDLE winamp;
+	char *file;
+
+	STARTUP( 1 );
+
+	file = pp.argv[0];
+	winamp = OpenWinampProcess( winamp_wnd,
+		PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ );
+
+	if( winamp != NULL )
+	{
+		size_t file_size = strlen( file ) + 1;
+		void *remote_file = AllocProcessMem( winamp, file_size );
+		size_t bytes_written;
+
+		if( remote_file != NULL )
+		{
+			WriteProcessMemory( winamp, remote_file, file, file_size, &bytes_written );
+			if( bytes_written == file_size )
+			{
+				SendMessage( winamp_wnd, WM_WA_IPC, (WPARAM) remote_file, IPC_CHANGECURRENTFILE );
+			}
+			FreeProcessMem( winamp, remote_file );
+		}
+		CloseHandle( winamp );
+	}
+}
+END_PPRO_SVC
+#endif
 
 
 /*! <service name="get_winamp_ini_path">
@@ -909,9 +939,60 @@ BEGIN_PPRO_SVC( end_of_plist )
 END_PPRO_SVC
 
 
+static HWND GetPlistWnd( HWND winamp_wnd )
+{
+	return (HWND) SendMessage( winamp_wnd, WM_WA_IPC, IPC_GETWND_PE, IPC_GETWND );
+}
+
+
+/*! <service name="dlg_plist_add_dir">
+/*!  <description>Open "Add Folder" playlist dialog.</description>
+/*! </service> */
+BEGIN_PPRO_SVC( dlg_plist_add_dir )
+{
+	HWND plist_wnd;
+	STARTUP( 0 );
+
+	plist_wnd = GetPlistWnd( winamp_wnd );
+	if( NULL != plist_wnd )
+		PostMessage( plist_wnd, WM_COMMAND, IDC_PLAYLIST_ADDDIR, 0 );
+}
+END_PPRO_SVC
+
+
+/*! <service name="dlg_plist_add_url">
+/*!  <description>Open "Add URL" playlist dialog.</description>
+/*! </service> */
+BEGIN_PPRO_SVC( dlg_plist_add_url )
+{
+	HWND plist_wnd;
+	STARTUP( 0 );
+
+	plist_wnd = GetPlistWnd( winamp_wnd );
+	if( NULL != plist_wnd )
+		PostMessage( plist_wnd, WM_COMMAND, IDC_PLAYLIST_ADDLOC, 0 );
+}
+END_PPRO_SVC
+
+
+/*! <service name="dlg_plist_add_file">
+/*!  <description>Open "Add file(s) to playlist" dialog.</description>
+/*! </service> */
+BEGIN_PPRO_SVC( dlg_plist_add_file )
+{
+	HWND plist_wnd;
+	STARTUP( 0 );
+
+	plist_wnd = GetPlistWnd( winamp_wnd );
+	if( NULL != plist_wnd )
+		PostMessage( plist_wnd, WM_COMMAND, IDC_PLAYLIST_ADDMP3, 0 );
+}
+END_PPRO_SVC
+
+
 /*! <service name="enqueue_file">
 /*!  <description>Enqueue file.</description>
-/*!  <argument name="file" type="string">The file to enqueue.</argument>
+/*!  <argument name="file" type="string">The file to enqueue. It can also be a directory path, Winamp will then enqueue files in that directory.</argument>
 /*! </service> */
 BEGIN_PPRO_SVC( enqueue_file )
 {
@@ -1824,7 +1905,18 @@ END_PPRO_SVC
 BEGIN_PPRO_SVC( dlg_open_url )
 {
 	STARTUP( 0 );
-	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_BUTTON2_CTRL, 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_FILE_LOC, 0 );
+}
+END_PPRO_SVC
+
+
+/*! <service name="dlg_open_dir">
+/*!  <description>Open "Open Folder" dialog.</description>
+/*! </service> */
+BEGIN_PPRO_SVC( dlg_open_dir )
+{
+	STARTUP( 0 );
+	PostMessage( winamp_wnd, WM_COMMAND, WINAMP_FILE_DIR, 0 );
 }
 END_PPRO_SVC
 
