@@ -22,6 +22,8 @@
 **/
 
 
+#include <stdio.h>
+
 /* PowerPro 4.5.12 is the first version to support EncodeFloat/DecodeFloat */
 #define PPRO_VERSION 4512
 #include <powerpro.h>
@@ -29,8 +31,6 @@
 /* Winamp SDK */
 #include <Winamp/wa_ipc.h>
 #include <lang_b/resource.h>
-
-#include <stdio.h>
 
 
 /* MSDN doesn't specify if it includes the terminating null character or not.
@@ -188,7 +188,7 @@ static HWND Startup( PPROHELPER *pp, unsigned int argc_required )
 
 
 #define STARTUP_NO_EXIT( argc_required_without_optional ) \
-	HWND winamp_wnd = Startup( &pp, (argc_required_without_optional) + 2 );
+	HWND winamp_wnd = Startup( pp, (argc_required_without_optional) + 2 );
 
 #define STARTUP( argc_required_without_optional ) \
 	STARTUP_NO_EXIT( (argc_required_without_optional) ); \
@@ -215,8 +215,8 @@ BEGIN_PPRO_SVC( add_bookmark )
 	STARTUP( 1 );
 
 	cds.dwData = IPC_ADDBOOKMARK;
-	cds.lpData = pp.argv[0];
-	cds.cbData = strlen( pp.argv[0] ) + 1;
+	cds.lpData = pp->argv[0];
+	cds.cbData = strlen( pp->argv[0] ) + 1;
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
 END_PPRO_SVC
@@ -231,8 +231,8 @@ BEGIN_PPRO_SVC( add_bookmark_w )
 	STARTUP( 1 );
 
 	cds.dwData = IPC_ADDBOOKMARKW;
-	cds.lpData = pp.argv[0];
-	cds.cbData = ( wcslen( (wchar_t*) pp.argv[0] ) + 1 ) * sizeof( wchar_t);
+	cds.lpData = pp->argv[0];
+	cds.cbData = ( wcslen( (wchar_t*) pp->argv[0] ) + 1 ) * sizeof( wchar_t);
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
 END_PPRO_SVC
@@ -280,7 +280,7 @@ END_PPRO_SVC
 BEGIN_PPRO_SVC( caption_full )
 {
 	STARTUP( 0 );
-	GetWindowText( winamp_wnd, pp.ret, pp.retsize );
+	GetWindowText( winamp_wnd, pp->ret, pp->retsize );
 }
 END_PPRO_SVC
 
@@ -558,7 +558,7 @@ BEGIN_PPRO_SVC( get_plist_current_metadata )
 	file = (const void*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
 	if( file != NULL )
 	{
-		GetFileMetadata( NULL, file, pp.argv[0], winamp_wnd, pp.ret, pp.retsize );
+		GetFileMetadata( NULL, file, pp->argv[0], winamp_wnd, pp->ret, pp->retsize );
 	}
 }
 END_PPRO_SVC
@@ -581,7 +581,7 @@ BEGIN_PPRO_SVC( set_plist_current_metadata )
 	index = GetCurrentPlistEntryIndex( winamp_wnd );
 	file = (const void*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
 
-	PPRO_SVC_RETURN_UINT( file != NULL && TRUE == SetFileMetadata( NULL, file, pp.argv[0], pp.argv[1], winamp_wnd ) );
+	PPRO_SVC_RETURN_UINT( pp, file != NULL && TRUE == SetFileMetadata( NULL, file, pp->argv[0], pp->argv[1], winamp_wnd ) );
 }
 END_PPRO_SVC
 
@@ -601,10 +601,10 @@ BEGIN_PPRO_SVC( set_plist_entry_metadata )
 
 	STARTUP( 3 );
 
-	index = (unsigned int) ( pp.svcs->DecodeFloat( pp.argv[0] ) - 1 );
+	index = (unsigned int) ( pp->svcs->DecodeFloat( pp->argv[0] ) - 1 );
 	file = (const void*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
 
-	PPRO_SVC_RETURN_UINT( file != NULL && TRUE == SetFileMetadata( NULL, file, pp.argv[1], pp.argv[2], winamp_wnd ) );
+	PPRO_SVC_RETURN_UINT( pp, file != NULL && TRUE == SetFileMetadata( NULL, file, pp->argv[1], pp->argv[2], winamp_wnd ) );
 }
 END_PPRO_SVC
 
@@ -623,11 +623,11 @@ BEGIN_PPRO_SVC( get_plist_entry_metadata )
 	
 	STARTUP( 2 );
 
-	index = (unsigned int) ( pp.svcs->DecodeFloat( pp.argv[0] ) - 1 );
+	index = (unsigned int) ( pp->svcs->DecodeFloat( pp->argv[0] ) - 1 );
 	file = (const void*) SendMessage( winamp_wnd, WM_WA_IPC, index, IPC_GETPLAYLISTFILE );
 	if( file != NULL )
 	{
-		GetFileMetadata( NULL, file, pp.argv[1], winamp_wnd, pp.ret, pp.retsize );
+		GetFileMetadata( NULL, file, pp->argv[1], winamp_wnd, pp->ret, pp->retsize );
 	}
 }
 END_PPRO_SVC
@@ -645,7 +645,7 @@ BEGIN_PPRO_SVC( set_file_metadata )
 {
 	STARTUP( 3 );
 
-	PPRO_SVC_RETURN_UINT( SetFileMetadata( pp.argv[0], NULL, pp.argv[1], pp.argv[2], winamp_wnd ) );
+	PPRO_SVC_RETURN_UINT( pp, SetFileMetadata( pp->argv[0], NULL, pp->argv[1], pp->argv[2], winamp_wnd ) );
 }
 END_PPRO_SVC
 
@@ -661,7 +661,7 @@ BEGIN_PPRO_SVC( get_file_metadata )
 {	
 	STARTUP( 2 );
 
-	GetFileMetadata( pp.argv[0], NULL, pp.argv[1], winamp_wnd, pp.ret, pp.retsize );
+	GetFileMetadata( pp->argv[0], NULL, pp->argv[1], winamp_wnd, pp->ret, pp->retsize );
 }
 END_PPRO_SVC
 
@@ -679,8 +679,8 @@ BEGIN_PPRO_SVC( get_plist_entry_path )
 	STARTUP( 1 );
 
 	/* change 1-based input into Winamp's 0-based index */
-	index = (unsigned int) ( pp.svcs->DecodeFloat( pp.argv[0] ) - 1 );
-	GetPlistEntryPath( winamp_wnd, index, pp.ret, pp.retsize );
+	index = (unsigned int) ( pp->svcs->DecodeFloat( pp->argv[0] ) - 1 );
+	GetPlistEntryPath( winamp_wnd, index, pp->ret, pp->retsize );
 }
 END_PPRO_SVC
 
@@ -698,8 +698,8 @@ BEGIN_PPRO_SVC( get_plist_entry_title )
 	STARTUP( 1 );
 
 	/* change 1-based input into Winamp's 0-based index */
-	index = (unsigned int) ( pp.svcs->DecodeFloat( pp.argv[0] ) - 1 );
-	GetPlistEntryTitle( winamp_wnd, index, pp.ret, pp.retsize );
+	index = (unsigned int) ( pp->svcs->DecodeFloat( pp->argv[0] ) - 1 );
+	GetPlistEntryTitle( winamp_wnd, index, pp->ret, pp->retsize );
 }
 END_PPRO_SVC
 
@@ -716,7 +716,7 @@ BEGIN_PPRO_SVC( get_plist_current_path )
 	STARTUP( 0 );
 
 	index = GetCurrentPlistEntryIndex( winamp_wnd );
-	GetPlistEntryPath( winamp_wnd, index, pp.ret, pp.retsize );
+	GetPlistEntryPath( winamp_wnd, index, pp->ret, pp->retsize );
 }
 END_PPRO_SVC
 
@@ -733,7 +733,7 @@ BEGIN_PPRO_SVC( get_plist_current_title )
 	STARTUP( 0 );
 
 	index = GetCurrentPlistEntryIndex( winamp_wnd );
-	GetPlistEntryTitle( winamp_wnd, index, pp.ret, pp.retsize );
+	GetPlistEntryTitle( winamp_wnd, index, pp->ret, pp->retsize );
 }
 END_PPRO_SVC
 
@@ -751,7 +751,7 @@ BEGIN_PPRO_SVC( set_plist_current_file )
 
 	STARTUP( 1 );
 
-	file = pp.argv[0];
+	file = pp->argv[0];
 	winamp = OpenWinampProcess( winamp_wnd,
 		PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ );
 
@@ -790,7 +790,7 @@ BEGIN_PPRO_SVC( get_winamp_ini_path )
 	path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETINIFILE );
 	if( path != NULL )
 	{
-		ReadStringFromProcessMemory( winamp_wnd, path, pp.ret, pp.retsize );
+		ReadStringFromProcessMemory( winamp_wnd, path, pp->ret, pp->retsize );
 	}
 }
 END_PPRO_SVC
@@ -809,7 +809,7 @@ BEGIN_PPRO_SVC( get_config_dir )
 	path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETINIDIRECTORY );
 	if( path != NULL )
 	{
-		ReadStringFromProcessMemory( winamp_wnd, path, pp.ret, pp.retsize );
+		ReadStringFromProcessMemory( winamp_wnd, path, pp->ret, pp->retsize );
 	}
 }
 END_PPRO_SVC
@@ -828,7 +828,7 @@ BEGIN_PPRO_SVC( get_plugin_dir )
 	path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETPLUGINDIRECTORY );
 	if( path != NULL )
 	{
-		ReadStringFromProcessMemory( winamp_wnd, path, pp.ret, pp.retsize );
+		ReadStringFromProcessMemory( winamp_wnd, path, pp->ret, pp->retsize );
 	}
 }
 END_PPRO_SVC
@@ -847,7 +847,7 @@ BEGIN_PPRO_SVC( get_winamp_m3u_dir )
 	path = (char*) SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETM3UDIRECTORY );
 	if( path != NULL )
 	{
-		ReadStringFromProcessMemory( winamp_wnd, path, pp.ret, pp.retsize );
+		ReadStringFromProcessMemory( winamp_wnd, path, pp->ret, pp->retsize );
 	}
 }
 END_PPRO_SVC
@@ -864,8 +864,8 @@ BEGIN_PPRO_SVC( change_directory )
 	STARTUP( 1 );
 
 	cds.dwData = IPC_CHDIR;
-	cds.lpData = pp.argv[0];
-	cds.cbData = strlen( pp.argv[0] ) + 1;
+	cds.lpData = pp->argv[0];
+	cds.cbData = strlen( pp->argv[0] ) + 1;
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
 END_PPRO_SVC
@@ -1001,8 +1001,8 @@ BEGIN_PPRO_SVC( enqueue_file )
 	STARTUP( 1 );
 
 	cds.dwData = IPC_ENQUEUEFILE;
-	cds.lpData = pp.argv[0];
-	cds.cbData = strlen( pp.argv[0] ) + 1;
+	cds.lpData = pp->argv[0];
+	cds.cbData = strlen( pp->argv[0] ) + 1;
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
 END_PPRO_SVC
@@ -1017,8 +1017,8 @@ BEGIN_PPRO_SVC( enqueue_file_w )
 	STARTUP( 1 );
 
 	cds.dwData = IPC_PLAYFILEW;
-	cds.lpData = pp.argv[0];
-	cds.cbData = ( wcslen( (wchar_t*) pp.argv[0] ) + 1 ) * sizeof( wchar_t);
+	cds.lpData = pp->argv[0];
+	cds.cbData = ( wcslen( (wchar_t*) pp->argv[0] ) + 1 ) * sizeof( wchar_t);
 	SendMessage( winamp_wnd, WM_COPYDATA, 0, (LPARAM) &cds );
 }
 END_PPRO_SVC
@@ -1082,7 +1082,7 @@ BEGIN_PPRO_SVC( get_bitrate )
 	STARTUP( 0 );
 
 	bitrate = SendMessage( winamp_wnd, WM_WA_IPC, 1, IPC_GETINFO );
-	PPRO_SVC_RETURN_UINT( bitrate );
+	PPRO_SVC_RETURN_UINT( pp, bitrate );
 }
 END_PPRO_SVC
 
@@ -1108,15 +1108,15 @@ BEGIN_PPRO_SVC( get_eq_data )
 
 	STARTUP( 1 );
 
-	position = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
+	position = (WPARAM) pp->svcs->DecodeFloat( pp->argv[0] );
 	data = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_GETEQDATA );
 	if( position >= 0 && position <= 10 )
 	{
-		PPRO_SVC_RETURN_FLOAT( 20 - (double) data * (20 + 20 ) / 63 );
+		PPRO_SVC_RETURN_FLOAT( pp, 20 - (double) data * (20 + 20 ) / 63 );
 	}
 	else
 	{
-		PPRO_SVC_RETURN_UINT( MAKE_BOOL( data ) );
+		PPRO_SVC_RETURN_UINT( pp, MAKE_BOOL( data ) );
 	}
 }
 END_PPRO_SVC
@@ -1143,9 +1143,9 @@ BEGIN_PPRO_SVC( get_eq_data63 )
 
 	STARTUP( 1 );
 
-	position = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
+	position = (WPARAM) pp->svcs->DecodeFloat( pp->argv[0] );
 	data = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_GETEQDATA );
-	PPRO_SVC_RETURN_UINT( ( ( position >= 0 && position <= 10 ) ? data : MAKE_BOOL( data ) ) );
+	PPRO_SVC_RETURN_UINT( pp, ( ( position >= 0 && position <= 10 ) ? data : MAKE_BOOL( data ) ) );
 }
 END_PPRO_SVC
 
@@ -1161,7 +1161,7 @@ BEGIN_PPRO_SVC( get_length )
 	STARTUP( 0 );
 
 	length = SendMessage( winamp_wnd, WM_WA_IPC, 1, IPC_GETOUTPUTTIME );
-	PPRO_SVC_RETURN_UINT( length );
+	PPRO_SVC_RETURN_UINT( pp, length );
 }
 END_PPRO_SVC
 
@@ -1181,7 +1181,7 @@ BEGIN_PPRO_SVC( get_net_status )
 	STARTUP( 0 );
 
 	status = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_INETAVAILABLE );
-	PPRO_SVC_RETURN_UINT( MAKE_BOOL( status ) );
+	PPRO_SVC_RETURN_UINT( pp, MAKE_BOOL( status ) );
 }
 END_PPRO_SVC
 
@@ -1198,7 +1198,7 @@ BEGIN_PPRO_SVC( get_num_channels )
 	STARTUP( 0 );
 	
 	channels = SendMessage( winamp_wnd, WM_WA_IPC, 2, IPC_GETINFO );
-	PPRO_SVC_RETURN_UINT( channels );
+	PPRO_SVC_RETURN_UINT( pp, channels );
 }
 END_PPRO_SVC
 
@@ -1215,7 +1215,7 @@ BEGIN_PPRO_SVC( get_panning )
 	STARTUP( 0 );
 
 	panning = SendMessage( winamp_wnd, WM_WA_IPC, (WPARAM) -666, IPC_SETPANNING );
-	PPRO_SVC_RETURN_INT( panning * 100 / 127 );
+	PPRO_SVC_RETURN_INT( pp, panning * 100 / 127 );
 }
 END_PPRO_SVC
 
@@ -1232,7 +1232,7 @@ BEGIN_PPRO_SVC( get_panning127 )
 	STARTUP( 0 );
 
 	panning = SendMessage( winamp_wnd, WM_WA_IPC, (WPARAM) -666, IPC_SETPANNING );
-	PPRO_SVC_RETURN_INT( panning );
+	PPRO_SVC_RETURN_INT( pp, panning );
 }
 END_PPRO_SVC
 
@@ -1248,7 +1248,7 @@ BEGIN_PPRO_SVC( get_playback_status )
 	STARTUP( 0 );
 
 	status = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_ISPLAYING );
-	PPRO_SVC_RETURN_UINT( status );
+	PPRO_SVC_RETURN_UINT( pp, status );
 }
 END_PPRO_SVC
 
@@ -1265,7 +1265,7 @@ BEGIN_PPRO_SVC( get_plist_length )
 	STARTUP( 0 );
 
 	length = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETLISTLENGTH );
-	PPRO_SVC_RETURN_UINT( length );
+	PPRO_SVC_RETURN_UINT( pp, length );
 }
 END_PPRO_SVC
 
@@ -1283,7 +1283,7 @@ BEGIN_PPRO_SVC( get_plist_position )
 
 	/* change Winamp's 0-based index into 1-based */
 	position = 1 + SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETLISTPOS );
-	PPRO_SVC_RETURN_UINT( position );
+	PPRO_SVC_RETURN_UINT( pp, position );
 }
 END_PPRO_SVC
 
@@ -1301,7 +1301,7 @@ BEGIN_PPRO_SVC( get_plist_position1 )
 
 	/* change Winamp's 0-based index into 1-based */
 	position = 1 + SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_WRITEPLAYLIST );
-	PPRO_SVC_RETURN_UINT( position );
+	PPRO_SVC_RETURN_UINT( pp, position );
 }
 END_PPRO_SVC
 
@@ -1317,7 +1317,7 @@ BEGIN_PPRO_SVC( get_position )
 	STARTUP( 0 );
 
 	position = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETOUTPUTTIME );
-	PPRO_SVC_RETURN_INT( position );
+	PPRO_SVC_RETURN_INT( pp, position );
 }
 END_PPRO_SVC
 
@@ -1333,7 +1333,7 @@ BEGIN_PPRO_SVC( get_position_in_sec )
 	STARTUP( 0 );
 
 	position = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETOUTPUTTIME );
-	PPRO_SVC_RETURN_INT( ( position != -1 ? ( position / 1000 ) : position ) );
+	PPRO_SVC_RETURN_INT( pp, ( position != -1 ? ( position / 1000 ) : position ) );
 }
 END_PPRO_SVC
 
@@ -1350,7 +1350,7 @@ BEGIN_PPRO_SVC( get_rating )
 	STARTUP( 0 );
 
 	rating = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETRATING );
-	PPRO_SVC_RETURN_UINT( rating );
+	PPRO_SVC_RETURN_UINT( pp, rating );
 }
 END_PPRO_SVC
 
@@ -1367,7 +1367,7 @@ BEGIN_PPRO_SVC( get_repeat )
 	STARTUP( 0 );
 
 	repeat = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GET_REPEAT );
-	PPRO_SVC_RETURN_UINT( MAKE_BOOL( repeat ) );
+	PPRO_SVC_RETURN_UINT( pp, MAKE_BOOL( repeat ) );
 }
 END_PPRO_SVC
 
@@ -1384,7 +1384,7 @@ BEGIN_PPRO_SVC( get_samplerate )
 	STARTUP( 0 );
 
 	samplerate = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETINFO );
-	PPRO_SVC_RETURN_UINT( samplerate );
+	PPRO_SVC_RETURN_UINT( pp, samplerate );
 }
 END_PPRO_SVC
 
@@ -1401,7 +1401,7 @@ BEGIN_PPRO_SVC( get_samplerate_hz )
 	STARTUP( 0 );
 
 	samplerate = SendMessage( winamp_wnd, WM_WA_IPC, 5, IPC_GETINFO );
-	PPRO_SVC_RETURN_UINT( samplerate );
+	PPRO_SVC_RETURN_UINT( pp, samplerate );
 }
 END_PPRO_SVC
 
@@ -1418,7 +1418,7 @@ BEGIN_PPRO_SVC( get_shuffle )
 	STARTUP( 0 );
 	
 	shuffle = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GET_SHUFFLE );
-	PPRO_SVC_RETURN_UINT( MAKE_BOOL( shuffle ) );
+	PPRO_SVC_RETURN_UINT( pp, MAKE_BOOL( shuffle ) );
 }
 END_PPRO_SVC
 
@@ -1435,7 +1435,7 @@ BEGIN_PPRO_SVC( get_time_display_mode )
 	STARTUP( 0 );
 
 	mode = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETTIMEDISPLAYMODE );
-	PPRO_SVC_RETURN_UINT( mode );
+	PPRO_SVC_RETURN_UINT( pp, mode );
 }
 END_PPRO_SVC
 
@@ -1450,7 +1450,7 @@ BEGIN_PPRO_SVC( set_time_display_mode )
 
 	STARTUP( 1 );
 
-	mode = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
+	mode = (WPARAM) pp->svcs->DecodeFloat( pp->argv[0] );
 	switch( mode )
 	{
 	case 0: mode = WINAMP_OPTIONS_ELAPSED;    break;
@@ -1477,7 +1477,7 @@ BEGIN_PPRO_SVC( get_version )
 	STARTUP( 0 );
 
 	version = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETVERSION );
-	sprintf( pp.ret, "%X.%X", WINAMP_VERSION_MAJOR( version ), WINAMP_VERSION_MINOR( version ) );
+	sprintf( pp->ret, "%X.%X", WINAMP_VERSION_MAJOR( version ), WINAMP_VERSION_MINOR( version ) );
 }
 END_PPRO_SVC
 
@@ -1503,7 +1503,7 @@ BEGIN_PPRO_SVC( get_version_hex )
 	STARTUP( 0 );
 
 	version = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GETVERSION );
-	sprintf( pp.ret, "%X", version );
+	sprintf( pp->ret, "%X", version );
 }
 END_PPRO_SVC
 
@@ -1520,7 +1520,7 @@ BEGIN_PPRO_SVC( get_video_height )
 	STARTUP( 0 );
 
 	size = SendMessage( winamp_wnd, WM_WA_IPC, 3, IPC_GETINFO );
-	PPRO_SVC_RETURN_UINT( HIWORD( size ) );
+	PPRO_SVC_RETURN_UINT( pp, HIWORD( size ) );
 }
 END_PPRO_SVC
 
@@ -1537,7 +1537,7 @@ BEGIN_PPRO_SVC( get_video_width )
 	STARTUP( 0 );
 
 	size = SendMessage( winamp_wnd, WM_WA_IPC, 3, IPC_GETINFO );
-	PPRO_SVC_RETURN_UINT( LOWORD( size ) );
+	PPRO_SVC_RETURN_UINT( pp, LOWORD( size ) );
 }
 END_PPRO_SVC
 
@@ -1553,7 +1553,7 @@ BEGIN_PPRO_SVC( get_volume )
 	STARTUP( 0 );
 
 	volume = SendMessage( winamp_wnd, WM_WA_IPC, (WPARAM) -666, IPC_SETVOLUME );
-	PPRO_SVC_RETURN_UINT( volume * 100 / 255 );
+	PPRO_SVC_RETURN_UINT( pp, volume * 100 / 255 );
 }
 END_PPRO_SVC
 
@@ -1569,7 +1569,7 @@ BEGIN_PPRO_SVC( get_volume255 )
 	STARTUP( 0 );
 
 	volume = SendMessage( winamp_wnd, WM_WA_IPC, (WPARAM) -666, IPC_SETVOLUME );
-	PPRO_SVC_RETURN_UINT( volume );
+	PPRO_SVC_RETURN_UINT( pp, volume );
 }
 END_PPRO_SVC
 
@@ -1581,7 +1581,7 @@ END_PPRO_SVC
 BEGIN_PPRO_SVC( is_running )
 {
 	STARTUP_NO_EXIT( 0 );
-	PPRO_SVC_RETURN_UINT( winamp_wnd != NULL ? 1 : 0 );
+	PPRO_SVC_RETURN_UINT( pp, winamp_wnd != NULL ? 1 : 0 );
 }
 END_PPRO_SVC
 
@@ -1596,7 +1596,7 @@ BEGIN_PPRO_SVC( is_fullscreen )
 	STARTUP( 0 );
 
 	status = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_IS_FULLSCREEN );
-	PPRO_SVC_RETURN_UINT( MAKE_BOOL( status ) );
+	PPRO_SVC_RETURN_UINT( pp, MAKE_BOOL( status ) );
 }
 END_PPRO_SVC
 
@@ -1611,7 +1611,7 @@ BEGIN_PPRO_SVC( is_vis_running )
 	STARTUP( 0 );
 
 	running = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_ISVISRUNNING );
-	PPRO_SVC_RETURN_UINT( MAKE_BOOL( running ) );
+	PPRO_SVC_RETURN_UINT( pp, MAKE_BOOL( running ) );
 }
 END_PPRO_SVC
 
@@ -1626,7 +1626,7 @@ BEGIN_PPRO_SVC( is_double_size )
 	STARTUP( 0 );
 
 	double_size = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_ISDOUBLESIZE );
-	PPRO_SVC_RETURN_UINT( MAKE_BOOL( double_size ) );
+	PPRO_SVC_RETURN_UINT( pp, MAKE_BOOL( double_size ) );
 }
 END_PPRO_SVC
 
@@ -1645,7 +1645,7 @@ BEGIN_PPRO_SVC( is_wnd_visible )
 
 	STARTUP( 1 );
 
-	wnd = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
+	wnd = (WPARAM) pp->svcs->DecodeFloat( pp->argv[0] );
 
 	switch( wnd )
 	{
@@ -1656,7 +1656,7 @@ BEGIN_PPRO_SVC( is_wnd_visible )
 		visible = SendMessage( winamp_wnd, WM_WA_IPC, wnd, IPC_ISWNDVISIBLE );
 	}
 
-	PPRO_SVC_RETURN_UINT( MAKE_BOOL( visible ) );
+	PPRO_SVC_RETURN_UINT( pp, MAKE_BOOL( visible ) );
 }
 END_PPRO_SVC
 
@@ -1675,7 +1675,7 @@ BEGIN_PPRO_SVC( is_wnd_in_wndshade )
 
 	STARTUP( 1 );
 
-	wnd = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
+	wnd = (WPARAM) pp->svcs->DecodeFloat( pp->argv[0] );
 
 	switch( wnd )
 	{
@@ -1687,7 +1687,7 @@ BEGIN_PPRO_SVC( is_wnd_in_wndshade )
 		wndshade = SendMessage( winamp_wnd, WM_WA_IPC, wnd, IPC_IS_WNDSHADE );
 	}
 
-	PPRO_SVC_RETURN_UINT( MAKE_BOOL( wndshade ) );
+	PPRO_SVC_RETURN_UINT( pp, MAKE_BOOL( wndshade ) );
 }
 END_PPRO_SVC
 
@@ -1716,9 +1716,9 @@ BEGIN_PPRO_SVC( jump_to_time )
 
 	STARTUP( 1 );
 
-	position = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
+	position = (WPARAM) pp->svcs->DecodeFloat( pp->argv[0] );
 	result = SendMessage( winamp_wnd, WM_WA_IPC, position, IPC_JUMPTOTIME );
-	PPRO_SVC_RETURN_INT( result );
+	PPRO_SVC_RETURN_INT( pp, result );
 }
 END_PPRO_SVC
 
@@ -1812,7 +1812,7 @@ BEGIN_PPRO_SVC( min_restore )
 
 	if( IsIconic( winamp_wnd ) )
 	{		
-		RestoreWindow( winamp_wnd, pp.svcs );
+		RestoreWindow( winamp_wnd, pp->svcs );
 	}
 	else
 	{
@@ -1967,7 +1967,7 @@ BEGIN_PPRO_SVC( play_any_audio_cd )
 
 	STARTUP( 1 );
 
-	drive = (unsigned int) pp.svcs->DecodeFloat( pp.argv[0] );
+	drive = (unsigned int) pp->svcs->DecodeFloat( pp->argv[0] );
 
 	switch( drive )
 	{
@@ -2074,7 +2074,7 @@ END_PPRO_SVC
 BEGIN_PPRO_SVC( restore )
 {
 	STARTUP( 0 );
-	RestoreWindow( winamp_wnd, pp.svcs );
+	RestoreWindow( winamp_wnd, pp->svcs );
 }
 END_PPRO_SVC
 
@@ -2134,15 +2134,15 @@ BEGIN_PPRO_SVC( set_eq_data )
 
 	STARTUP( 2 );
 
-	pos = (BYTE) pp.svcs->DecodeFloat( pp.argv[0] );
+	pos = (BYTE) pp->svcs->DecodeFloat( pp->argv[0] );
 	if( pos >= 0 && pos <= 10 )
 	{
-		double value = pp.svcs->DecodeFloat( pp.argv[1] );
+		double value = pp->svcs->DecodeFloat( pp->argv[1] );
 		value63 = (WORD) ( ( 20 - value ) * 63 / ( 20 + 20 ) );
 	}
 	else
 	{
-		value63 = (WORD) pp.svcs->DecodeFloat( pp.argv[1] );
+		value63 = (WORD) pp->svcs->DecodeFloat( pp->argv[1] );
 	}
 	position = MAKEWPARAM( value63, MAKEWORD( pos, 0xDB ) );
 	PostMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETEQDATA );
@@ -2172,8 +2172,8 @@ BEGIN_PPRO_SVC( set_eq_data63 )
 
 	STARTUP( 2 );
 
-	pos = (BYTE) pp.svcs->DecodeFloat( pp.argv[0] );
-	value = (WORD) pp.svcs->DecodeFloat( pp.argv[1] );
+	pos = (BYTE) pp->svcs->DecodeFloat( pp->argv[0] );
+	value = (WORD) pp->svcs->DecodeFloat( pp->argv[1] );
 	position = MAKEWPARAM( value, MAKEWORD( pos, 0xDB ) );
 	PostMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETEQDATA );
 }
@@ -2191,7 +2191,7 @@ BEGIN_PPRO_SVC( set_panning )
 
 	STARTUP( 1 );
 
-	panning = pp.svcs->DecodeFloat( pp.argv[0] );
+	panning = pp->svcs->DecodeFloat( pp->argv[0] );
 	PostMessage( winamp_wnd, WM_WA_IPC, (WPARAM) (BYTE) ( panning * 127 / 100 ), IPC_SETPANNING );
 }
 END_PPRO_SVC
@@ -2208,7 +2208,7 @@ BEGIN_PPRO_SVC( set_panning127 )
 
 	STARTUP( 1 );
 
-	panning = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
+	panning = (WPARAM) pp->svcs->DecodeFloat( pp->argv[0] );
 	PostMessage( winamp_wnd, WM_WA_IPC, panning, IPC_SETPANNING );
 }
 END_PPRO_SVC
@@ -2226,7 +2226,7 @@ BEGIN_PPRO_SVC( set_plist_position )
 	STARTUP( 1 );
 
 	/* change 1-based input into Winamp's 0-based index */
-	position = (WPARAM) ( pp.svcs->DecodeFloat( pp.argv[0] ) - 1 );
+	position = (WPARAM) ( pp->svcs->DecodeFloat( pp->argv[0] ) - 1 );
 	PostMessage( winamp_wnd, WM_WA_IPC, position, IPC_SETPLAYLISTPOS );
 }
 END_PPRO_SVC
@@ -2243,7 +2243,7 @@ BEGIN_PPRO_SVC( set_plist_manual_advance )
 
 	STARTUP( 1 );
 
-	status = MAKE_BOOL( (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] ) );
+	status = MAKE_BOOL( (WPARAM) pp->svcs->DecodeFloat( pp->argv[0] ) );
 	PostMessage( winamp_wnd, WM_WA_IPC, status, IPC_SET_MANUALPLADVANCE );
 }
 END_PPRO_SVC
@@ -2261,7 +2261,7 @@ BEGIN_PPRO_SVC( get_plist_manual_advance )
 	STARTUP( 0 );
 
 	status = SendMessage( winamp_wnd, WM_WA_IPC, 0, IPC_GET_MANUALPLADVANCE );
-	PPRO_SVC_RETURN_UINT( MAKE_BOOL( status ) );
+	PPRO_SVC_RETURN_UINT( pp, MAKE_BOOL( status ) );
 }
 END_PPRO_SVC
 
@@ -2277,7 +2277,7 @@ BEGIN_PPRO_SVC( set_rating )
 
 	STARTUP( 1 );
 	
-	rating = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
+	rating = (WPARAM) pp->svcs->DecodeFloat( pp->argv[0] );
 	PostMessage( winamp_wnd, WM_WA_IPC, rating, IPC_SETRATING );
 }
 END_PPRO_SVC
@@ -2295,7 +2295,7 @@ BEGIN_PPRO_SVC( set_volume )
 
 	STARTUP( 1 );
 	
-	volume = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
+	volume = (WPARAM) pp->svcs->DecodeFloat( pp->argv[0] );
 	volume255 = (WPARAM) ( volume * 2.55 );
 	if( volume255 / 2.55 < volume )
 		++volume255;
@@ -2315,7 +2315,7 @@ BEGIN_PPRO_SVC( set_volume255 )
 
 	STARTUP( 1 );
 
-	volume = (WPARAM) pp.svcs->DecodeFloat( pp.argv[0] );
+	volume = (WPARAM) pp->svcs->DecodeFloat( pp->argv[0] );
 	PostMessage( winamp_wnd, WM_WA_IPC, volume, IPC_SETVOLUME );
 }
 END_PPRO_SVC
@@ -2392,8 +2392,8 @@ BEGIN_PPRO_SVC( caption_num_and_title )
 
 	GetWindowText( winamp_wnd, caption, sizeof( caption ) );
 	trim_caption_end( caption );
-	pp.ret[0] = '\0';
-	strncat( pp.ret, caption, pp.retsize - 1 );
+	pp->ret[0] = '\0';
+	strncat( pp->ret, caption, pp->retsize - 1 );
 }
 END_PPRO_SVC
 
@@ -2418,14 +2418,14 @@ BEGIN_PPRO_SVC( caption_title )
 	/* trim the beginning number "XX. " */
 	p = strstr( caption, ". " );
 	
-	pp.ret[0] = '\0';
+	pp->ret[0] = '\0';
 	if( p != NULL )
 	{
-		strncat( pp.ret, p + 2 /* 2 == strlen( ". " ) */, pp.retsize - 1 );
+		strncat( pp->ret, p + 2 /* 2 == strlen( ". " ) */, pp->retsize - 1 );
 	}
 	else /* The number was not found (there is an option in Winamp to not show it) */
 	{
-		strncat( pp.ret, caption, pp.retsize - 1 );
+		strncat( pp->ret, caption, pp->retsize - 1 );
 	}
 }
 END_PPRO_SVC

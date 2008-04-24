@@ -42,7 +42,17 @@ set( SOURCES
 	"version.h.cmake"
 	"${CMAKE_CURRENT_BINARY_DIR}/version.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/include/powerpro.h"
-	${WinampSdkFiles} )
+	${WinampSdkFiles}
+# Need to add them somewhere, so they can be easily reached from VS.
+# There is no way to do it in Documentation target.	
+	"${CMAKE_CURRENT_SOURCE_DIR}/../doc/WinampC.xsl"
+	"${CMAKE_CURRENT_SOURCE_DIR}/../doc/WinampC.xml" )
+	
+source_group( "Documentation Files"
+	FILES
+		"${CMAKE_CURRENT_SOURCE_DIR}/../doc/WinampC.xsl"
+		"${CMAKE_CURRENT_SOURCE_DIR}/../doc/WinampC.xml" )
+
 
 
 add_library( "WinampC" SHARED ${SOURCES} )

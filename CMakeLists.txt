@@ -2,7 +2,7 @@ project( "WinampC" )
 
 set( WINAMPC_VERSION_MAJOR        "1" )
 set( WINAMPC_VERSION_MINOR        "2" )
-set( WINAMPC_VERSION_BUILD        "1" )
+set( WINAMPC_VERSION_BUILD        "2" )
 set( WINAMPC_VERSION_REVISION     "0" )
 set( WINAMPC_COPYRIGHT_LAST_YEAR  "2008" )
 

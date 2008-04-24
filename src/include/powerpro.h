@@ -6,8 +6,6 @@
 **/
 
 
-/* Definitions for PowerPro plugins */
-
 #ifndef _POWERPRO_H_
 #define _POWERPRO_H_
 
@@ -17,7 +15,7 @@
  * This is the same format that is used in PowerPro variable 'pproversion'.
  */
 #ifndef PPRO_VERSION
-#error "PPRO_VERSION must specify the oldest PowerPro version that you intend to support."
+	#error "PPRO_VERSION must specify the oldest PowerPro version that you intend to support."
 #endif
 
 /* 3500 (and earlier) is not supported because it has no PPROSERVICES struct and
@@ -26,17 +24,14 @@
  * but I had no access to any version between these two.
  */
 #if PPRO_VERSION < 3600
-#error "The first supported PowerPro version is 3600. Check your PPRO_VERSION definition."
+	#error "The first supported PowerPro version is 3600. Check your PPRO_VERSION definition."
 #endif
 
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+	#define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-
-/* For sprintf in PPRO_SVC_RETURN_* macros */
-#include <stdio.h>
 
 
 /* Maximum length of PowerPro variable in single byte characters.
@@ -47,16 +42,16 @@
  * access to any version between these two.
  */
 #if PPRO_VERSION >= 3700
-#define PPRO_MAX_VAR_LENGTH 531
+	#define PPRO_MAX_VAR_LENGTH 531
 #else
-#define PPRO_MAX_VAR_LENGTH 263
+	#define PPRO_MAX_VAR_LENGTH 263
 #endif
 
 /* The maximum number of arguments that a service can receive */
 #if PPRO_VERSION >= 4404
-#define PPRO_MAX_SVC_ARGS 24
+	#define PPRO_MAX_SVC_ARGS 24
 #else
-#define PPRO_MAX_SVC_ARGS 10
+	#define PPRO_MAX_SVC_ARGS 10
 #endif
 
 
@@ -160,7 +155,7 @@ typedef struct PPROSERVICES
  * No information available for versions between 3600 and 3700.
  */
 #if PPRO_VERSION < 3700
-	#define PPRO_RETURN_NOTHING_BY_DEFAULT   pp.ret[0] = '\0';
+	#define PPRO_RETURN_NOTHING_BY_DEFAULT   pp->ret[0] = '\0';
 #else
 	#define PPRO_RETURN_NOTHING_BY_DEFAULT
 #endif
@@ -196,40 +191,43 @@ typedef struct PPROHELPER
  * END_PPRO_SVC
  *
  * The following meaningful variable is defined inside the block:
- *    PPROHELPER pp;
+ *    PPROHELPER *pp;
  */
 #define BEGIN_PPRO_SVC( service_name ) \
 	PPRO_EXTERN_C __declspec(dllexport) void service_name( LPVOID __ppro_unused1, LPVOID __ppro_unused2, \
 		BOOL (*__ppro_get_var)(LPSTR, LPSTR), void (*__ppro_set_var)(LPSTR, LPSTR), \
 		DWORD *__ppro_flags, UINT __ppro_argc, LPSTR *__ppro_argv, PPROSERVICES *__ppro_services ) \
 	{ \
-		PPROHELPER pp; \
-		pp.argc = __ppro_argc; \
-		pp.argv = &__ppro_argv[1]; \
-		pp.ret = __ppro_argv[0]; \
+		PPROHELPER __ppro_pp; \
+		PPROHELPER *pp = &__ppro_pp; \
+		pp->argc = __ppro_argc; \
+		pp->argv = &__ppro_argv[1]; \
+		pp->ret = __ppro_argv[0]; \
 		PPRO_RETURN_NOTHING_BY_DEFAULT \
-		pp.retsize = PPRO_MAX_VAR_LENGTH + 1; \
-		pp.svcs = __ppro_services; \
-		pp.flgs = __ppro_flags; \
-		pp.GetVar = __ppro_get_var; \
-		pp.SetVar = __ppro_set_var; \
+		pp->retsize = PPRO_MAX_VAR_LENGTH + 1; \
+		pp->svcs = __ppro_services; \
+		pp->flgs = __ppro_flags; \
+		pp->GetVar = __ppro_get_var; \
+		pp->SetVar = __ppro_set_var; \
 		/* prevent 'argument not used' warnings */ \
 		(void) __ppro_unused1; (void) __ppro_unused2; (void) pp;
-
 
 #define END_PPRO_SVC \
 	}
 
 
-#define PPRO_SVC_RETURN_INT( integer )  sprintf( pp.ret, "%d", (int) (integer) )
-#define PPRO_SVC_RETURN_UINT( uinteger )  sprintf( pp.ret, "%u", (unsigned int) (uinteger) )
+/* For sprintf in the macros below */
+#include <stdio.h>
+
+#define PPRO_SVC_RETURN_INT( pp, integer )  sprintf( (pp)->ret, "%d", (int) (integer) )
+#define PPRO_SVC_RETURN_UINT( pp, uinteger )  sprintf( (pp)->ret, "%u", (unsigned int) (uinteger) )
 
 /* PowerPro 4.5.12 is the first version to support EncodeFloat/DecodeFloat */
 #if PPRO_VERSION < 4512
-#pragma message( "PPRO_SVC_RETURN_FLOAT returns string instead of PowerPro float" )
-#define PPRO_SVC_RETURN_FLOAT( double_num )  sprintf( pp.ret, "%.3f", (double) (double_num) )
+	#pragma message( "PPRO_SVC_RETURN_FLOAT returns string instead of PowerPro float" )
+	#define PPRO_SVC_RETURN_FLOAT( pp, double_num )  sprintf( (pp)->ret, "%.3f", (double) (double_num) )
 #else
-#define PPRO_SVC_RETURN_FLOAT( double_num )  pp.svcs->EncodeFloat( (double) (double_num), pp.ret )
+	#define PPRO_SVC_RETURN_FLOAT( pp, double_num )  (pp)->svcs->EncodeFloat( (double) (double_num), (pp)->ret )
 #endif
 
 
