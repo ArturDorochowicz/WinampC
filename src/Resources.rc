@@ -28,9 +28,7 @@
 
 
 // English (U.K.) resources
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
-#endif
 
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION     WINAMPC_VERSION_MAJOR,WINAMPC_VERSION_MINOR,WINAMPC_VERSION_BUILD,WINAMPC_VERSION_REVISION
@@ -45,14 +43,14 @@ BEGIN
     BLOCK "080904b0"   //"languageID" '+' "charsetID" - (U.K. English,Unicode)
     BEGIN
       //add standard values
-      VALUE "CompanyName",      ""
+      VALUE "CompanyName",      "Artur Dorochowicz"
       VALUE "FileDescription",  "Winamp Control Plugin"
+	  VALUE "InternalName",     "Winamp Control Plugin"
+	  VALUE "ProductName",      "Winamp Control Plugin"
       VALUE "FileVersion",      WINAMPC_VERSION_STRING
-      VALUE "InternalName",     "Winamp Control Plugin"
-      VALUE "LegalCopyright",   "Copyright © " WINAMPC_COPYRIGHT_YEARS_STRING " Artur Dorochowicz"    
-      VALUE "OriginalFilename", "WinampC.dll"
-      VALUE "ProductName",      "Winamp Control Plugin"
       VALUE "ProductVersion",   WINAMPC_VERSION_STRING
+      VALUE "LegalCopyright",   "Copyright © 2003-" WINAMPC_COPYRIGHT_LAST_YEAR_STRING " Artur Dorochowicz"    
+      VALUE "OriginalFilename", "WinampC.dll"
     END
   END
   BLOCK "VarFileInfo"

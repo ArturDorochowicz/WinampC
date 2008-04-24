@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet
 	version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -88,13 +88,16 @@
 			<!-- let attributes be copied -->
 			<xsl:apply-templates select="@*"/>
 			<!-- add list of services -->
-			<xsl:for-each select="$services/service">
+			<xsl:for-each select="$services/group">
 				<xsl:sort select="@name" order="ascending"/>
-				<li>
-					<a href="#{generate-id()}">
-						<xsl:value-of select="normalize-space(@name)"/>
-					</a>
-				</li>				
+				<xsl:for-each select="service">
+					<xsl:sort select="@name" order="ascending"/>
+					<li>
+						<a href="#{generate-id()}">
+							<xsl:value-of select="normalize-space(@name)"/>
+						</a>
+					</li>
+				</xsl:for-each>
 			</xsl:for-each>
 		</xsl:copy>
 	</xsl:template>
@@ -105,68 +108,72 @@
 			<!-- let attributes be copied -->
 			<xsl:apply-templates select="@*"/>
 			<!-- add descriptions -->
-			<xsl:for-each select="$services/service">
+			<xsl:for-each select="$services/group">
 				<xsl:sort select="@name" order="ascending"/>
-				<li id="{generate-id()}">
-					<div>
-						<xsl:value-of select="normalize-space(@name)"/>
-						<xsl:text>( </xsl:text>
-						<xsl:for-each select="argument">
+				<xsl:for-each select="service">
+					<xsl:sort select="@name" order="ascending"/>
+					<li id="{generate-id()}">
+						<div>
 							<xsl:value-of select="normalize-space(@name)"/>
-							<xsl:if test="last() > position()">
-								<xsl:text>, </xsl:text>
-							</xsl:if>
-						</xsl:for-each>
-						<xsl:text> )</xsl:text>
-					</div>
-					<a href="#{$listOfServicesHeaderId}">Go up</a>
-
-					<p>
-						<xsl:apply-templates select="description"/>
-					</p>
-
-					<xsl:if test="count(requirements) > 0">
-						<h4>Requirements</h4>
-						<p>
-							<xsl:value-of select="normalize-space(requirements)"/>
-						</p>
-					</xsl:if>
-
-					<xsl:if test="count(argument) > 0">
-						<h4>Parameters</h4>
-						<dl>
+							<xsl:text>( </xsl:text>
 							<xsl:for-each select="argument">
-								<dt>
-									<xsl:value-of select="normalize-space(@type)"/>
-									<xsl:text> </xsl:text>
-									<span>
-										<xsl:value-of select="normalize-space(@name)"/>
-									</span>
-								</dt>
-								<dd>
-									<xsl:apply-templates select="self::node()"/>
-								</dd>
+								<xsl:value-of select="normalize-space(@name)"/>
+								<xsl:if test="last() > position()">
+									<xsl:text>, </xsl:text>
+								</xsl:if>
 							</xsl:for-each>
-						</dl>
-					</xsl:if>
+							<xsl:text> )</xsl:text>
+						</div>
+						<a href="#{$listOfServicesHeaderId}">Go up</a>
 
-					<h4>Return value</h4>
-					<xsl:choose>
-						<xsl:when test="count(return-value) > 0">
+						<p>
+							<xsl:apply-templates select="description"/>
+						</p>
+
+						<xsl:if test="count(requirements) > 0">
+							<h4>Requirements</h4>
+							<p>
+								<xsl:value-of select="normalize-space(requirements)"/>
+							</p>
+						</xsl:if>
+
+						<xsl:if test="count(argument) > 0">
+							<h4>Parameters</h4>
 							<dl>
-								<dt>
-									<xsl:value-of select="normalize-space(return-value/@type)"/>
-								</dt>
-								<dd>
-									<xsl:apply-templates select="return-value"/>
-								</dd>
+								<xsl:for-each select="argument">
+									<dt>
+										<xsl:value-of select="normalize-space(@type)"/>
+										<xsl:text> </xsl:text>
+										<span>
+											<xsl:value-of select="normalize-space(@name)"/>
+										</span>
+										<xsl:if test="@optional='true'">&#160;&#160;&#160;optional</xsl:if>
+									</dt>
+									<dd>
+										<xsl:apply-templates select="self::node()"/>
+									</dd>
+								</xsl:for-each>
 							</dl>
-						</xsl:when>
-						<xsl:otherwise>
-							<p>No return value.</p>
-						</xsl:otherwise>
-					</xsl:choose>
-				</li>
+						</xsl:if>
+
+						<h4>Return value</h4>
+						<xsl:choose>
+							<xsl:when test="count(return-value) > 0">
+								<dl>
+									<dt>
+										<xsl:value-of select="normalize-space(return-value/@type)"/>
+									</dt>
+									<dd>
+										<xsl:apply-templates select="return-value"/>
+									</dd>
+								</dl>
+							</xsl:when>
+							<xsl:otherwise>
+								<p>No return value.</p>
+							</xsl:otherwise>
+						</xsl:choose>
+					</li>
+				</xsl:for-each>
 			</xsl:for-each>
 		</xsl:copy>
 	</xsl:template>

@@ -1,12 +1,9 @@
 
-# pcregrep.exe and pcre3.dll are in package PCRE for Windows
-# http://gnuwin32.sourceforge.net/packages/pcre.htm
-# Normal grep won't handle lookarounds in the regex used here
-find_program( GREP "pcregrep"
-	PATHS "${CMAKE_CURRENT_SOURCE_DIR}/tool" )
+# Microsoft PowerShell. If installed, should be in PATH.
+find_program( MSH "powershell" )
 
-if( NOT GREP )
-	message( "Cannot find 'pcregrep' executable." )
+if( NOT MSH )
+	message( "Cannot find 'powershell' executable." )
 endif( )
 
 # xsltproc.exe is part of libxml2 library
@@ -27,28 +24,19 @@ if( NOT TIDY )
 endif( )
 
 
-# Command that creates services.xml by grepping the source code file.
 add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/services.xml"
 	COMMAND
-		"${CMAKE_COMMAND}"
-			"-E echo \"<!DOCTYPE x [<!ENTITY nbsp '&#160;'><!ENTITY ndash '&#8211;'><!ENTITY mdash '&#8212;'>]> <services>\""
-			" > \"${CMAKE_CURRENT_BINARY_DIR}/services.xml\""
-	COMMAND
-		"${GREP}"
-			--file="${CMAKE_CURRENT_SOURCE_DIR}/pattern.txt"
-			--only-matching
+		"${MSH}" 
+			"${CMAKE_CURRENT_SOURCE_DIR}/extract-services-descriptions.ps1"
+			"${CMAKE_CURRENT_BINARY_DIR}/services.xml"			
 			"${CMAKE_CURRENT_SOURCE_DIR}/../src/WinampC.c"
-			>> "${CMAKE_CURRENT_BINARY_DIR}/services.xml"
-	COMMAND
-		"${CMAKE_COMMAND}"
-			"-E echo \"</services>\""
-			" >> \"${CMAKE_CURRENT_BINARY_DIR}/services.xml\""
 	DEPENDS
+		"${CMAKE_CURRENT_SOURCE_DIR}/extract-services-descriptions.ps1"
 		"${CMAKE_CURRENT_SOURCE_DIR}/../src/WinampC.c"
-		"${CMAKE_CURRENT_SOURCE_DIR}/pattern.txt" )
+	COMMENT	
+		"Extracting services' descriptions from source code files into an XML file" )
 
 
-# Command that applies XSL transform
 add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml"
 	COMMAND
 		"${XSLT}"
@@ -57,16 +45,17 @@ add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml"
 			--nonet
 			--stringparam "servicesPath" "${CMAKE_CURRENT_BINARY_DIR}/services.xml"
 			--stringparam "pluginVersion" "${WINAMPC_VERSION_MAJOR}.${WINAMPC_VERSION_MINOR}.${WINAMPC_VERSION_BUILD}"
-			--stringparam "lastCopyrightYear" "${CURRENT_YEAR}"
+			--stringparam "lastCopyrightYear" "${WINAMPC_COPYRIGHT_LAST_YEAR}"
 			"${CMAKE_CURRENT_SOURCE_DIR}/WinampC.xsl"
 			"${CMAKE_CURRENT_SOURCE_DIR}/WinampC.xml"
 	DEPENDS
 		"${CMAKE_CURRENT_SOURCE_DIR}/WinampC.xsl"
 		"${CMAKE_CURRENT_SOURCE_DIR}/WinampC.xml"
-		"${CMAKE_CURRENT_BINARY_DIR}/services.xml" )
+		"${CMAKE_CURRENT_BINARY_DIR}/services.xml"
+	COMMENT
+		"Applying XSL transform to produce documentation in XHTML" )
 
 
-# Tidy the output from XSL transform
 # Due to some problems with doctype emitted by Tidy (no system indentifier and
 # no way to specify one), we provide it ourselves.
 add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/WinampC.html"
@@ -86,10 +75,12 @@ add_custom_command( OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/WinampC.html"
 			"${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml"
 			>> "${CMAKE_CURRENT_BINARY_DIR}/WinampC.html"
 	DEPENDS
-		"${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml" )
+		"${CMAKE_CURRENT_BINARY_DIR}/WinampC.xhtml"
+	COMMENT
+		"Running Tidy to produce final HTML documentation from XHTML" )
 
 
-if( XSLT AND GREP AND TIDY )
+if( MSH AND XSLT AND TIDY )
 	add_custom_target( "Documentation"
 		DEPENDS
 			"${CMAKE_CURRENT_BINARY_DIR}/WinampC.html" )
